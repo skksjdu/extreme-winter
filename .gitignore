@@ -1,0 +1,8 @@
+.gradle/
+build/
+work/
+outputs/
+.idea/
+*.iml
+.codex-project-state.json
+logs/

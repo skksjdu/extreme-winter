@@ -1,0 +1,25 @@
+package dev.extremewinter.network;
+
+import dev.extremewinter.config.WinterConfig;
+import dev.extremewinter.temperature.TemperatureData;
+import dev.extremewinter.temperature.TemperatureModel;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.server.network.ServerPlayerEntity;
+
+public final class TemperatureSync {
+    private TemperatureSync() { }
+
+    public static void register(WinterConfig config) {
+        PayloadTypeRegistry.playS2C().register(TemperaturePayload.ID, TemperaturePayload.CODEC);
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> send(handler.player, config));
+    }
+
+    public static void send(ServerPlayerEntity player, WinterConfig config) {
+        if (!ServerPlayNetworking.canSend(player, TemperaturePayload.ID)) return;
+        double value = TemperatureModel.clamp(TemperatureData.get(player), config);
+        ServerPlayNetworking.send(player, new TemperaturePayload(value, config.minTemperature,
+                config.maxTemperature, TemperatureModel.stage(value, config)));
+    }
+}

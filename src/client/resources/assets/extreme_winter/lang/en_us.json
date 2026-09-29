@@ -1,0 +1,8 @@
+{
+  "hud.extreme_winter.temperature": "Temperature: %s / %s · %s",
+  "hud.extreme_winter.stage.0": "Normal",
+  "hud.extreme_winter.stage.1": "Cold",
+  "hud.extreme_winter.stage.2": "Chilled",
+  "hud.extreme_winter.stage.3": "Hypothermia",
+  "hud.extreme_winter.stage.4": "Freezing"
+}
