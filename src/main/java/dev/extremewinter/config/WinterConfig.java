@@ -29,6 +29,13 @@ public final class WinterConfig {
     public boolean starterShelter = true;
     public boolean snowAccumulation = true;
     public boolean waterFreezing = true;
+    public boolean outdoorHeatExtinguishing = true;
+    public int campfireExposureSeconds = 120;
+    public int soulCampfireExposureSeconds = 180;
+    public int furnaceExposureSeconds = 240;
+    public int blastFurnaceExposureSeconds = 300;
+    public int smokerExposureSeconds = 150;
+    public int lavaExposureSeconds = 3600;
 
     public void validate() {
         finiteRange("minTemperature", minTemperature, -10000, 10000);
@@ -58,6 +65,12 @@ public final class WinterConfig {
         finiteRange("samplesPerPass", samplesPerPass, 1, 64);
         finiteRange("simulationRadiusChunks", simulationRadiusChunks, 0, 8);
         finiteRange("maxSnowLayers", maxSnowLayers, 1, 4096);
+        finiteRange("campfireExposureSeconds", campfireExposureSeconds, 1, 604800);
+        finiteRange("soulCampfireExposureSeconds", soulCampfireExposureSeconds, 1, 604800);
+        finiteRange("furnaceExposureSeconds", furnaceExposureSeconds, 1, 604800);
+        finiteRange("blastFurnaceExposureSeconds", blastFurnaceExposureSeconds, 1, 604800);
+        finiteRange("smokerExposureSeconds", smokerExposureSeconds, 1, 604800);
+        finiteRange("lavaExposureSeconds", lavaExposureSeconds, 1, 604800);
     }
 
     private static void finiteRange(String name, double value, double minimum, double maximum) {

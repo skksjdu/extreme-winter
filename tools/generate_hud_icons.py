@@ -20,7 +20,8 @@ def main():
             pixels.append(0)
             for x, char in enumerate(row):
                 color = COLORS[char]
-                if char != '.' and (name == 'empty' or (name == 'half' and x > 4)):
+                # Warmth drains left-to-right, including within the partially empty flame.
+                if char != '.' and (name == 'empty' or (name == 'half' and x < 4)):
                     color = (54, 46, 41, 255) if char != 'o' else (93, 76, 59, 255)
                 pixels.extend(color)
         png = bytes([137, 80, 78, 71, 13, 10, 26, 10])

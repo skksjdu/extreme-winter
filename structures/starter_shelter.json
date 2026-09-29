@@ -1,7 +1,7 @@
 {
   "size": [
     9,
-    10,
+    6,
     11
   ],
   "spawn": [
@@ -11,10 +11,11 @@
   ],
   "palette": {
     ".": "minecraft:air",
-    "#": "minecraft:cobblestone",
+    "#": "minecraft:stone",
+    "b": "minecraft:stone_bricks",
     "w": "minecraft:spruce_planks",
-    "g": "minecraft:glass",
-    "s": "minecraft:cobblestone_stairs[facing=south,half=bottom,shape=straight,waterlogged=false]",
+    "k": "minecraft:stripped_spruce_log[axis=y]",
+    "e": "minecraft:stripped_spruce_log[axis=x]",
     "D": "minecraft:spruce_door[facing=north,half=lower,hinge=left,open=false,powered=false]",
     "U": "minecraft:spruce_door[facing=north,half=upper,hinge=left,open=false,powered=false]",
     "B": "minecraft:red_bed[facing=south,part=foot,occupied=false]",
@@ -23,151 +24,88 @@
     "t": "minecraft:crafting_table",
     "f": "minecraft:furnace[facing=east,lit=false]",
     "F": "minecraft:campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]",
-    "p": "minecraft:wheat[age=4]",
-    "a": "minecraft:farmland[moisture=7]",
-    "~": "minecraft:water[level=0]",
     "L": "minecraft:lantern[hanging=true,waterlogged=false]",
-    "h": "minecraft:cobblestone_slab[type=bottom,waterlogged=false]",
-    "k": "minecraft:stripped_spruce_log[axis=y]",
-    "e": "minecraft:stripped_spruce_log[axis=x]",
-    "v": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]",
-    "r": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]",
-    "R": "minecraft:spruce_slab[type=bottom,waterlogged=false]",
-    "b": "minecraft:stone_bricks",
-    "q": "minecraft:spruce_fence[east=false,north=false,south=false,west=false,waterlogged=false]",
-    "T": "minecraft:spruce_trapdoor[facing=north,half=bottom,open=false,powered=false,waterlogged=false]",
-    "C": "minecraft:brown_carpet"
+    "C": "minecraft:brown_carpet",
+    "q": "minecraft:spruce_fence[east=false,north=false,south=false,west=false,waterlogged=false]"
   },
   "layers": [
     [
-      "b..sss..b",
       "bbbbbbbbb",
       "bbbbbbbbb",
       "bbbbbbbbb",
       "bbbbbbbbb",
-      "bbbbbaaab",
-      "bbbbba~ab",
-      "bbbbbaaab",
-      "bbbbbaaab",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
       "bbbbbbbbb",
       "bbbbbbbbb"
     ],
     [
-      "q.......q",
-      "kwwwDwwwk",
-      "w.......w",
-      "wcB.....w",
-      "wtH.....w",
-      "wf.C.pppw",
-      "w..C.p.pw",
-      "w.T..pppw",
-      "w#F..pppw",
-      "w###....w",
-      "kwwwwwwwk"
+      "kbbbDbbbk",
+      "#.......#",
+      "#.......#",
+      "#cB.....#",
+      "#tH.C...#",
+      "#f..C...#",
+      "#.......#",
+      "#.......#",
+      "#bFq....#",
+      "#.b.....#",
+      "kbbbbbbbk"
     ],
     [
-      "q.......q",
-      "kwgwUwgwk",
-      "w.......w",
-      "g.......g",
-      "g.......g",
-      "g.......g",
-      "g.......g",
-      "g.......g",
-      "w.......w",
-      "w.......w",
-      "kwwgggwwk"
+      "kbbbUbbbk",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "kbbbbbbbk"
     ],
     [
-      "q.L...L.q",
-      "kwgwwwgwk",
-      "w.......w",
-      "g...L...g",
-      "g.......g",
-      "g.......g",
-      "g.....L.g",
-      "g.......g",
-      "wbbb....w",
-      "w.......w",
-      "kwwgggwwk"
+      "kbbbbbbbk",
+      "#.......#",
+      "#.......#",
+      "#...L...#",
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "#.....L.#",
+      "#.......#",
+      "#.......#",
+      "kbbbbbbbk"
     ],
     [
+      "kbbbbbbbk",
+      "#.......#",
+      "#.......#",
       "eeeeeeeee",
-      "kwwwwwwwk",
-      "weeeeeeew",
-      "w...w...w",
-      "w.......w",
-      "w.......w",
-      "w.....w.w",
-      "weeeeeeew",
-      "w.b.....w",
-      "w.......w",
-      "kwwwwwwwk"
+      "#.......#",
+      "#.......#",
+      "#.......#",
+      "eeeeeeeee",
+      "#.......#",
+      "eeeeeeeee",
+      "kbbbbbbbk"
     ],
     [
-      "v.......r",
-      "vwwwwwwwr",
-      "v.......r",
-      "v.......r",
-      "v.......r",
-      "v.......r",
-      "v.......r",
-      "v.......r",
-      "v.b.....r",
-      "v.......r",
-      "vwwwwwwwr"
-    ],
-    [
-      ".v.....r.",
-      ".vwgggwr.",
-      ".v.....r.",
-      ".v.....r.",
-      ".v.....r.",
-      ".v.....r.",
-      ".v.....r.",
-      ".v.....r.",
-      ".vb....r.",
-      ".v.....r.",
-      ".vwgggwr."
-    ],
-    [
-      "..v...r..",
-      "..vwwwr..",
-      "..v...r..",
-      "..v...r..",
-      "..v...r..",
-      "..v...r..",
-      "..v...r..",
-      "..v...r..",
-      "..b...r..",
-      "..v...r..",
-      "..vwwwr.."
-    ],
-    [
-      "...v.r...",
-      "...vwr...",
-      "...v.r...",
-      "...v.r...",
-      "...v.r...",
-      "...v.r...",
-      "...v.r...",
-      "...v.r...",
-      "..bv.r...",
-      "...v.r...",
-      "...vwr..."
-    ],
-    [
-      "....R....",
-      "....R....",
-      "....R....",
-      "....R....",
-      "....R....",
-      "....R....",
-      "....R....",
-      "....R....",
-      "..b.R....",
-      "....R....",
-      "....R...."
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########"
     ]
   ],
   "chest": {
@@ -179,51 +117,11 @@
     "items": [
       [
         "minecraft:bread",
-        8
+        3
       ],
       [
-        "minecraft:wheat_seeds",
-        8
-      ],
-      [
-        "minecraft:carrot",
-        4
-      ],
-      [
-        "minecraft:potato",
-        4
-      ],
-      [
-        "minecraft:oak_sapling",
-        4
-      ],
-      [
-        "minecraft:spruce_sapling",
+        "minecraft:apple",
         2
-      ],
-      [
-        "minecraft:wooden_pickaxe",
-        1
-      ],
-      [
-        "minecraft:stone_axe",
-        1
-      ],
-      [
-        "minecraft:stone_shovel",
-        1
-      ],
-      [
-        "minecraft:wooden_hoe",
-        1
-      ],
-      [
-        "minecraft:torch",
-        8
-      ],
-      [
-        "minecraft:coal",
-        4
       ]
     ]
   }

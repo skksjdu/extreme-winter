@@ -34,6 +34,13 @@
 | `starterShelter` | true | 只在新世界首次启动时尝试放置避难所 |
 | `snowAccumulation` | true | 开启本模组的额外积雪采样 |
 | `waterFreezing` | true | 开启本模组的额外水源结冰采样 |
+| `outdoorHeatExtinguishing` | true | 主世界露天热源熄灭 / 岩浆源冷却 |
+| `campfireExposureSeconds` | 120 | 营火累计露天游戏秒 |
+| `soulCampfireExposureSeconds` | 180 | 灵魂营火累计露天游戏秒 |
+| `furnaceExposureSeconds` | 240 | 熔炉累计燃烧且露天游戏秒 |
+| `blastFurnaceExposureSeconds` | 300 | 高炉累计燃烧且露天游戏秒 |
+| `smokerExposureSeconds` | 150 | 烟熏炉累计燃烧且露天游戏秒 |
+| `lavaExposureSeconds` | 3600 | 岩浆源累计露天游戏秒，默认 3 游戏日后成为黑曜石 |
 
 1 游戏秒 = 20 tick。所有速率必须是 0–100 的有限数字；温度上下限允许 -10000–10000。
 阈值必须满足 `minTemperature < fatigueThreshold < slownessThreshold < coldThreshold <= maxTemperature`。
@@ -54,3 +61,9 @@
 积雪使用 `extreme_winter:snow_drift`，每格保持 1–8 层并跨格堆叠。
 无支撑时生成原版下落方块实体；薄雪会合并。实体与邻居变化使用计划 tick，不逐 tick 扫描整个雪堆。
 普通铲子可快速清理，每层掉落一个雪球。原版纹理引用允许资源包改变雪的外观。
+
+1.1.0 配置无需重写，缺失的新字段自动使用默认值；可手动添加上述字段，时长允许 1–604800 游戏秒。
+有顶时暂停计时，区块卸载/离线不推进；计时保存在方块实体附件或世界数据中。熄灭的营火可重新点燃。
+炉子被天气熄灭后，需要屋顶才能重新自动点燃，不丢弃库存中的物品或燃料。
+默认岩浆发现扫描每秒一块已加载地表区块，不扫描地下、流动岩浆或下界。
+内置圆润树叶视觉包可以在游戏资源包菜单中关闭，与这些服务器配置独立。

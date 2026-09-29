@@ -5,6 +5,7 @@
   "name": "Extreme Winter",
   "description": "A small, vanilla-friendly winter survival loop for Minecraft 1.21.6.",
   "environment": "*",
+  "mixins": ["extreme_winter.mixins.json"],
   "entrypoints": {
     "main": ["dev.extremewinter.ExtremeWinter"],
     "client": ["dev.extremewinter.client.ExtremeWinterClient"]

@@ -8,6 +8,7 @@ import dev.extremewinter.config.WinterConfig;
 import dev.extremewinter.config.ConfigFile;
 import net.fabricmc.loader.api.FabricLoader;
 import dev.extremewinter.temperature.TemperatureManager;
+import dev.extremewinter.temperature.HeatWeathering;
 import dev.extremewinter.network.TemperatureSync;
 import dev.extremewinter.environment.WinterClimate;
 import dev.extremewinter.environment.WinterEnvironment;
@@ -34,6 +35,7 @@ public final class ExtremeWinter implements ModInitializer {
         var environment = new WinterEnvironment(CONFIG);
         ServerWorldEvents.LOAD.register((server, world) -> environment.onLoad(world));
         ServerTickEvents.END_WORLD_TICK.register(environment::tick);
+        ServerTickEvents.END_WORLD_TICK.register(new HeatWeathering(CONFIG)::tick);
         var shelter = new StarterShelter(CONFIG);
         ServerLifecycleEvents.SERVER_STARTED.register(shelter::onStarted);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> shelter.onJoin(handler.player));

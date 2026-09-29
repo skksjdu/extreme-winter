@@ -78,11 +78,12 @@ share one set of values; JSON loading/validation was added in phase 10.
 - Environmental sampling has one shared per-world budget, not a full scan per
   player. Defaults are 16 columns each 20 ticks; freezing shares the sampled
   columns every 40 ticks. Sampling never loads a missing chunk.
-- Shelter generation is startup-only. At most two bounded searches of 121
-  footprints use already loaded chunks. Blocks with block entities are rejected;
-  only air, snow and ordinary grass/ferns can be cleared above the chosen surface.
-- A small corner foundation and entrance stairs adapt the NBT template to ground
-  height; room geometry and loot are in the editable JSON/NBT, not Java placements.
+- Shelter generation is startup-only: two bounded searches, at most 289 anchors x four
+  orientations each. Only already loaded chunks are considered. The 9 x 6 x 11 template
+  carves natural terrain, rejects fluids, trees and block entities, and records rotation.
+- A safe open-site fallback encloses the same room in a bounded snow-capped rock mound.
+  The entrance is a short level tunnel or a three-step hillside exit. Furniture and food
+  live in the editable JSON/NBT. Existing shelters and arrival markers remain valid.
 - `POST_PROCESSING` is Fabric's documented phase for changing biome properties.
   Climate/weather settings are explicit switches because another climate mod may
   wish to own those same properties. No rendering classes are replaced.
@@ -127,3 +128,25 @@ No Iris internals or mod gameplay were changed to work around the test launcher.
 - Legacy JSON defaults migrate once, retaining customized values and unknown fields;
   the original is backed up before writing. Broken files remain untouched. Rates, damage
   and accumulation remain configurable.
+
+## 1.1.1 changes
+
+- The half flame now empties on its left, matching the row's left-to-right depletion.
+- Mountain shelter interior: 7 x 9 usable floor, four-block clearance, no farm, and only
+  three bread/two apples in the chest. Persistent rotation has a NONE default for old saves.
+- Campfires/furnaces persist elapsed outdoor seconds on their own block entities using
+  Fabric attachments. Every second only nearby loaded chunks' block entities are visited.
+  Exposure pauses under cover; relighting a campfire resets its clock.
+- A single common-side `AbstractFurnaceBlockEntity.tick` HEAD injection prevents automatic
+  fuel ignition while weather-blocked. Extinguishing reads back the complete existing NBT,
+  zeroing only active burn time; input, remaining fuel, output, recipe XP and components are
+  retained. Adding a roof releases the block. There are no client/renderer injections.
+- Source lava is discovered from one already-loaded surface chunk per second. A world
+  PersistentState stores source positions and exposure seconds; unloaded/roofed sources
+  pause, absent sources are discarded. Default 3600 seconds produces obsidian, including
+  progress across save/rejoin. Flowing lava and non-Overworld dimensions are excluded.
+- The default-enabled built-in resource pack overrides only 11 leaf models and textures.
+  It uses vanilla JSON cuboids/biome tinting and has no Sodium/Iris dependency. Snow models
+  and textures were reverted to vanilla per user review; wood assets remain untouched.
+- Eclipse Unstable is tested from the official branch ZIP, without modifying its sources.
+  The separate ShaderBaselineTest excludes Extreme Winter to investigate driver messages.

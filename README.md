@@ -1,4 +1,4 @@
-# Extreme Winter · 极寒生存 1.1.0
+# Extreme Winter · 极寒生存 1.1.1
 
 面向 **Minecraft Java 1.21.6 / Fabric / 单人世界**的小型冬季生存模组。
 核心体验是离开避难所收集资源、逐渐失温，再回到屋顶下或热源旁恢复。
@@ -6,14 +6,13 @@
 ## 安装与开始
 
 1. 使用 **Minecraft 1.21.6**，安装 Fabric Loader **0.19.5**，游戏运行时使用 **Java 21**。
-2. 将 **Fabric API 0.128.2+1.21.6** 与 `extreme-winter-1.1.0.jar` 放进该游戏实例的 `mods` 文件夹。同一实例只保留一个本模组 JAR。
-3. 创建一个新的普通生存世界。初次进入会出现在出生点附近的小屋内。
-4. 使用床设置重生点；检查箱子、农田与工具，留意饱食度上方的十枚火焰。火焰越少，身体越冷。
+2. 将 **Fabric API 0.128.2+1.21.6** 与 `extreme-winter-1.1.1.jar` 放进该游戏实例的 `mods` 文件夹。同一实例只保留一个本模组 JAR。
+3. 创建一个新的普通生存世界。初次进入会出现在山体内部的避难所。
+4. 使用床设置重生点；检查食物箱和营火，留意饱食度上方的十枚火焰。火焰越少，身体越冷。
 
-成品在 `outputs/extreme-winter-1.1.0.jar`。不要安装 `-sources.jar` 或测试 JAR。
-GitHub 下载：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/releases/tag/v1.1.0)；[原始 1.0.0](https://github.com/skksjdu/extreme-winter/releases/tag/v1.0.0) 保留。
-预览：[小屋外观](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/winter-1.1.0-shaders.png)、
-[室内与火焰 HUD](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/shelter-1.1.0-hud.png)。
+成品在 `outputs/extreme-winter-1.1.1.jar`。不要安装 `-sources.jar` 或测试 JAR。
+**1.1.1 仅在本地交付和 Git 提交，尚未发布到 GitHub。**
+历史版本：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/releases/tag/v1.1.0)。
 无需安装 Sodium、Iris 或光影包；它们是可选项。其他模组也要选择明确支持 1.21.6 的版本。
 
 ## 已实现玩法
@@ -26,6 +25,7 @@ GitHub 下载：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/rele
 - 单人世界的内置服务器计算并保存体温；客户端仅接收自己的体温信息并绘制 HUD。
 - 露天、降水、夜间和浸水分别增加热量损失。玻璃屋顶也有效；树冠和洞穴按简单遮蔽模型算作有顶。
 - 点燃的营火、灵魂营火、熔炉、高炉、烟熏炉，以及岩浆可以供暖。熄灭的热源无效。
+- 露天营火和炉子累计暴露后熄灭；岩浆源极慢冷却为黑曜石。详情见下表。
 - 热源默认半径 **4 格**，距离越远恢复越慢，使用碰撞射线检查墙体遮挡。多个热源取最强值，不叠加。
 - 创造/旁观模式保持温暖；下界和末地不继续降温并逐渐恢复。退出游戏不会重置体温，死亡重生会重置。
 
@@ -44,19 +44,38 @@ GitHub 下载：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/rele
 
 ## 初始避难所
 
-9 × 11 格、10 格高的云杉木小屋：石砖基座、原木框架、坡屋顶、门廊、暖色灯笼与石砌烟囱。
-包含床、工作台、熔炉、一次性物资箱、营火、照明和有顶农田。
-箱子提供少量食物、种子、树苗、木/石工具、8 支火把和 4 块煤，没有铁装或高级装备。
-农田有普通水源，照明支持夜间生长；树苗供后续种树。铁、红石、钻石等仍需出门探索。
+9 × 11 格占地、6 格高的山内避难所，室内约 **7 × 9 格、4 格净高**，与 1.1.0 木屋主体空间相近。
+石墙、石顶和木梁，保留床、工作台、熔炉、营火及照明。箱子**只有 3 个面包、2 个苹果**，没有农田、种子、树苗、工具、煤或额外装备。
 
-房屋由可替换的原版 NBT 结构模板生成。世界保存生成结果，重进不会重复造屋或刷新箱子。
-入口会补充最多 8 级台阶，适应附近的地面落差。
-建筑氛围参考 [SheraNom 的 Simple Spruce Starter House](https://www.planetminecraft.com/project/simple-spruce-starter-house-easy/)；
-本项目自行设计蓝图，没有导入他人的建筑文件。新版房屋仅用于新世界，不覆盖旧版房屋。
+优先在出生区域的天然坡地中挖出房间，四个朝向选址；房间上方至少两层天然地形。
+附近已加载区域没有合适山坡时，在经过安全检查的空地建一座覆雪岩丘，把房间埋在其中，保证基地保持山体内部的形式。
+入口有短通道。选址不覆盖方块实体、液体或树木；无安全位置时记录日志并跳过。
+生成器只搜索已加载区块，不为寻找山地无限生成地图。
 
-只在世界第一次开始计时时尝试生成，**已有存档不会被自动插入小屋**。
-生成器只搜索出生点附近已加载的安全位置，必要时采用小型架高平台，不挖掉山体或树木。
-极端地形找不到安全位置时会跳过并写入日志，避免强行覆盖地形。不会在每次读档时反复尝试。
+原版 NBT 蓝图在 `structures/starter_shelter.json`。结果、朝向和首次到达标记写入世界存档，重进不重建、不补货。
+**仅用于新世界；已有 1.1.0 存档的小屋保留，不自动改造。**
+
+## 露天热源与视觉
+
+| 热源 | 默认累计露天时长 |
+| --- | --- |
+| 营火 | 2 分钟 |
+| 灵魂营火 | 3 分钟 |
+| 烟熏炉 | 2 分 30 秒 |
+| 熔炉 | 4 分钟 |
+| 高炉 | 5 分钟 |
+| 岩浆源 | 60 分钟，即 3 个游戏日；变为黑曜石 |
+
+仅主世界生效，每游戏秒计时，有顶时暂停；暂停游戏、退出或区块卸载不增加计时，进度会保存。
+营火可手动重新点燃，重新计算时长。炉子熄灭后停止自动点燃，保留剩余物品和未消耗燃料；加屋顶后恢复工作。
+岩浆只处理露天源方块，流动岩浆不直接转化，下界保留。扫描在玩家附近已加载区块中逐步发现岩浆，默认最多约 81 秒完成一轮发现。
+
+内置资源包 **圆润树叶** 默认启用，只修改 11 种树叶的模型、贴图；积雪已恢复原版，木头和其他方块保留。
+采用原版 JSON 方块模型和贴图，碰撞/采集尺寸不改变；可在资源包菜单关闭，其他资源包可覆盖它。
+火焰整排及单颗内部均从左向右变空，半颗火焰保留右侧。
+
+Eclipse Shader Unstable 使用 Iris 安装。兼容性实测的光影快照、模组版本及结果见 [验证报告](docs/TESTING.md)。
+光影包保留自己的光照、积雪覆盖和树叶摆动设置，本模组不修改其源文件。
 
 ## 配置
 
@@ -77,7 +96,7 @@ GitHub 下载：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/rele
 运行矩阵使用实际打包 JAR，测试代码是独立开发测试模组，不进入成品。
 
 本版本按用户确认的**单人范围**验收，未进行专用服务器/多人连接测试。
-没有自写 Mixin、OpenGL 调用、自定义渲染管线或对 Sodium/Iris 内部类的修改。
+只有一个服务端炉子 tick Mixin，用于阻止露天熄灭后自动续燃；没有 OpenGL 调用、客户端渲染 Mixin或对 Sodium/Iris 内部类的修改。
 光影包控制自身的天气、雾和光照；不会为了统一画面与它们争夺渲染控制权。
 不保证所有光影、整合包、保护领地插件或所有地图种子兼容。
 
@@ -97,7 +116,7 @@ GitHub 下载：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/rele
 # 正式 JAR 回归（A=基础，B=+Sodium，C=+Iris，D=+光影，E=更多性能模组）：
 .\scripts\Build.ps1 runProductionGameTest -PcompatProfile=A
 
-# 编辑房屋 JSON 后重建 NBT（Python 3，无第三方依赖）：
+# 编辑避难所 JSON 后重建 NBT（Python 3，无第三方依赖）：
 python tools/generate_shelter.py
 ```
 
@@ -105,9 +124,9 @@ python tools/generate_shelter.py
 `-Porg.gradle.java.installations.paths=C:\你的路径\jdk-21`。无需全局安装 Gradle。
 `gradlew.bat build` 输出到 `build/libs`；`scripts/Build.ps1` 将下载缓存限制在项目 `work` 目录。
 
-正式测试 B–E 需要 `work/compat` 中的可选模组，D 还需在其测试实例中启用光影。
+正式测试 B–E 需要 `work/compat` 中的可选模组，D 还需在其测试实例中启用 Eclipse Unstable 光影。
 这些第三方文件仅用于本地测试，不与模组打包分发。
 
 源码按 `temperature`、`environment`、`shelter`、`network`、`config` 分离，
-客户端代码在 `src/client`；房屋蓝图在 `structures/starter_shelter.json`。
+客户端代码在 `src/client`；避难所蓝图在 `structures/starter_shelter.json`。
 接口依据和实现取舍见 [实现记录](docs/IMPLEMENTATION.md)。

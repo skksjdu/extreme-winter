@@ -40,8 +40,7 @@ def main():
         for z, row in enumerate(layer):
             assert len(row) == width, (y, z, row, len(row))
             for x, key in enumerate(row):
-                # Omit air outside the front wall so the entrance does not carve terrain.
-                if z == 0 and key == '.': continue
+                # Explicit interior air carves the room into the selected hillside.
                 block = {'pos': (9, (3, [x, y, z])), 'state': (3, indices[key])}
                 if [x, y, z] == spec['chest']['position']:
                     items = [{'Slot': (1, i), 'id': (8, name), 'count': (3, count)}

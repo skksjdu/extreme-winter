@@ -31,7 +31,8 @@ class ConfigFileTest {
     @Test void invalidConfigFallsBackWithoutOverwriting() throws Exception {
         Path path = directory.resolve("winter.json");
         for (String invalid : new String[]{"{broken", "null", "{\"snowIntervalTicks\":0}",
-                "{\"heatSourceRadius\":999}", "{\"coldThreshold\":10}", "{\"baseLoss\":\"NaN\"}"}) {
+                "{\"heatSourceRadius\":999}", "{\"coldThreshold\":10}", "{\"baseLoss\":\"NaN\"}",
+                "{\"lavaExposureSeconds\":0}", "{\"campfireExposureSeconds\":-1}"}) {
             Files.writeString(path, invalid);
             assertEquals(0.32, ConfigFile.load(path).baseLoss);
             assertEquals(invalid, Files.readString(path));

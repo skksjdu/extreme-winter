@@ -39,14 +39,21 @@ public final class WinterClientTest implements FabricClientGameTest {
                 require(state.generated(), "new world generates starter shelter: " + state.outcome());
                 shelterOrigin[0] = state.origin();
                 var player = server.getPlayerManager().getPlayerList().getFirst();
-                require(player.getBlockPos().equals(state.origin().add(4, 1, 7)), "first arrival is inside shelter");
+                require(player.getBlockPos().equals(state.at(4, 1, 7)), "first arrival is inside shelter");
                 require(!Exposure.outdoors(world, player.getBlockPos()), "starter shelter has a protective roof");
                 require(new HeatSources(ExtremeWinter.CONFIG.heatSourceRadius).strength(player) > 0,
                         "starter shelter provides heat at spawn");
-                require(world.getBlockState(state.origin().add(6, 0, 6)).isOf(Blocks.WATER), "farm has a water source");
-                require(world.getBlockState(state.origin().add(5, 1, 5)).isOf(Blocks.WHEAT), "farm has planted crops");
-                var chest = (ChestBlockEntity) world.getBlockEntity(state.origin().add(1, 1, 3));
-                require(chest != null && chest.getStack(0).getCount() == 8, "starter food is in template chest");
+                for (int x = 0; x < 9; x++) for (int z = 0; z < 11; z++) for (int y = 0; y < 6; y++) {
+                    var block = world.getBlockState(state.at(x, y, z));
+                    require(!block.isOf(Blocks.FARMLAND) && !block.isOf(Blocks.WHEAT) && !block.isOf(Blocks.WATER),
+                            "mountain shelter has no farm");
+                }
+                require(world.getBlockState(state.at(4, 7, 7)).isOf(Blocks.STONE), "room is enclosed in rock above the roof");
+                var chest = (ChestBlockEntity) world.getBlockEntity(state.at(1, 1, 3));
+                require(chest != null && chest.getStack(0).isOf(Items.BREAD) && chest.getStack(0).getCount() == 3
+                        && chest.getStack(1).isOf(Items.APPLE) && chest.getStack(1).getCount() == 2,
+                        "starter chest has only three bread and two apples");
+                for (int slot = 2; slot < chest.size(); slot++) require(chest.getStack(slot).isEmpty(), "no extra starter supplies");
                 chest.removeStack(0);
                 chest.markDirty();
                 new StarterShelter(ExtremeWinter.CONFIG).onStarted(server);
@@ -202,6 +209,8 @@ public final class WinterClientTest implements FabricClientGameTest {
                     "HUD receives temperature and maps it to eight full warmth flames"));
             game.getClientWorld().waitForChunksRender();
             context.takeScreenshot("phase6-temperature-hud");
+            context.runOnClient(client -> TemperatureHud.update(new dev.extremewinter.network.TemperaturePayload(85, 0, 100, 0)));
+            context.takeScreenshot("warmth-85-left-to-right");
             game.getServer().runOnServer(server -> {
                 var world = server.getOverworld();
                 // Contain the HUD fixture so water cannot spread beyond the later cleanup volume.
@@ -233,7 +242,7 @@ public final class WinterClientTest implements FabricClientGameTest {
             game.getServer().runOnServer(server -> {
                 var state = ShelterState.get(server.getOverworld());
                 require(state.generated() && state.origin().equals(shelterOrigin[0]), "shelter marker survives reload");
-                var chest = (ChestBlockEntity) server.getOverworld().getBlockEntity(state.origin().add(1, 1, 3));
+                var chest = (ChestBlockEntity) server.getOverworld().getBlockEntity(state.at(1, 1, 3));
                 require(chest != null && chest.getStack(0).isEmpty(), "reload does not replenish starter chest");
                 require(server.getPlayerManager().getPlayerList().getFirst().getBlockY() == 100,
                         "rejoin does not teleport player back to shelter");

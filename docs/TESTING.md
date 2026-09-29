@@ -1,86 +1,69 @@
-# 1.1.0 验证报告
+# 1.1.1 验证报告
 
-时间：2026-09-30（Asia/Shanghai）。Minecraft 1.21.6 单人游戏。
-**14 项单元测试通过，A–E 五组实际发布 JAR 集成测试全部通过。**
+2026-09-30，本地验收；未上传 GitHub。安装包：`outputs/extreme-winter-1.1.1.jar`。
+Minecraft Java 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
+构建沿用 Gradle 9.8.0 / Loom 1.18.2 / 本机 Java 26，系统配置未更改。
 
-## 运行矩阵
+## 最终 JAR 运行矩阵
 
-共同环境：Fabric Loader 0.19.5、Fabric API 0.128.2+1.21.6、Temurin Java 21.0.12.1、
-Windows / Intel Arc。Loom 的 ClientProductionRunTask 加载实际 remapped 1.1.0 JAR。
-测试代码位于独立测试模组，不进入成品。第三方 JAR 和光影包不打包分发。
+所有运行使用最终 remapped JAR，包含积雪外观回退后的资源。单人内置服务器，Windows / Intel Arc。
 
-| 组 | 可选组件 | 结果 | 时长 |
+| 配置 | 组合 | 结果 | Gradle 运行时长 |
 | --- | --- | --- | --- |
-| A | 无 | 通过 | 64 秒 |
-| B | Sodium 0.7.3 | 通过 | 61 秒 |
-| C | Sodium 0.7.3 + Iris 1.9.6，未启用光影 | 通过 | 64 秒 |
-| D | C + Complementary Reimagined r5.9.3，实际启用光影 | 通过 | 70 秒 |
-| E | C + Lithium 0.17.0 + FerriteCore 8.0.4 + Mod Menu 15.0.2 | 通过 | 66 秒 |
+| A | Fabric API | 通过 | 1m 9s |
+| B | A + Sodium 0.7.3 | 通过 | 1m 8s |
+| C | B + Iris 1.9.6，未启用光影 | 通过 | 1m 9s |
+| D | C + Eclipse Shader Unstable，实际启用 | 通过 | 1m 15s |
+| E | C + Lithium 0.17.0 / FerriteCore 8.0.4 / Mod Menu 15.0.2 | 通过 | 1m 8s |
 
-D 的日志确认载入指定光影，测试通过 Iris 公共 API 确认处于启用状态。
-可选文件的发布元数据支持 1.21.6，已经校验 SHA-512。
-本次运行日志为 work/new-matrix-A.log 至 work/new-matrix-E.log，不是旧版本日志。
+每组执行体温/HUD、积雪重力、山内基地、露天热源、保存重进和普通地形截图检查。
+14 项单元测试通过（8 项体温、6 项配置），0 失败/错误/跳过；新增时长非法值纳入配置测试。
 
-## 实际游戏验证
+## 新版行为与画面
 
-- 新世界生成坡顶小屋，首次进入有屋顶、热源和基础物资；普通地形种子 20260929 生成成功。
-- 农作物经过真实 tick 后仍存在，每个种植格的方块光照至少为 9。
-- 室外降温、屋顶遮蔽、热源回暖、墙体遮挡、熄灭热源检查通过。
-- 35 体温时缓慢扣血，0 体温时扣血明显更多；缓慢、疲劳施加及回暖后过期检查通过。
-- 64 层积雪跨格堆积，达到整列上限后停止，保护屋顶、农作物和机器。
-- 移除三格雪柱的底格，剩余两格实际下落并重新堆叠。
-- 7 层雪落到 5 层薄雪后合并为 8 + 4 层，层数守恒。
-- 普通石铲可以采集重力积雪，8 层雪的实际战利品表产生 8 个雪球。
-- 露天静止水结冰，有顶水源受保护，未加载的远处区块被跳过。
-- 服务端体温同步到火焰 HUD，80 显示八枚完整火焰；截图核对与饱食度对齐。
-- 水下截图核对火焰上移，氧气条、饱食度和心形互不遮挡。
-- 保存重进保留体温、坐标和避难所状态；箱子不补货，断开连接清空 HUD。
-- A–E 每组均执行上述回归，并确认对应可选模组实际加载。
+- 85 体温截图与图标逐像素核对：第一颗为空、第二颗左半为空，右半有火；整排继续从左向右减少。
+- 超平坦世界在覆雪岩丘内部生成房间；普通地形种子 20260929 选中天然山坡，位置 36,70,-12，旋转 CLOCKWISE_180。
+- 室内约 7×9 格、4 格高，出生有顶且营火供暖；屋顶之外仍有岩体。床、工作台、炉子和吊灯存在。
+- 两盏吊灯经过真实 tick 仍有木梁支撑，出生位置方块光照至少 9。
+- 结构中没有农田、作物、水源；箱子仅 3 面包和 2 苹果，其余格为空。
+- 首次到达、旋转和生成记录可保存；重进不重复传送，不补货。
+- 短时测试配置验证营火、灵魂营火、熔炉、高炉、烟熏炉的各自时限，以及玻璃屋顶保护。
+- 营火部分计时经过保存重开仍保留，熄灭后可重新点燃获得新周期。
+- 炉子熄灭后实际不供暖，不自动续燃，库存输入和燃料保留；加屋顶后可恢复。
+- 岩浆源保存重开后继续计时并成为黑曜石，有顶岩浆暂停；正常默认值 3600 游戏秒，即 3 游戏日。
+- 最终视觉包只包含 11 种树叶的 22 个模型/贴图文件。雪和木头没有覆盖文件；雪层/重力雪仍引用原版模型。
+- 回退积雪时，所有 22 个树叶资源与回退前 SHA-256 完全一致。近距离截图确认雪为原版方形、树叶圆润、云杉木保持原样。
 
-## 单元测试与包检查
+## Eclipse Unstable 实测与限制
 
-8 项体温规则测试：两分钟降到 40、天气/室内/浸水、被动恢复、数据修复、
-阶段边界、热源恢复、40 以下递增伤害、自定义温标。
-6 项配置测试：缺失生成、部分配置、非法文件保留、阈值验证、旧默认迁移/备份/
-保留自定义和未知字段，以及保留禁用冻伤设置。0 失败、0 错误、0 跳过。
+使用[官方 Unstable 仓库](https://github.com/Merlin1809/Eclipse-Shader/tree/Unstable)的完整 ZIP，未修改光影源文件。
+下载快照提交：[3c18afcfd89c3bbc4ddf1cf3ea9867731ecd4cc7](https://github.com/Merlin1809/Eclipse-Shader/commit/3c18afcfd89c3bbc4ddf1cf3ea9867731ecd4cc7)。
+光影 ZIP SHA-256：`ff12a1b35d5f811c0dce6142527f500fc94a0f32c95ced37bd6186a5eb1bb934`。
 
-tools/audit_package.py 通过：19 个 Java 类，字节码 Java 21，Minecraft 精确为 1.21.6。
-结构、中文资源、积雪模型/战利品表和三个 9×9 图标存在。
-没有测试代码、嵌入第三方 JAR、自写 Mixin、Sodium/Iris 硬依赖或 OpenGL 调用。
+Sodium 0.7.3 / Iris 1.9.6 的发布 JAR 支持此游戏版本；测试日志和 Iris 公共 API 均确认 Eclipse 处于启用状态。
+室内、室外、体温条和圆润树叶截图已检查，没有白屏、缺失材质或测试断言失败。
 
-成品 52,564 字节。SHA-256：
-cb2be449b10e8cf3c5c0b1c79fd3a2ff2ed1772449785978ecc6938163840a87
+当前 Intel Arc（驱动 32.0.101.8132）日志反复报告 `GL_INVALID_ENUM` / `non-integer format 28`。
+独立基线仅加载 Fabric API、Sodium、Iris 和测试 JAR，明确排除 Extreme Winter 及其视觉包，仍复现相同错误，画面可显示且基线通过。
+**因此可确认该日志问题不依赖本模组；不能据此确认更细的光影/驱动根因。**
+未实测本机 NVIDIA GPU、其他驱动或 Eclipse 未来 Unstable 提交，不将本次结果视为所有硬件无错误的保证。
 
-## 性能及验证边界
+## 包检查与性能
 
-预热后热源检测 100 次的单次平均值：
-A 41.195 μs、B 43.299 μs、C 50.429 μs、D 53.387 μs、E 46.236 μs。
-这是局部测量，不代表全游戏 FPS/TPS 或多人性能保证。
-默认每位玩家每秒检测 257 个热源候选位置，环境每秒全局采样 16 列。
-积雪只沿当前列检查层数，重力由邻居更新和计划 tick 触发，不扫描全世界。
+成品 85722 字节，24 个 Java 类，字节码 Java 21；只含一个服务端炉子 tick Mixin。
+没有测试类、嵌入第三方 JAR、Sodium/Iris 硬依赖、客户端渲染 Mixin、雪/木头视觉覆盖。
+SHA-256：`5804f979de500e4e277345d3c2dc7ba106b65c9a6b2c1eddbb6eadf738c02f99`。
 
-开发中修复：原版雪的替换标记和较低碰撞高度会令上层下落后变成物品；
-重力雪采用独立注册设置，满层碰撞为一整格，下落和薄雪合并回归通过。
-水下 HUD 早期测试让水扩散出清理范围，重进后仍然浸水降温；测试水槽现已封闭并检查
-清理后的干燥状态，没有放宽体温存档断言。
+热源扫描预热后的单次均值（100 次）：A 51.236 μs，B 47.818 μs，C 49.887 μs，D 46.463 μs，E 44.037 μs。不是整机 FPS 或 TPS 测量。
+露天热源每秒只访问玩家附近已加载区块的方块实体；岩浆发现每秒扫描一个已加载地表区块，默认一轮最多约 81 秒。
+离线、暂停和区块卸载不补算暴露时长；岩浆长时默认值用同一逻辑的短时配置验证，未实际等待一小时。
 
-光影包仍报告既有 uniform/方块映射警告，实际启用、截图和所有断言正常。
-离线身份的 Mojang 皮肤/公钥查询可能超时；Gradle 有未来版本弃用提示，保持固定 9.8.0。
+## 复查材料
 
-按用户的单人范围，没有专用服务器/多人测试。未穷举种子、内容模组、资源包和光影。
-未做长时间平衡、大存档压力或单独的骑乘 HUD 截图测试。
-旧存档小屋不被替换；极端新世界找不到安全地点时仍可能跳过小屋。
+- 最终构建：`work/build-1.1.1-final.log`；矩阵：`work/test-1.1.1-A.log` 至 `work/test-1.1.1-E.log`。
+- 无本模组光影基线：`work/test-1.1.1-eclipse-baseline.log`；启动脚本：`work/shader-baseline.gradle`。
+- 单元报告：`build/reports/tests/test/index.html`；包检查：`python tools/audit_package.py`。
+- 最终截图：`outputs/shelter-1.1.1-eclipse.png`、`outputs/winter-1.1.1-eclipse.png`、`outputs/visuals-1.1.1-eclipse.png`、`outputs/warmth-1.1.1-left-to-right.png`。
 
-## 可复查材料
-
-- 单元报告：build/test-results/test；HTML：build/reports/tests/test/index.html。
-- 日志：work/new-matrix-A.log 至 work/new-matrix-E.log。
-- 测试存档与截图：work/run-production-A 至 work/run-production-E。
-- [成品 JAR](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/extreme-winter-1.1.0.jar)，
-  [校验文件](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/SHA256SUMS-1.1.0.txt)。
-- [原版雪景](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/winter-1.1.0-vanilla.png)、
-  [光影雪景](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/winter-1.1.0-shaders.png)、
-  [安全屋与火焰 HUD](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/shelter-1.1.0-hud.png)、
-  [水下 HUD](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/warmth-1.1.0-underwater.png)。
-- [1.1.0 发布页](https://github.com/skksjdu/extreme-winter/releases/tag/v1.1.0)。
-- [1.0.0 历史验证报告](https://github.com/skksjdu/extreme-winter/blob/v1.0.0/docs/TESTING.md)。
+仅单人验收，未做专用服务器/多人、所有种子、长时间存档压力和全资源包组合测试。
+旧存档基地保留；新基地需要新世界。极端地形无安全已加载位置时仍可能跳过生成。

@@ -7,14 +7,15 @@ import dev.extremewinter.config.WinterConfig;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructurePlacementData;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -24,9 +25,11 @@ public final class StarterShelter {
     private static final Identifier TEMPLATE = Identifier.of(ExtremeWinter.ID, "starter_shelter");
     private static final TagKey<Block> GROUND = TagKey.of(RegistryKeys.BLOCK, Identifier.of(ExtremeWinter.ID, "shelter_ground"));
     private static final AttachmentType<Boolean> ARRIVED = AttachmentRegistry.create(
-            Identifier.of(ExtremeWinter.ID, "shelter_arrival"), builder -> builder
-                    .initializer(() -> false).persistent(Codec.BOOL).copyOnDeath());
+            Identifier.of(ExtremeWinter.ID, "shelter_arrival"), b -> b.initializer(() -> false).persistent(Codec.BOOL).copyOnDeath());
     private final WinterConfig config;
+    private record Site(BlockPos origin, BlockRotation rotation, boolean mound, int entranceRise) {
+        BlockPos at(int x, int y, int z) { return origin.add(new BlockPos(x, y, z).rotate(rotation)); }
+    }
 
     public StarterShelter(WinterConfig config) { this.config = config; }
 
@@ -39,35 +42,29 @@ public final class StarterShelter {
             return;
         }
         var template = world.getStructureTemplateManager().getTemplate(TEMPLATE);
-        if (template.isEmpty()) {
-            state.finish("missing_template", null);
-            ExtremeWinter.LOGGER.error("Starter shelter template is missing; no blocks were placed");
+        if (template.isEmpty() || !template.get().getSize().equals(new Vec3i(9, 6, 11))) {
+            state.finish("invalid_template", null);
+            ExtremeWinter.LOGGER.error("Mountain shelter template must be 9 x 6 x 11 blocks");
             return;
         }
-        Vec3i size = template.get().getSize();
-        // The blueprint's spawn/bed anchors assume this size; reject incompatible datapack overrides.
-        if (!size.equals(new Vec3i(9, 10, 11))) {
-            state.finish("invalid_template_size", null);
-            ExtremeWinter.LOGGER.error("Starter shelter must be 9 x 10 x 11 blocks");
-            return;
-        }
-        BlockPos site = findSite(world, size, false);
-        if (site == null) site = findSite(world, size, true);
+        Site site = findSite(world, false);
+        if (site == null) site = findSite(world, true);
         if (site == null) {
             state.finish("no_safe_loaded_site", null);
-            ExtremeWinter.LOGGER.warn("No safe loaded site near spawn; starter shelter skipped to preserve terrain");
+            ExtremeWinter.LOGGER.warn("No safe loaded mountain shelter site; skipped without touching terrain");
             return;
         }
-        // Mark before placement, so another call in this session cannot regenerate loot.
-        state.finish("placing", site);
-        boolean placed = template.get().place(world, site, site,
-                new StructurePlacementData().setIgnoreEntities(true), world.random, Block.NOTIFY_ALL);
-        state.finish(placed ? "generated" : "placement_failed", site);
+        state.setRotation(site.rotation());
+        state.finish("placing", site.origin());
+        if (site.mound()) buildMound(world, site);
+        boolean placed = template.get().place(world, site.origin(), site.origin(),
+                new StructurePlacementData().setIgnoreEntities(true).setRotation(site.rotation()), world.random, Block.NOTIFY_ALL);
+        if (placed) carveEntrance(world, site);
+        state.finish(placed ? "generated" : "placement_failed", site.origin());
         if (placed) {
-            addCornerSupports(world, site, size);
-            addEntranceSteps(world, site);
-            world.setSpawnPos(site.add(4, 1, 2), 0);
-            ExtremeWinter.LOGGER.info("Starter shelter generated at {}", site.toShortString());
+            world.setSpawnPos(site.at(4, 1, 2), state.arrivalYaw());
+            ExtremeWinter.LOGGER.info("Mountain shelter generated at {} ({}, {})", site.origin().toShortString(),
+                    site.rotation(), site.mound() ? "snow-covered rock mound fallback" : "natural hillside");
         }
     }
 
@@ -77,81 +74,96 @@ public final class StarterShelter {
         var world = player.getServer().getOverworld();
         var state = ShelterState.get(world);
         if (!state.generated()) return;
-        BlockPos pos = state.origin().add(4, 1, 7);
-        player.teleport(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, Set.of(), 180, 0, true);
+        BlockPos pos = state.at(4, 1, 7);
+        player.teleport(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, Set.of(), state.arrivalYaw(), 0, true);
     }
 
-    private BlockPos findSite(ServerWorld world, Vec3i size, boolean raised) {
+    private Site findSite(ServerWorld world, boolean mound) {
         BlockPos spawn = world.getSpawnPos();
-        // Startup-only bounded search. Never request or generate additional chunks.
-        for (int ring = 0; ring <= 5; ring++) {
+        // Startup-only search, four hillside orientations, no extra chunk generation.
+        for (int ring = 0; ring <= 8; ring++) {
             for (int dx = -ring; dx <= ring; dx++) for (int dz = -ring; dz <= ring; dz++) {
                 if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) continue;
-                BlockPos candidate = checkSite(world, spawn.getX() + dx * 12 - 4,
-                        spawn.getZ() + dz * 12 - 5, size, raised);
-                if (candidate != null) return candidate;
+                for (BlockRotation rotation : BlockRotation.values()) {
+                    int x = spawn.getX() + dx * 12, z = spawn.getZ() + dz * 12;
+                    if (world.getChunkManager().getWorldChunk(x >> 4, z >> 4) == null) continue;
+                    var entrance = new BlockPos(4, 0, -1).rotate(rotation);
+                    int ex = x + entrance.getX(), ez = z + entrance.getZ();
+                    if (world.getChunkManager().getWorldChunk(ex >> 4, ez >> 4) == null) continue;
+                    int y = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, ex, ez) - 1;
+                    var candidate = new Site(new BlockPos(x, y, z), rotation, mound, 0);
+                    if (checkSite(world, candidate)) return candidate;
+                    if (!mound) {
+                        candidate = new Site(new BlockPos(x, y - 3, z), rotation, false, 3);
+                        if (checkSite(world, candidate)) return candidate;
+                    }
+                }
             }
         }
         return null;
     }
 
-    private BlockPos checkSite(ServerWorld world, int originX, int originZ, Vec3i size, boolean raised) {
-        int minimum = Integer.MAX_VALUE;
-        int maximum = Integer.MIN_VALUE;
-        for (int x = 0; x < size.getX(); x++) for (int z = 0; z < size.getZ(); z++) {
-            int wx = originX + x, wz = originZ + z;
-            var chunk = world.getChunkManager().getWorldChunk(wx >> 4, wz >> 4);
-            if (chunk == null) return null;
-            int y = chunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING, wx & 15, wz & 15) + 1;
-            var surface = world.getBlockState(new BlockPos(wx, y - 1, wz));
-            boolean natural = surface.isIn(GROUND);
-            if (!natural && !(raised && (surface.isOf(Blocks.WATER) || surface.isIn(BlockTags.LEAVES)))) return null;
-            minimum = Math.min(minimum, y);
-            maximum = Math.max(maximum, y);
-        }
-        if (maximum - minimum > (raised ? 8 : 2)) return null;
-        BlockPos origin = new BlockPos(originX, maximum, originZ);
-        for (int x = 0; x < size.getX(); x++) for (int z = 0; z < size.getZ(); z++) {
-            for (int y = 0; y < size.getY(); y++) {
-                BlockPos pos = origin.add(x, y, z);
-                if (!world.isInBuildLimit(pos) || !world.getWorldBorder().contains(pos)) return null;
-                var block = world.getBlockState(pos);
-                if (block.hasBlockEntity()) return null;
-                if (!block.isAir() && !block.isOf(Blocks.SHORT_GRASS) && !block.isOf(Blocks.TALL_GRASS)
-                        && !block.isOf(Blocks.FERN) && !block.isOf(Blocks.LARGE_FERN) && !block.isOf(Blocks.SNOW)) return null;
+    private boolean checkSite(ServerWorld world, Site site) {
+        int covered = 0;
+        int margin = site.mound() ? 6 : 1;
+        for (int x = -margin; x <= 8 + margin; x++) for (int z = -margin; z <= 10 + margin; z++) {
+            BlockPos column = site.at(x, 0, z);
+            if (world.getChunkManager().getWorldChunk(column.getX() >> 4, column.getZ() >> 4) == null) return false;
+            int top = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
+            var surface = world.getBlockState(new BlockPos(column.getX(), top - 1, column.getZ()));
+            if (!surface.isIn(GROUND)) return false;
+            if (site.mound() && (top > site.origin().getY() + 2 || top < site.origin().getY() - 5)) return false;
+            if (x >= 0 && x <= 8 && z >= 1 && z <= 10) {
+                if (top >= site.origin().getY() + 8 && world.getBlockState(site.at(x, 6, z)).isIn(GROUND)) covered++;
+            }
+            int maxY = site.mound() ? 13 : 8;
+            for (int y = 0; y <= maxY; y++) {
+                BlockPos pos = site.at(x, y, z);
+                if (!world.isInBuildLimit(pos) || !world.getWorldBorder().contains(pos)
+                        || !replaceable(world.getBlockState(pos))) return false;
             }
         }
-        return origin;
+        if (!site.mound() && (covered < 60 || !world.getBlockState(site.at(4, 7, 7)).isIn(GROUND))) return false;
+        for (int z = -1; z >= -6; z--) for (int x = 3; x <= 5; x++) for (int y = 0; y <= 3 + site.entranceRise(); y++) {
+            BlockPos pos = site.at(x, y, z);
+            if (!world.isChunkLoaded(pos) || !world.isInBuildLimit(pos) || !world.getWorldBorder().contains(pos)
+                    || !replaceable(world.getBlockState(pos))) return false;
+        }
+        return true;
     }
 
-    private void addCornerSupports(ServerWorld world, BlockPos origin, Vec3i size) {
-        for (int x : new int[]{0, size.getX() - 1}) for (int z : new int[]{1, size.getZ() - 1}) {
-            for (int depth = 1; depth <= 8; depth++) {
-                BlockPos pos = origin.add(x, -depth, z);
-                if (!world.getBlockState(pos).isAir()) break;
-                world.setBlockState(pos, Blocks.COBBLESTONE.getDefaultState(), Block.NOTIFY_ALL);
+    private static boolean replaceable(BlockState state) {
+        return !state.hasBlockEntity() && state.getFluidState().isEmpty()
+                && (state.isAir() || state.isIn(GROUND) || state.isOf(Blocks.SHORT_GRASS)
+                || state.isOf(Blocks.TALL_GRASS) || state.isOf(Blocks.FERN) || state.isOf(Blocks.LARGE_FERN));
+    }
+
+    private void buildMound(ServerWorld world, Site site) {
+        for (int x = -6; x <= 14; x++) for (int z = -6; z <= 16; z++) {
+            double dx = (x - 4) / 11.0, dz = (z - 5) / 12.0;
+            double distance = dx * dx + dz * dz;
+            if (distance >= 1) continue;
+            int height = (int) Math.round(12 * Math.sqrt(1 - distance));
+            for (int y = -5; y <= height; y++) {
+                BlockPos pos = site.at(x, y, z);
+                if (!world.isInBuildLimit(pos) || (y < 0 && !world.getBlockState(pos).isAir())) continue;
+                var block = y == height ? Blocks.SNOW_BLOCK : y > height - 3 ? Blocks.STONE :
+                        ((x + z + y) % 7 == 0 ? Blocks.ANDESITE : Blocks.STONE);
+                world.setBlockState(pos, block.getDefaultState(), Block.NOTIFY_LISTENERS);
             }
         }
     }
 
-    private void addEntranceSteps(ServerWorld world, BlockPos origin) {
-        // Adapt the template porch to a small terrain drop so players can return home.
-        var stairs = world.getBlockState(origin.add(4, 0, 0));
-        for (int step = 1; step <= 8; step++) {
-            BlockPos center = origin.add(4, -step, -step);
-            if (world.getChunkManager().getWorldChunk(center.getX() >> 4, center.getZ() >> 4) == null
-                    || !world.isInBuildLimit(center) || !world.getWorldBorder().contains(center)) break;
-            var existing = world.getBlockState(center);
-            if (!existing.isAir() && !existing.isOf(Blocks.SNOW)
-                    && !existing.isOf(Blocks.SHORT_GRASS) && !existing.isOf(Blocks.TALL_GRASS)) break;
-            for (int dx = -1; dx <= 1; dx++) {
-                BlockPos pos = center.add(dx, 0, 0);
-                if (!world.getWorldBorder().contains(pos)
-                        || world.getChunkManager().getWorldChunk(pos.getX() >> 4, pos.getZ() >> 4) == null) continue;
-                var block = world.getBlockState(pos);
-                if (block.isAir() || block.isOf(Blocks.SNOW) || block.isOf(Blocks.SHORT_GRASS)
-                        || block.isOf(Blocks.TALL_GRASS)) world.setBlockState(pos, stairs, Block.NOTIFY_ALL);
+    private void carveEntrance(ServerWorld world, Site site) {
+        for (int z = -1; z >= -6; z--) for (int x = 3; x <= 5; x++) {
+            int rise = Math.min(site.entranceRise(), -z - 1);
+            var floor = Blocks.COBBLESTONE.getDefaultState();
+            if (rise > 0 && -z - 1 <= site.entranceRise()) {
+                floor = Blocks.COBBLESTONE_STAIRS.getDefaultState().with(net.minecraft.state.property.Properties.HORIZONTAL_FACING,
+                        site.rotation().rotate(net.minecraft.util.math.Direction.NORTH));
             }
+            world.setBlockState(site.at(x, rise, z), floor, Block.NOTIFY_ALL);
+            for (int y = rise + 1; y <= rise + 3; y++) world.setBlockState(site.at(x, y, z), Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL);
         }
     }
 }
