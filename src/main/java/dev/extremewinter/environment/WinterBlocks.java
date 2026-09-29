@@ -19,6 +19,7 @@ public final class WinterBlocks {
     public static final SnowDriftBlock SNOW_DRIFT = Registry.register(Registries.BLOCK, ID,
             new SnowDriftBlock(AbstractBlock.Settings.create().mapColor(MapColor.WHITE)
                     .strength(0.1f).requiresTool().sounds(BlockSoundGroup.SNOW).ticksRandomly().nonOpaque()
+                    .dynamicBounds().velocityMultiplier(0.85f)
                     .lootTable(Optional.of(RegistryKey.of(RegistryKeys.LOOT_TABLE,
                             Identifier.of(ExtremeWinter.ID, "blocks/snow_drift"))))
                     .registryKey(RegistryKey.of(RegistryKeys.BLOCK, ID))));

@@ -101,7 +101,7 @@ public final class NaturalWorldTest implements FabricClientGameTest {
             });
             context.waitTicks(100);
             game.getClientWorld().waitForChunksRender();
-            context.takeScreenshot("rounded-snow-leaves-" + profile);
+            context.takeScreenshot("vanilla-snow-leaves-" + profile);
             ExtremeWinter.LOGGER.info("TEST {}: natural world and rendering checks PASSED", profile);
         }
     }

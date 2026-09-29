@@ -150,3 +150,20 @@ No Iris internals or mod gameplay were changed to work around the test launcher.
   and textures were reverted to vanilla per user review; wood assets remain untouched.
 - Eclipse Unstable is tested from the official branch ZIP, without modifying its sources.
   The separate ShaderBaselineTest excludes Extreme Winter to investigate driver messages.
+
+## 1.1.2 changes
+
+- Remove the built-in foliage pack and its generator/registration. All eleven leaf species
+  resolve to vanilla models/textures again; snow still references vanilla assets.
+- Use cached player-specific collision shapes at half the visible snow height (1/16 to
+  1/2 block). `dynamicBounds()` is required so entity-dependent shapes are not cached as
+  a single solid shape. Other entities, including falling snow, keep full-height support;
+  stacked snow continues to fall and merge without losing layers.
+- Vanilla `velocityMultiplier(0.85f)` adds moderate horizontal drag without resetting
+  vertical velocity or applying a lingering status effect. Jumping and gravity remain
+  vanilla; walking speed recovers immediately outside snow. Like vanilla soul sand,
+  the horizontal drag also applies to other entities contacting the drift.
+- `SnowMovementTest` uses real client movement input and checks client/server sinking,
+  thin/full/stacked snow, jump height, walking speed recovery and vanilla leaf resources.
+- Optional shader setup uses Complementary Reimagined r5.9.3, Iris 1.9.6 and Sodium 0.7.3.
+  Exact official Modrinth 1.21.6 compatibility metadata and SHA-512 hashes are checked.

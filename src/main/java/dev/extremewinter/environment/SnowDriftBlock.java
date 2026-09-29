@@ -4,11 +4,13 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.EntityShapeContext;
 import net.minecraft.block.Falling;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AutomaticItemPlacementContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -26,6 +28,13 @@ import net.minecraft.world.tick.ScheduledTickView;
 /** Vanilla snow geometry/texture and melting, with vanilla falling entities and layer conservation. */
 public final class SnowDriftBlock extends SnowBlock implements Falling {
     public static final MapCodec<SnowBlock> CODEC = createCodec(SnowDriftBlock::new);
+    private static final VoxelShape[] PLAYER_SHAPES = new VoxelShape[8];
+
+    static {
+        for (int layers = 1; layers <= 8; layers++) {
+            PLAYER_SHAPES[layers - 1] = Block.createCuboidShape(0, 0, 0, 16, layers, 16);
+        }
+    }
 
     public SnowDriftBlock(Settings settings) { super(settings); }
     @Override public MapCodec<SnowBlock> getCodec() { return CODEC; }
@@ -36,7 +45,11 @@ public final class SnowDriftBlock extends SnowBlock implements Falling {
 
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        // Vanilla snow uses (layers - 1)/8 collision height. A full drift must support the next falling block.
+        // Players compress the surface to half its visible height (at most half a block).
+        if (context instanceof EntityShapeContext entityContext && entityContext.getEntity() instanceof PlayerEntity) {
+            return PLAYER_SHAPES[state.get(LAYERS) - 1];
+        }
+        // Falling snow and other entities retain solid support, preserving stacked-snow gravity.
         return getOutlineShape(state, world, pos, context);
     }
 

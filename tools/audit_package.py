@@ -6,11 +6,13 @@ import struct
 import zipfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
-path = root / 'build/libs/extreme-winter-1.1.1.jar'
+version = next(line.split('=', 1)[1].strip() for line in (root / 'gradle.properties').read_text().splitlines()
+               if line.startswith('mod_version='))
+path = root / f'build/libs/extreme-winter-{version}.jar'
 with zipfile.ZipFile(path) as jar:
     names = jar.namelist()
     meta = json.loads(jar.read('fabric.mod.json'))
-    assert meta['version'] == '1.1.1'
+    assert meta['version'] == version
     assert meta['depends']['minecraft'] == '1.21.6'
     assert set(meta['depends']) == {'fabricloader', 'minecraft', 'java', 'fabric-api'}
     assert meta['mixins'] == ['extreme_winter.mixins.json']
@@ -30,12 +32,9 @@ with zipfile.ZipFile(path) as jar:
     for icon in ('empty', 'half', 'full'):
         png = jar.read('assets/extreme_winter/textures/gui/sprites/hud/warmth_' + icon + '.png')
         assert struct.unpack('>II', png[16:24]) == (9, 9)
-    pack = 'resourcepacks/powder_and_foliage/'
-    assert pack + 'pack.mcmeta' in names
-    visuals = [name.removeprefix(pack + 'assets/minecraft/') for name in names
-               if name.startswith(pack + 'assets/minecraft/') and not name.endswith('/')]
-    assert len(visuals) == 22, visuals
-    assert all('leaves' in name for name in visuals), 'Unexpected snow/wood/other overrides'
+    visuals = [name for name in names if name.startswith('assets/minecraft/')
+               or name.startswith('resourcepacks/')]
+    assert not visuals, 'Vanilla visuals must not be overridden'
 print(json.dumps({'file': str(path), 'bytes': path.stat().st_size,
                   'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                   'classes': len(classes), 'bytecode_java': 21,

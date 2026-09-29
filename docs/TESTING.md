@@ -1,4 +1,38 @@
-# 1.1.1 验证报告
+# 1.1.2 验证报告
+
+2026-09-30，本地验证；未上传 GitHub。成品：`outputs/extreme-winter-1.1.2.jar`。
+Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
+
+- `build` 通过；14 项单元测试通过，0 失败、错误或跳过。
+- 最终 JAR 基础单人回归 A 通过，1m 35s；覆盖温度/HUD、积雪重力与层数守恒、避难所、热源、保存重进。
+- 光影回归 D 通过，1m 41s。组合为 Sodium 0.7.3、Iris 1.9.6、Complementary Reimagined r5.9.3；启动日志与 Iris 公共 API 均确认光影实际启用，室内/室外/HUD 截图已检查。
+- 新增真实客户端输入测试：1–8 层雪的玩家碰撞高度为 1/16–1/2 格，薄雪、满层雪、两格堆叠雪均稳定落地，客户端与内置服务器位置一致。
+- 相同 30 tick 前进输入，普通地面 6.21617 格，三种雪地均 5.32773 格，速度比 0.85708，即降低约 **14.3%**；多格积雪没有叠加减速。
+- 普通地面与雪地跳跃最高点均为 1.25220 格；离开雪地后速度恢复，测试期间未出现窒息或额外冻伤。
+- A 组合中，11 种树叶的模型与纹理共 22 项资源在运行时均来自 `vanilla`；D 组合模型仍来自 `vanilla`，纹理由 Sodium 自带的原版贴图副本提供。两组截图均确认原版树叶形状已恢复。
+- 包检查通过：63821 字节，24 个 Java 21 类，只有既有炉子 Mixin，没有测试类、内嵌第三方 JAR 或任何原版视觉覆盖。
+  SHA-256：`72a3b2b1c15d1001b40f339c82b989281b99fd06d348ebe59cb7446161b33cf5`。
+
+官方 Modrinth API 明确标记这三个文件支持 1.21.6；缓存下载逐个按官方 SHA-512 校验。
+发布页：[Complementary r5.9.3](https://modrinth.com/shader/complementary-reimagined/version/Bqen1mJX)、
+[Iris 1.9.6](https://modrinth.com/mod/iris/version/Rhzf61g1)、
+[Sodium 0.7.3](https://modrinth.com/mod/sodium/version/7pwil2dy)。
+Iris/Sodium 文件名中的 1.21.8 不代表排除 1.21.6。
+
+复查材料：`work/build-1.1.2.log`、`work/test-1.1.2-A.log`、`work/test-1.1.2-D.log`、
+`work/install-1.1.2-modrinth.json`、`build/reports/tests/test/index.html`；包检查为 `python tools/audit_package.py`。
+1.1.2 只重新验证 A/D 单人组合；下方 1.1.1 的完整 A–E 矩阵为历史记录，不能代替新版本实测。
+
+光影日志保留 `BIOME_SULFUR_CAVES`、`endFlashIntensityM/endFlashFactor1` 和旧 `stone_slab variant` 映射警告，主世界画面与所有回归通过。
+本次 D 未发现此前 Eclipse 的 `GL_INVALID_ENUM/non-integer format 28`；没有修改任何光影源文件来隐藏警告。
+未验证末地相关光影效果、其他 GPU 或用户存档的实际启动。
+截图交付：`outputs/visuals-1.1.2-vanilla.png`、`outputs/visuals-1.1.2-complementary.png`、`outputs/shelter-1.1.2-complementary.png`。
+
+已安装至用户指定的 `D:\迅雷下载\PCL 正式版 2.12.7.3\.minecraft\versions\1.21.6-Fabric 0.19.5`：
+仅替换本模组，新增 Iris/Sodium/光影包与启用配置，`options.txt` 只移除旧树叶包 ID，逐个核验安装文件哈希。
+旧模组和原始 `options.txt` 位于 `work/install-backup-1.1.2-20260930-072007`，安装清单为 `outputs/installation-1.1.2.json`。
+
+# 1.1.1 历史验证报告
 
 2026-09-30，本地验收；未上传 GitHub。安装包：`outputs/extreme-winter-1.1.1.jar`。
 Minecraft Java 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
