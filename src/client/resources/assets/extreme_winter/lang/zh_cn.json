@@ -4,5 +4,6 @@
   "hud.extreme_winter.stage.1": "寒冷",
   "hud.extreme_winter.stage.2": "失温",
   "hud.extreme_winter.stage.3": "严重失温",
-  "hud.extreme_winter.stage.4": "冻伤"
+  "hud.extreme_winter.stage.4": "冻伤",
+  "block.extreme_winter.snow_drift": "重力积雪"
 }

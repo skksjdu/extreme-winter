@@ -1,111 +1,86 @@
-# 1.0.0 验证报告
+# 1.1.0 验证报告
 
-时间：2026-09-30（Asia/Shanghai）。目标：Minecraft 1.21.6 单人游戏。
-**10 项单元测试通过，A–E 五组正式 JAR 单人集成测试全部通过。**
-
-2026-09-30 将原 0.1.0 正式编号为 **1.0.0**，未改玩法；再次构建成功，10 项单测通过，包结构检查通过。
-五组游戏矩阵对应原 0.1.0 的相同玩法代码，未因版本号变更重复运行。
-发布构建日志：`work/baseline-1.0.0-build.log`；发布校验：`outputs/SHA256SUMS-1.0.0.txt`。
-
-## 交付复核（2026-09-30）
-
-续接任务时核对了上述五组成功日志、JUnit XML 和原版/光影截图；未重复运行游戏矩阵。
-本轮执行 `scripts/Build.ps1 build --offline --no-daemon --stacktrace`，45 秒成功，
-编译和测试任务使用已有有效缓存（`UP-TO-DATE`），没有新增玩法代码。
-随后再次通过 `tools/audit_package.py`，将同一份 40,332 字节成品和三张原始截图复制到 `outputs`，
-逐文件校验复制前后 SHA-256 一致，并生成 `outputs/SHA256SUMS.txt`。
-
-原 0.1.0 成品 SHA-256：`63bbf1751db4f467b2f2ab97502875f156ad8b8c4fd9e6bfab3cde5c4243918e`。
-正式 1.0.0 成品 SHA-256：`4a66ef56cc257a95b72c345fecb73ac2ac665ef23ce683023d7c1e827c54cb01`。
-构建日志：`work/resume-build-isolated.log`。
+时间：2026-09-30（Asia/Shanghai）。Minecraft 1.21.6 单人游戏。
+**14 项单元测试通过，A–E 五组实际发布 JAR 集成测试全部通过。**
 
 ## 运行矩阵
 
 共同环境：Fabric Loader 0.19.5、Fabric API 0.128.2+1.21.6、Temurin Java 21.0.12.1、
-Windows、Intel Arc 图形设备。使用 Loom 的 `ClientProductionRunTask` 加载实际 remapped 模组 JAR，
-独立测试模组通过 Fabric Client Game Test API 操作单人世界。无服务器 EULA 修改或专用服务器启动。
+Windows / Intel Arc。Loom 的 ClientProductionRunTask 加载实际 remapped 1.1.0 JAR。
+测试代码位于独立测试模组，不进入成品。第三方 JAR 和光影包不打包分发。
 
-| 组 | 可选组件 | 结果 | 本轮运行时长 |
+| 组 | 可选组件 | 结果 | 时长 |
 | --- | --- | --- | --- |
-| A | 无 | 通过 | 56 秒 |
-| B | Sodium 0.7.3 | 通过 | 51 秒 |
-| C | Sodium 0.7.3 + Iris 1.9.6，未启用光影 | 通过 | 53 秒 |
-| D | C + Complementary Reimagined r5.9.3，实际启用光影 | 通过 | 102 秒 |
-| E | C + Lithium 0.17.0 + FerriteCore 8.0.4 + Mod Menu 15.0.2 | 通过 | 57 秒 |
+| A | 无 | 通过 | 64 秒 |
+| B | Sodium 0.7.3 | 通过 | 61 秒 |
+| C | Sodium 0.7.3 + Iris 1.9.6，未启用光影 | 通过 | 64 秒 |
+| D | C + Complementary Reimagined r5.9.3，实际启用光影 | 通过 | 70 秒 |
+| E | C + Lithium 0.17.0 + FerriteCore 8.0.4 + Mod Menu 15.0.2 | 通过 | 66 秒 |
 
-Sodium/Iris 下载文件名含 `mc1.21.8`，发布元数据声明同时支持 1.21.6，
-Iris 包内依赖明确列出 1.21.6/1.21.7/1.21.8；本次实际运行的游戏版本为 **1.21.6**，没有迁移版本。
-下载文件经过 Modrinth 发布记录的 SHA-512 校验。第三方 JAR/光影包仅用于本地测试，不打包分发。
+D 的日志确认载入指定光影，测试通过 Iris 公共 API 确认处于启用状态。
+可选文件的发布元数据支持 1.21.6，已经校验 SHA-512。
+本次运行日志为 work/new-matrix-A.log 至 work/new-matrix-E.log，不是旧版本日志。
 
-来源：[Sodium](https://modrinth.com/mod/sodium/version/7pwil2dy)、
-[Iris](https://modrinth.com/mod/iris/version/Rhzf61g1)、
-[Lithium](https://modrinth.com/mod/lithium/version/XWGBHYcB)、
-[FerriteCore](https://modrinth.com/mod/ferrite-core/version/LdlksamY)、
-[Mod Menu](https://modrinth.com/mod/modmenu/version/ku5NivOP)、
-[Complementary Reimagined](https://modrinth.com/shader/complementary-reimagined)。
+## 实际游戏验证
 
-## 每组实际执行的检查
+- 新世界生成坡顶小屋，首次进入有屋顶、热源和基础物资；普通地形种子 20260929 生成成功。
+- 农作物经过真实 tick 后仍存在，每个种植格的方块光照至少为 9。
+- 室外降温、屋顶遮蔽、热源回暖、墙体遮挡、熄灭热源检查通过。
+- 35 体温时缓慢扣血，0 体温时扣血明显更多；缓慢、疲劳施加及回暖后过期检查通过。
+- 64 层积雪跨格堆积，达到整列上限后停止，保护屋顶、农作物和机器。
+- 移除三格雪柱的底格，剩余两格实际下落并重新堆叠。
+- 7 层雪落到 5 层薄雪后合并为 8 + 4 层，层数守恒。
+- 普通石铲可以采集重力积雪，8 层雪的实际战利品表产生 8 个雪球。
+- 露天静止水结冰，有顶水源受保护，未加载的远处区块被跳过。
+- 服务端体温同步到火焰 HUD，80 显示八枚完整火焰；截图核对与饱食度对齐。
+- 水下截图核对火焰上移，氧气条、饱食度和心形互不遮挡。
+- 保存重进保留体温、坐标和避难所状态；箱子不补货，断开连接清空 HUD。
+- A–E 每组均执行上述回归，并确认对应可选模组实际加载。
 
-受控超平坦世界与普通地形世界各一个，普通地形种子为 `20260929`。
-受控世界会保存、关闭、重新打开，检查同一个存档。
+## 单元测试与包检查
 
-- 自动生成小屋；首次进入定位在室内，有屋顶和有效热源。
-- NBT 模板中的水、农作物和箱子食物存在；取走食物后重复调用、存档重进都不会补货。
-- 重新进入保留玩家离开小屋后的坐标和体温，不被强制传送回初始位置。
-- 露天体温缓慢下降；玻璃屋顶阻止露天降温；营火恢复体温。
-- 实际墙体阻挡热源；熄灭营火不供暖。
-- 低温施加缓慢和挖掘疲劳；最低温周期性扣血；回暖后本模组的短时效果自然过期。
-- 体温与 HUD 同步；重进重新同步；断开世界连接后 HUD 数据清空。
-- 原版雪层成功放置、增长到配置上限后停止；不会替换作物、阻塞机器顶面或在玻璃屋顶下新增雪层。
-- 露天静止水源变成冰；有玻璃屋顶的水源不冻结；未加载的远处区块被跳过。
-- 普通地形新世界成功生成小屋；农作物经过实际 tick 后仍存在，每个种植格的方块光照至少为 9。
-- A–E 按预期加载对应可选模组。D 通过 Iris **公共 API** 确认光影处于启用状态，日志确认载入指定光影包。
-- 检查正常世界内外部截图：HUD 可读，屋内照明、天气和地形绘制正常。D 的画面允许光影包控制雪、雾和光照。
+8 项体温规则测试：两分钟降到 40、天气/室内/浸水、被动恢复、数据修复、
+阶段边界、热源恢复、40 以下递增伤害、自定义温标。
+6 项配置测试：缺失生成、部分配置、非法文件保留、阈值验证、旧默认迁移/备份/
+保留自定义和未知字段，以及保留禁用冻伤设置。0 失败、0 错误、0 跳过。
 
-## 单元与包结构检查
+tools/audit_package.py 通过：19 个 Java 类，字节码 Java 21，Minecraft 精确为 1.21.6。
+结构、中文资源、积雪模型/战利品表和三个 9×9 图标存在。
+没有测试代码、嵌入第三方 JAR、自写 Mixin、Sodium/Iris 硬依赖或 OpenGL 调用。
 
-6 项体温规则测试：探索时间、露天/室内/浸水区别、被动恢复上限、异常存档数值修复、
-阶段边界、热源恢复量。4 项配置测试：默认生成、部分字段配置、非法值回退且文件保留、阈值约束。
-全部通过，0 失败，0 跳过。
+成品 52,564 字节。SHA-256：
+cb2be449b10e8cf3c5c0b1c79fd3a2ff2ed1772449785978ecc6938163840a87
 
-`tools/audit_package.py` 验证成品：17 个 Java 类，字节码目标 Java 21，Minecraft 依赖精确为 1.21.6；
-JSON 资源可解析，结构模板和中文翻译存在；没有测试类、嵌入依赖、自写 Mixin 或可选渲染模组硬依赖。
-公共代码通过独立 source set 编译，不依赖客户端渲染类。
+## 性能及验证边界
 
-## 性能证据及边界
+预热后热源检测 100 次的单次平均值：
+A 41.195 μs、B 43.299 μs、C 50.429 μs、D 53.387 μs、E 46.236 μs。
+这是局部测量，不代表全游戏 FPS/TPS 或多人性能保证。
+默认每位玩家每秒检测 257 个热源候选位置，环境每秒全局采样 16 列。
+积雪只沿当前列检查层数，重力由邻居更新和计划 tick 触发，不扫描全世界。
 
-普通地形小屋内，每组调用热源检测 100 次，平均每次：
-A 46.839 μs、B 46.078 μs、C 59.217 μs、D 63.910 μs、E 48.695 μs。
-这是本机已预热场景的局部测量，**不是全游戏 FPS/TPS 保证或多人负载测试**。
+开发中修复：原版雪的替换标记和较低碰撞高度会令上层下落后变成物品；
+重力雪采用独立注册设置，满层碰撞为一整格，下落和薄雪合并回归通过。
+水下 HUD 早期测试让水扩散出清理范围，重进后仍然浸水降温；测试水槽现已封闭并检查
+清理后的干燥状态，没有放宽体温存档断言。
 
-默认每位玩家每秒检测 257 个热源候选位置；不在每 tick 扫描。
-环境默认全局每秒采样 16 个表面列，结冰每两秒复用一次采样，不遍历整张地图。
-配置硬限制将热源半径控制在 6、每批采样控制在 64。
+光影包仍报告既有 uniform/方块映射警告，实际启用、截图和所有断言正常。
+离线身份的 Mojang 皮肤/公钥查询可能超时；Gradle 有未来版本弃用提示，保持固定 9.8.0。
 
-## 已处理失败与观察到的日志
-
-- 本轮受限构建进程读取 Loom 的 Minecraft 缓存 JAR 时出现 `AccessDeniedException`。
-  正常本地权限下使用 `--no-daemon` 单次进程后构建成功；未修改文件权限、系统 Java 设置或项目依赖。
-- 早期开发模式 D 启动时缺少 Iris 内嵌的 `jcpp`：本地文件依赖被 Loom 开发映射处理后移除了内部 JAR。
-  改用正式 JAR 运行模式后，原包依赖正常加载，D 全部检查通过。失败日志保存在
-  `work/dev-iris-nested-dependency-failure.log`，没有通过修改 Iris 或禁用光影掩盖错误。
-- 离线开发身份查询 Mojang 皮肤/公钥接口发生超时。单人测试正常完成；没有登录账号或多人验证结论。
-- 光影包 r5.9.3 对本游戏/Iris 组合报告部分未知 uniform（`BIOME_SULFUR_CAVES`、`endFlashIntensity`）
-  和方块映射警告。光影实际启用，截图与测试均通过；没有修改第三方光影文件或声称日志完全无警告。
-- Gradle 提示部分 API 在未来 Gradle 10 中弃用；本项目固定使用已经通过的 Gradle 9.8.0。
-
-## 未验证范围
-
-按用户的单人范围，未测试专用服务器或多人连接；未穷举所有种子、第三方内容模组、资源包和光影包。
-死亡复位、跨维度行为基于 Fabric 持久化附件与实现规则，本轮未单独执行死亡重生/传送门回归。
-极端地形没有安全位置时会跳过初始小屋，详见安装说明。未进行长时间游玩平衡或超大存档压力测试。
+按用户的单人范围，没有专用服务器/多人测试。未穷举种子、内容模组、资源包和光影。
+未做长时间平衡、大存档压力或单独的骑乘 HUD 截图测试。
+旧存档小屋不被替换；极端新世界找不到安全地点时仍可能跳过小屋。
 
 ## 可复查材料
 
-- 逐组日志：`work/matrix-A.log` 至 `work/matrix-E.log`。
-- 原始截图与测试存档：`work/run-production-A` 至 `work/run-production-E`。
-- JUnit XML：`build/test-results/test`；HTML 报告：`build/reports/tests/test/index.html`。
-- 依赖下载记录：`work/compat/versions.json`。
-- 成品与校验：`outputs/extreme-winter-1.0.0.jar`、`outputs/SHA256SUMS.txt`。
-- 预览：[原版雪景](../outputs/winter-vanilla.png)、[光影雪景](../outputs/winter-shaders.png)、
-  [光影下的室内与 HUD](../outputs/shelter-hud-shaders.png)。
+- 单元报告：build/test-results/test；HTML：build/reports/tests/test/index.html。
+- 日志：work/new-matrix-A.log 至 work/new-matrix-E.log。
+- 测试存档与截图：work/run-production-A 至 work/run-production-E。
+- [成品 JAR](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/extreme-winter-1.1.0.jar)，
+  [校验文件](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/SHA256SUMS-1.1.0.txt)。
+- [原版雪景](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/winter-1.1.0-vanilla.png)、
+  [光影雪景](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/winter-1.1.0-shaders.png)、
+  [安全屋与火焰 HUD](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/shelter-1.1.0-hud.png)、
+  [水下 HUD](https://github.com/skksjdu/extreme-winter/releases/download/v1.1.0/warmth-1.1.0-underwater.png)。
+- [1.1.0 发布页](https://github.com/skksjdu/extreme-winter/releases/tag/v1.1.0)。
+- [1.0.0 历史验证报告](https://github.com/skksjdu/extreme-winter/blob/v1.0.0/docs/TESTING.md)。

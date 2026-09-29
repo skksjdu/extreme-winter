@@ -26,6 +26,15 @@ public final class TemperatureModel {
                 : config.maxTemperature;
     }
 
+    /** Health points per damage pulse; one point is half a heart. */
+    public static float freezingDamage(double value, WinterConfig config) {
+        value = clamp(value, config);
+        if (value >= config.damageThreshold) return 0;
+        double severity = (config.damageThreshold - value) / (config.damageThreshold - config.minTemperature);
+        return (float) (config.minimumFreezingDamage
+                + severity * (config.freezingDamage - config.minimumFreezingDamage));
+    }
+
     public static int stage(double value, WinterConfig config) {
         if (value <= config.minTemperature) return 4;
         if (value < config.fatigueThreshold) return 3;

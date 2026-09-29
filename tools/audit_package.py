@@ -6,11 +6,11 @@ import struct
 import zipfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
-path = root / 'build/libs/extreme-winter-1.0.0.jar'
+path = root / 'build/libs/extreme-winter-1.1.0.jar'
 with zipfile.ZipFile(path) as jar:
     names = jar.namelist()
     meta = json.loads(jar.read('fabric.mod.json'))
-    assert meta['version'] == '1.0.0'
+    assert meta['version'] == '1.1.0'
     assert meta['depends']['minecraft'] == '1.21.6'
     assert set(meta['depends']) == {'fabricloader', 'minecraft', 'java', 'fabric-api'}
     assert 'mixins' not in meta
@@ -23,6 +23,11 @@ with zipfile.ZipFile(path) as jar:
         if name.endswith('.json'): json.loads(jar.read(name))
     assert 'data/extreme_winter/structure/starter_shelter.nbt' in names
     assert 'assets/extreme_winter/lang/zh_cn.json' in names
+    assert 'assets/extreme_winter/blockstates/snow_drift.json' in names
+    assert 'data/extreme_winter/loot_table/blocks/snow_drift.json' in names
+    for icon in ('empty', 'half', 'full'):
+        png = jar.read('assets/extreme_winter/textures/gui/sprites/hud/warmth_' + icon + '.png')
+        assert struct.unpack('>II', png[16:24]) == (9, 9)
 print(json.dumps({'file': str(path), 'bytes': path.stat().st_size,
                   'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                   'classes': len(classes), 'bytecode_java': 21,

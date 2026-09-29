@@ -11,6 +11,7 @@ import dev.extremewinter.temperature.TemperatureManager;
 import dev.extremewinter.network.TemperatureSync;
 import dev.extremewinter.environment.WinterClimate;
 import dev.extremewinter.environment.WinterEnvironment;
+import dev.extremewinter.environment.WinterBlocks;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -26,6 +27,7 @@ public final class ExtremeWinter implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        WinterBlocks.initialize();
         TemperatureData.initialize();
         TemperatureSync.register(CONFIG);
         WinterClimate.register(CONFIG);

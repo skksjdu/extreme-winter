@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class TemperatureModelTest {
     private final WinterConfig config = new WinterConfig();
 
-    @Test void daytimeExplorationHasMoreThanTenMinutesBeforeSlowness() {
+    @Test void snowDayReachesDamageThresholdInTwoMinutes() {
         double value = 100;
-        for (int seconds = 0; seconds < 600; seconds++) {
+        for (int seconds = 0; seconds < 120; seconds++) {
             value = TemperatureModel.step(value, true, true, false, false, 0, config);
         }
         assertEquals(40, value, 1e-8);
@@ -17,8 +17,8 @@ class TemperatureModelTest {
 
     @Test void rainAndNightOnlyPenalizeExposureButWaterPenalizesIndoorsToo() {
         assertEquals(80, TemperatureModel.step(80, false, true, true, false, 0, config));
-        assertEquals(79.4, TemperatureModel.step(80, false, true, true, true, 0, config), 1e-8);
-        assertEquals(79.87, TemperatureModel.step(80, true, true, true, false, 0, config), 1e-8);
+        assertEquals(78.6, TemperatureModel.step(80, false, true, true, true, 0, config), 1e-8);
+        assertEquals(79.32, TemperatureModel.step(80, true, true, true, false, 0, config), 1e-8);
     }
 
     @Test void shelterIsSafeAndPassiveRecoveryStopsAtColdThreshold() {
@@ -44,6 +44,23 @@ class TemperatureModelTest {
     @Test void heatRecoversGraduallyAndNeverStacksBeyondTheStrongestSource() {
         assertEquals(51.2, TemperatureModel.step(50, false, false, false, false, 1, config), 1e-8);
         assertEquals(50.3, TemperatureModel.step(50, false, false, false, false, 0.25, config), 1e-8);
-        assertTrue(TemperatureModel.step(50, true, true, true, false, 0.25, config) > 50);
+        assertTrue(TemperatureModel.step(50, true, true, true, false, 1, config) > 50);
+    }
+
+    @Test void freezingStartsBelowFortyAndIncreasesAsTemperatureFalls() {
+        assertEquals(0, TemperatureModel.freezingDamage(40, config));
+        assertEquals(0, TemperatureModel.freezingDamage(100, config));
+        assertTrue(TemperatureModel.freezingDamage(39.99, config) >= 1);
+        assertEquals(3.5f, TemperatureModel.freezingDamage(20, config));
+        assertEquals(6, TemperatureModel.freezingDamage(0, config));
+        assertTrue(TemperatureModel.freezingDamage(5, config) > TemperatureModel.freezingDamage(35, config));
+    }
+
+    @Test void customTemperatureScaleUsesConfiguredDamageThreshold() {
+        config.minTemperature = -20;
+        config.damageThreshold = 20;
+        assertEquals(0, TemperatureModel.freezingDamage(20, config));
+        assertEquals(3.5f, TemperatureModel.freezingDamage(0, config));
+        assertEquals(6, TemperatureModel.freezingDamage(-20, config));
     }
 }

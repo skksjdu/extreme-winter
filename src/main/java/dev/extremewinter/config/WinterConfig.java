@@ -2,25 +2,28 @@ package dev.extremewinter.config;
 
 /** Rates are temperature units per second (20 game ticks). Loaded once at game startup. */
 public final class WinterConfig {
+    public int configVersion = 2;
     public double minTemperature = 0;
     public double maxTemperature = 100;
     public double coldThreshold = 70;
     public double slownessThreshold = 40;
     public double fatigueThreshold = 20;
-    public double baseLoss = 0.06;
-    public double weatherPenalty = 0.04;
-    public double nighttimePenalty = 0.03;
-    public double waterPenalty = 0.6;
+    public double baseLoss = 0.32;
+    public double weatherPenalty = 0.18;
+    public double nighttimePenalty = 0.18;
+    public double waterPenalty = 1.4;
     public double recoveryRate = 1.2;
     public double shelteredRecoveryRate = 0.03;
     public int heatSourceRadius = 4;
-    public int damageIntervalSeconds = 5;
-    public float freezingDamage = 1;
+    public int damageIntervalSeconds = 4;
+    public double damageThreshold = 40;
+    public float minimumFreezingDamage = 1;
+    public float freezingDamage = 6;
     public int snowIntervalTicks = 20;
     public int freezeIntervalTicks = 40;
     public int samplesPerPass = 16;
     public int simulationRadiusChunks = 4;
-    public int maxSnowLayers = 3;
+    public int maxSnowLayers = 64;
     public boolean persistentWeather = true;
     public boolean coldVanillaBiomes = true;
     public boolean starterShelter = true;
@@ -45,12 +48,16 @@ public final class WinterConfig {
         finiteRange("shelteredRecoveryRate", shelteredRecoveryRate, 0, 100);
         finiteRange("heatSourceRadius", heatSourceRadius, 1, 6);
         finiteRange("damageIntervalSeconds", damageIntervalSeconds, 1, 3600);
+        finiteRange("damageThreshold", damageThreshold, minTemperature, maxTemperature);
+        if (damageThreshold <= minTemperature) throw new IllegalArgumentException("damageThreshold must exceed minTemperature");
+        finiteRange("minimumFreezingDamage", minimumFreezingDamage, 0, 20);
         finiteRange("freezingDamage", freezingDamage, 0, 20);
+        if (minimumFreezingDamage > freezingDamage) throw new IllegalArgumentException("Minimum damage exceeds maximum");
         finiteRange("snowIntervalTicks", snowIntervalTicks, 20, 72000);
         finiteRange("freezeIntervalTicks", freezeIntervalTicks, 20, 72000);
         finiteRange("samplesPerPass", samplesPerPass, 1, 64);
         finiteRange("simulationRadiusChunks", simulationRadiusChunks, 0, 8);
-        finiteRange("maxSnowLayers", maxSnowLayers, 1, 8);
+        finiteRange("maxSnowLayers", maxSnowLayers, 1, 4096);
     }
 
     private static void finiteRange(String name, double value, double minimum, double maximum) {

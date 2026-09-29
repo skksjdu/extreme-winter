@@ -51,26 +51,43 @@ public final class WinterEnvironment {
             int z = world.random.nextInt(16);
             int y = chunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING, x, z) + 1;
             BlockPos surface = new BlockPos(cx * 16 + x, y, cz * 16 + z);
-            if (world.getBlockState(surface.down()).isOf(Blocks.SNOW)) surface = surface.down();
+            if (SnowDriftBlock.layers(world.getBlockState(surface.down())) > 0) surface = surface.down();
             if (freeze) tryFreeze(world, surface.down());
             if (snow) trySnow(world, surface);
         }
     }
 
     public boolean trySnow(ServerWorld world, BlockPos pos) {
-        if (!isExposedSurface(world, pos) || world.getLightLevel(LightType.BLOCK, pos) >= 10
-                || !world.getBiome(pos).value().isCold(pos, world.getSeaLevel())) return false;
-        var state = world.getBlockState(pos);
-        if (state.isOf(Blocks.SNOW)) {
-            int layers = state.get(SnowBlock.LAYERS);
-            if (layers >= config.maxSnowLayers) return false;
-            return world.setBlockState(pos, state.with(SnowBlock.LAYERS, layers + 1), Block.NOTIFY_ALL);
+        if (world.getChunkManager().getWorldChunk(pos.getX() >> 4, pos.getZ() >> 4) == null
+                || !world.isInBuildLimit(pos) || !world.getWorldBorder().contains(pos)) return false;
+        // Accept a sampled snow position or the air immediately above an existing drift.
+        BlockPos top = pos;
+        if (world.getBlockState(top).isAir() && SnowDriftBlock.layers(world.getBlockState(top.down())) > 0) top = top.down();
+        while (SnowDriftBlock.layers(world.getBlockState(top.up())) > 0 && world.isInBuildLimit(top.up())) top = top.up();
+        if (!isExposedSurface(world, top) || world.getLightLevel(LightType.BLOCK, top) >= 10
+                || !world.getBiome(top).value().isCold(top, world.getSeaLevel())) return false;
+        var state = world.getBlockState(top);
+        int layers = SnowDriftBlock.layers(state);
+        if (layers > 0) {
+            int total = layers;
+            BlockPos lower = top.down();
+            // A bounded column walk, never a chunk-wide scan.
+            while (total < config.maxSnowLayers && SnowDriftBlock.layers(world.getBlockState(lower)) > 0) {
+                total += SnowDriftBlock.layers(world.getBlockState(lower));
+                lower = lower.down();
+            }
+            if (total >= config.maxSnowLayers) return false;
+            if (layers < 8) return world.setBlockState(top,
+                    WinterBlocks.SNOW_DRIFT.getDefaultState().with(SnowBlock.LAYERS, layers + 1), Block.NOTIFY_ALL);
+            BlockPos above = top.up();
+            if (!isExposedSurface(world, above) || !world.getBlockState(above).isAir()) return false;
+            return world.setBlockState(above, WinterBlocks.SNOW_DRIFT.getDefaultState(), Block.NOTIFY_ALL);
         }
         // Never replace crops, grass, machines, waterlogged blocks, or any non-air block.
         if (!state.isAir()) return false;
         var below = world.getBlockState(pos.down());
         if (below.hasBlockEntity() || !below.isIn(SNOW_SURFACES)) return false;
-        var snow = Blocks.SNOW.getDefaultState();
+        var snow = WinterBlocks.SNOW_DRIFT.getDefaultState();
         if (!snow.canPlaceAt(world, pos)) return false;
         return world.setBlockState(pos, snow, Block.NOTIFY_ALL);
     }

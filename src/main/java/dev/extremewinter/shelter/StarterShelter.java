@@ -46,9 +46,9 @@ public final class StarterShelter {
         }
         Vec3i size = template.get().getSize();
         // The blueprint's spawn/bed anchors assume this size; reject incompatible datapack overrides.
-        if (!size.equals(new Vec3i(9, 6, 11))) {
+        if (!size.equals(new Vec3i(9, 10, 11))) {
             state.finish("invalid_template_size", null);
-            ExtremeWinter.LOGGER.error("Starter shelter must be 9 x 6 x 11 blocks");
+            ExtremeWinter.LOGGER.error("Starter shelter must be 9 x 10 x 11 blocks");
             return;
         }
         BlockPos site = findSite(world, size, false);

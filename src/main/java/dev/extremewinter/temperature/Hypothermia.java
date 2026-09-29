@@ -14,8 +14,9 @@ public final class Hypothermia {
         // Short refreshes expire naturally. Never remove effects belonging to potions or other mods.
         if (stage >= 2) player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 40, 0, false, false, true));
         if (stage >= 3) player.addStatusEffect(new StatusEffectInstance(StatusEffects.MINING_FATIGUE, 40, 0, false, false, true));
-        if (stage == 4 && Math.floorMod(serverTicks + player.getId(), 20 * config.damageIntervalSeconds) == 0) {
-            player.damage(player.getWorld(), player.getDamageSources().freeze(), config.freezingDamage);
+        float damage = TemperatureModel.freezingDamage(temperature, config);
+        if (damage > 0 && Math.floorMod(serverTicks + player.getId(), 20 * config.damageIntervalSeconds) == 0) {
+            player.damage(player.getWorld(), player.getDamageSources().freeze(), damage);
         }
     }
 }

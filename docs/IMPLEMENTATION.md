@@ -105,3 +105,25 @@ published optional mod JARs and the actual `remapJar` output. This also tests th
 deliverable's Minecraft name remapping. The test mod is remapped into
 `build/testmods`, and it is never included in `build/libs` or the distributed mod.
 No Iris internals or mod gameplay were changed to work around the test launcher.
+
+## 1.1.0 changes
+
+- Warmth is ten original 9 x 9 flame sprites above hunger, including half icons. The public
+  Fabric HUD API remains unchanged; normal GUI sprites are rendered through Minecraft.
+  The row moves above the oxygen bar while underwater and above multiple mount-health rows.
+- Default snowy daylight loss is 0.5 units/second; nighttime is 0.68. Freezing starts below
+  40, every four seconds, interpolating 1 to 6 health points toward minimum temperature.
+- `SnowDriftBlock` extends vanilla `SnowBlock` and implements vanilla `Falling`. Models
+  reference vanilla snow textures. Neighbor changes schedule gravity; vanilla falling
+  entities handle movement/networking/rendering. No Mixin or custom entity renderer.
+  A full drift has full collision height, which prevents the next falling block from
+  incorrectly trying to replace its support. Thin deposits combine and preserve layers.
+  Total column depth defaults to 64 layers; sampling walks only that column.
+- The 9 x 11 footprint now has a 10-block-high gabled spruce roof, stripped-log framing,
+  stone-brick base, covered porch, lanterns and chimney. Furniture/loot/farm anchors stay
+  compatible with the existing first-arrival logic. Old world shelters are never replaced.
+  Visual inspiration: [SheraNom's Simple Spruce Starter House](https://www.planetminecraft.com/project/simple-spruce-starter-house-easy/).
+  The blueprint was authored locally; no downloaded schematic is included.
+- Legacy JSON defaults migrate once, retaining customized values and unknown fields;
+  the original is backed up before writing. Broken files remain untouched. Rates, damage
+  and accumulation remain configurable.

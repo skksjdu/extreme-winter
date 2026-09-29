@@ -1,6 +1,14 @@
 {
-  "size": [9, 6, 11],
-  "spawn": [4, 1, 7],
+  "size": [
+    9,
+    10,
+    11
+  ],
+  "spawn": [
+    4,
+    1,
+    7
+  ],
   "palette": {
     ".": "minecraft:air",
     "#": "minecraft:cobblestone",
@@ -19,25 +27,204 @@
     "a": "minecraft:farmland[moisture=7]",
     "~": "minecraft:water[level=0]",
     "L": "minecraft:lantern[hanging=true,waterlogged=false]",
-    "h": "minecraft:cobblestone_slab[type=bottom,waterlogged=false]"
+    "h": "minecraft:cobblestone_slab[type=bottom,waterlogged=false]",
+    "k": "minecraft:stripped_spruce_log[axis=y]",
+    "e": "minecraft:stripped_spruce_log[axis=x]",
+    "v": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight,waterlogged=false]",
+    "r": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight,waterlogged=false]",
+    "R": "minecraft:spruce_slab[type=bottom,waterlogged=false]",
+    "b": "minecraft:stone_bricks",
+    "q": "minecraft:spruce_fence[east=false,north=false,south=false,west=false,waterlogged=false]",
+    "T": "minecraft:spruce_trapdoor[facing=north,half=bottom,open=false,powered=false,waterlogged=false]",
+    "C": "minecraft:brown_carpet"
   },
   "layers": [
-    ["...sss...", "#########", "#########", "#########", "#########", "#####aaa#", "#####a~a#", "#####aaa#", "#####aaa#", "#########", "#########"],
-    [".........", "wwwwDwwww", "w.......w", "wcB.....w", "wtH.....w", "wf...pppw", "w....p.pw", "w.h..pppw", "w#F..pppw", "w###....w", "wwwwwwwww"],
-    [".........", "wwgwUwgww", "w.......w", "g.......g", "g.......g", "g.......g", "g.......g", "g.......g", "w.......w", "w.......w", "wwwgggwww"],
-    [".........", "wwgwwwgww", "w.......w", "g.......g", "g.......g", "g.......g", "g.......g", "g.......g", "w.......w", "w.......w", "wwwgggwww"],
-    [".........", "wwwwwwwww", "w.......w", "w...L...w", "w.......w", "w.......w", "w.....L.w", "w.......w", "w.......w", "w.......w", "wwwwwwwww"],
-    [".........", "wwwwwwwww", "wwwwwwwww", "wwwwwwwww", "wwwwwwwww", "wwwwwgggw", "wwwwwgggw", "wwwwwgggw", "wwwwwgggw", "wwwwwwwww", "wwwwwwwww"]
+    [
+      "b..sss..b",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
+      "bbbbbbbbb",
+      "bbbbbaaab",
+      "bbbbba~ab",
+      "bbbbbaaab",
+      "bbbbbaaab",
+      "bbbbbbbbb",
+      "bbbbbbbbb"
+    ],
+    [
+      "q.......q",
+      "kwwwDwwwk",
+      "w.......w",
+      "wcB.....w",
+      "wtH.....w",
+      "wf.C.pppw",
+      "w..C.p.pw",
+      "w.T..pppw",
+      "w#F..pppw",
+      "w###....w",
+      "kwwwwwwwk"
+    ],
+    [
+      "q.......q",
+      "kwgwUwgwk",
+      "w.......w",
+      "g.......g",
+      "g.......g",
+      "g.......g",
+      "g.......g",
+      "g.......g",
+      "w.......w",
+      "w.......w",
+      "kwwgggwwk"
+    ],
+    [
+      "q.L...L.q",
+      "kwgwwwgwk",
+      "w.......w",
+      "g...L...g",
+      "g.......g",
+      "g.......g",
+      "g.....L.g",
+      "g.......g",
+      "wbbb....w",
+      "w.......w",
+      "kwwgggwwk"
+    ],
+    [
+      "eeeeeeeee",
+      "kwwwwwwwk",
+      "weeeeeeew",
+      "w...w...w",
+      "w.......w",
+      "w.......w",
+      "w.....w.w",
+      "weeeeeeew",
+      "w.b.....w",
+      "w.......w",
+      "kwwwwwwwk"
+    ],
+    [
+      "v.......r",
+      "vwwwwwwwr",
+      "v.......r",
+      "v.......r",
+      "v.......r",
+      "v.......r",
+      "v.......r",
+      "v.......r",
+      "v.b.....r",
+      "v.......r",
+      "vwwwwwwwr"
+    ],
+    [
+      ".v.....r.",
+      ".vwgggwr.",
+      ".v.....r.",
+      ".v.....r.",
+      ".v.....r.",
+      ".v.....r.",
+      ".v.....r.",
+      ".v.....r.",
+      ".vb....r.",
+      ".v.....r.",
+      ".vwgggwr."
+    ],
+    [
+      "..v...r..",
+      "..vwwwr..",
+      "..v...r..",
+      "..v...r..",
+      "..v...r..",
+      "..v...r..",
+      "..v...r..",
+      "..v...r..",
+      "..b...r..",
+      "..v...r..",
+      "..vwwwr.."
+    ],
+    [
+      "...v.r...",
+      "...vwr...",
+      "...v.r...",
+      "...v.r...",
+      "...v.r...",
+      "...v.r...",
+      "...v.r...",
+      "...v.r...",
+      "..bv.r...",
+      "...v.r...",
+      "...vwr..."
+    ],
+    [
+      "....R....",
+      "....R....",
+      "....R....",
+      "....R....",
+      "....R....",
+      "....R....",
+      "....R....",
+      "....R....",
+      "..b.R....",
+      "....R....",
+      "....R...."
+    ]
   ],
   "chest": {
-    "position": [1, 1, 3],
+    "position": [
+      1,
+      1,
+      3
+    ],
     "items": [
-      ["minecraft:bread", 8], ["minecraft:wheat_seeds", 8],
-      ["minecraft:carrot", 4], ["minecraft:potato", 4],
-      ["minecraft:oak_sapling", 4], ["minecraft:spruce_sapling", 2],
-      ["minecraft:wooden_pickaxe", 1], ["minecraft:stone_axe", 1],
-      ["minecraft:stone_shovel", 1], ["minecraft:wooden_hoe", 1],
-      ["minecraft:torch", 8], ["minecraft:coal", 4]
+      [
+        "minecraft:bread",
+        8
+      ],
+      [
+        "minecraft:wheat_seeds",
+        8
+      ],
+      [
+        "minecraft:carrot",
+        4
+      ],
+      [
+        "minecraft:potato",
+        4
+      ],
+      [
+        "minecraft:oak_sapling",
+        4
+      ],
+      [
+        "minecraft:spruce_sapling",
+        2
+      ],
+      [
+        "minecraft:wooden_pickaxe",
+        1
+      ],
+      [
+        "minecraft:stone_axe",
+        1
+      ],
+      [
+        "minecraft:stone_shovel",
+        1
+      ],
+      [
+        "minecraft:wooden_hoe",
+        1
+      ],
+      [
+        "minecraft:torch",
+        8
+      ],
+      [
+        "minecraft:coal",
+        4
+      ]
     ]
   }
 }
