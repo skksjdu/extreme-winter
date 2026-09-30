@@ -3,7 +3,7 @@
   "id": "extreme_winter",
   "version": "${version}",
   "name": "Extreme Winter",
-  "description": "A small, vanilla-friendly winter survival loop for Minecraft 1.21.6.",
+  "description": "A small, vanilla-friendly winter survival loop for Minecraft 26.1.",
   "environment": "*",
   "mixins": ["extreme_winter.mixins.json"],
   "entrypoints": {
@@ -12,8 +12,8 @@
   },
   "depends": {
     "fabricloader": ">=0.19.5",
-    "minecraft": "1.21.6",
-    "java": ">=21",
-    "fabric-api": ">=0.128.2+1.21.6"
+    "minecraft": "26.1",
+    "java": ">=25",
+    "fabric-api": ">=0.145.1+26.1"
   }
 }

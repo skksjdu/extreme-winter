@@ -9,23 +9,23 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.CampfireBlockEntity;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.GameMode;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.GameType;
 
 public final class StarterAndHeatItemsTest implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
@@ -34,121 +34,121 @@ public final class StarterAndHeatItemsTest implements FabricClientGameTest {
         for (int index = 0; index < 2; index++) {
             try (var game = context.worldBuilder().create()) {
                 if (first == null) first = game.getWorldSave();
-                game.getClientWorld().waitForChunksRender();
+                game.getClientLevel().waitForChunksRender();
                 game.getServer().runOnServer(server -> {
-                    var player = server.getPlayerManager().getPlayerList().getFirst();
-                    require(player.getInventory().count(Items.CAMPFIRE) == 1, "every fresh save receives one campfire");
-                    var position = player.getPos();
-                    var spawn = server.getOverworld().getSpawnPos();
+                    var player = server.getPlayerList().getPlayers().getFirst();
+                    require(player.getInventory().countItem(Items.CAMPFIRE) == 1, "every fresh save receives one campfire");
+                    var position = player.position();
+                    var spawn = server.overworld().getRespawnData().pos();
                     StarterSupplies.onJoin(player);
-                    require(player.getPos().equals(position) && server.getOverworld().getSpawnPos().equals(spawn),
+                    require(player.position().equals(position) && server.overworld().getRespawnData().pos().equals(spawn),
                             "starter kit does not teleport or change vanilla spawn");
-                    require(player.getInventory().count(Items.CAMPFIRE) == 1, "repeated join does not duplicate kit");
-                    player.getInventory().clear();
-                    player.getInventory().markDirty();
+                    require(player.getInventory().countItem(Items.CAMPFIRE) == 1, "repeated join does not duplicate kit");
+                    player.getInventory().clearContent();
+                    player.getInventory().setChanged();
                 });
             }
         }
         try (var game = first.open()) {
-            game.getClientWorld().waitForChunksRender();
+            game.getClientLevel().waitForChunksRender();
             game.getServer().runOnServer(server -> require(
-                    server.getPlayerManager().getPlayerList().getFirst().getInventory().count(Items.CAMPFIRE) == 0,
+                    server.getPlayerList().getPlayers().getFirst().getInventory().countItem(Items.CAMPFIRE) == 0,
                     "reopened save does not replenish the starter kit"));
             game.getServer().runOnServer(server -> {
-                var world = server.getOverworld();
-                var player = server.getPlayerManager().getPlayerList().getFirst();
-                player.changeGameMode(GameMode.SURVIVAL);
+                var world = server.overworld();
+                var player = server.getPlayerList().getPlayers().getFirst();
+                player.setGameMode(GameType.SURVIVAL);
                 TemperatureData.set(player, 80);
                 for (int x = 16; x <= 30; x++) for (int z = -3; z <= 3; z++) {
-                    world.setBlockState(new BlockPos(x, 99, z), Blocks.STONE.getDefaultState());
-                    world.setBlockState(new BlockPos(x, 104, z), Blocks.GLASS.getDefaultState());
+                    world.setBlock(new BlockPos(x, 99, z), Blocks.STONE.defaultBlockState(), 3);
+                    world.setBlock(new BlockPos(x, 104, z), Blocks.GLASS.defaultBlockState(), 3);
                 }
-                player.teleport(world, 20.5, 100, 0.5, Set.of(), 0, 0, true);
+                player.teleportTo(world, 20.5, 100, 0.5, Set.of(), 0, 0, true);
                 var camp = new BlockPos(22, 100, 0);
-                world.setBlockState(camp, Blocks.CAMPFIRE.getDefaultState());
+                world.setBlock(camp, Blocks.CAMPFIRE.defaultBlockState(), 3);
                 var entity = (CampfireBlockEntity) world.getBlockEntity(camp);
-                entity.getItemsBeingCooked().set(0, new ItemStack(Items.BEEF));
+                entity.getItems().set(0, new ItemStack(Items.BEEF));
                 HeatItems.writeExposure(entity, 100);
-                player.setSneaking(true);
-                var hit = new BlockHitResult(Vec3d.ofCenter(camp), Direction.UP, camp, false);
-                var action = UseBlockCallback.EVENT.invoker().interact(player, world, Hand.MAIN_HAND, hit);
-                require(action.isAccepted() && world.getBlockState(camp).isAir(), "empty-hand sneaking picks up campfire");
-                player.setSneaking(false);
-                var returned = player.getInventory().getStack(0);
-                require(returned.isOf(Items.CAMPFIRE) && HeatItems.elapsed(returned) == 100,
+                player.setShiftKeyDown(true);
+                var hit = new BlockHitResult(Vec3.atCenterOf(camp), Direction.UP, camp, false);
+                var action = UseBlockCallback.EVENT.invoker().interact(player, world, InteractionHand.MAIN_HAND, hit);
+                require(action.consumesAction() && world.getBlockState(camp).isAir(), "empty-hand sneaking picks up campfire");
+                player.setShiftKeyDown(false);
+                var returned = player.getInventory().getItem(0);
+                require(returned.is(Items.CAMPFIRE) && HeatItems.elapsed(returned) == 100,
                         "picked-up campfire keeps partially used clock");
-                int beef = world.getEntitiesByClass(ItemEntity.class, new Box(camp).expand(2),
-                        item -> item.getStack().isOf(Items.BEEF)).stream().mapToInt(item -> item.getStack().getCount()).sum();
+                int beef = world.getEntitiesOfClass(ItemEntity.class, new AABB(camp).inflate(2),
+                        item -> item.getItem().is(Items.BEEF)).stream().mapToInt(item -> item.getItem().getCount()).sum();
                 require(beef == 1, "pickup preserves cooking item exactly once");
                 var furnace = new BlockPos(25, 100, 0);
-                world.setBlockState(furnace, Blocks.FURNACE.getDefaultState());
+                world.setBlock(furnace, Blocks.FURNACE.defaultBlockState(), 3);
                 HeatItems.writeExposure(world.getBlockEntity(furnace), 200);
-                var drops = Block.getDroppedStacks(world.getBlockState(furnace), world, furnace,
+                var drops = Block.getDrops(world.getBlockState(furnace), world, furnace,
                         world.getBlockEntity(furnace), player, new ItemStack(Items.IRON_PICKAXE));
-                var dropped = drops.stream().filter(stack -> stack.isOf(Items.FURNACE)).findFirst().orElseThrow();
+                var dropped = drops.stream().filter(stack -> stack.is(Items.FURNACE)).findFirst().orElseThrow();
                 require(HeatItems.elapsed(dropped) == 200, "ordinary furnace drop preserves clock");
                 var destination = new BlockPos(27, 100, 0);
-                player.setStackInHand(Hand.MAIN_HAND, dropped);
-                var support = destination.down();
-                var placement = new ItemPlacementContext(player, Hand.MAIN_HAND, dropped,
-                        new BlockHitResult(Vec3d.ofCenter(support).add(0, 0.5, 0), Direction.UP, support, false));
-                require(((BlockItem) Items.FURNACE).place(placement).isAccepted(), "real BlockItem placement succeeds");
-                require(world.getBlockState(destination).isOf(Blocks.FURNACE)
+                player.setItemInHand(InteractionHand.MAIN_HAND, dropped);
+                var support = destination.below();
+                var placement = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, dropped,
+                        new BlockHitResult(Vec3.atCenterOf(support).add(0, 0.5, 0), Direction.UP, support, false));
+                require(((BlockItem) Items.FURNACE).place(placement).consumesAction(), "real BlockItem placement succeeds");
+                require(world.getBlockState(destination).is(Blocks.FURNACE)
                         && HeatItems.elapsed(world.getBlockEntity(destination)) == 200,
                         "placed furnace retains its clock instead of becoming full");
                 // A completely depleted campfire is placed extinguished, with no free burning tick.
                 var empty = new ItemStack(Items.CAMPFIRE);
                 empty.set(HeatItems.EXPOSURE, ExtremeWinter.CONFIG.campfireExposureSeconds);
-                player.setStackInHand(Hand.MAIN_HAND, empty);
+                player.setItemInHand(InteractionHand.MAIN_HAND, empty);
                 var emptySupport = new BlockPos(29, 99, 0);
-                require(((BlockItem) Items.CAMPFIRE).place(new ItemPlacementContext(player, Hand.MAIN_HAND, empty,
-                        new BlockHitResult(Vec3d.ofCenter(emptySupport).add(0, 0.5, 0), Direction.UP, emptySupport, false))).isAccepted(),
+                require(((BlockItem) Items.CAMPFIRE).place(new BlockPlaceContext(player, InteractionHand.MAIN_HAND, empty,
+                        new BlockHitResult(Vec3.atCenterOf(emptySupport).add(0, 0.5, 0), Direction.UP, emptySupport, false))).consumesAction(),
                         "depleted campfire can be placed");
-                require(!world.getBlockState(emptySupport.up()).get(Properties.LIT), "depleted campfire is immediately unlit");
-                player.getInventory().clear();
+                require(!world.getBlockState(emptySupport.above()).getValue(BlockStateProperties.LIT), "depleted campfire is immediately unlit");
+                player.getInventory().clearContent();
                 var recovering = new ItemStack(Items.CAMPFIRE);
                 recovering.set(HeatItems.EXPOSURE, 100);
-                player.getInventory().setStack(0, recovering);
+                player.getInventory().setItem(0, recovering);
             });
             context.waitTicks(40);
             game.getServer().runOnServer(server -> {
-                var player = server.getPlayerManager().getPlayerList().getFirst();
-                int elapsed = HeatItems.elapsed(player.getInventory().getStack(0));
+                var player = server.getPlayerList().getPlayers().getFirst();
+                int elapsed = HeatItems.elapsed(player.getInventory().getItem(0));
                 require(elapsed == 92, "two real seconds of backpack recovery restore eight seconds: " + elapsed);
-                for (var item : new net.minecraft.item.Item[]{Items.CAMPFIRE, Items.SOUL_CAMPFIRE,
+                for (var item : new net.minecraft.world.item.Item[]{Items.CAMPFIRE, Items.SOUL_CAMPFIRE,
                         Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER}) {
                     var stack = new ItemStack(item);
                     int limit = HeatItems.limit(item, ExtremeWinter.CONFIG);
-                    require(!stack.isItemBarVisible(), "unused heat source has no persistent bar");
+                    require(!stack.isBarVisible(), "unused heat source has no persistent bar");
                     stack.set(HeatItems.EXPOSURE, limit);
-                    require(stack.isItemBarVisible() && stack.getItemBarStep() == 0, "depleted source displays empty bar");
+                    require(stack.isBarVisible() && stack.getBarWidth() == 0, "depleted source displays empty bar");
                     for (int second = 0; second < 30; second++) HeatItems.recover(stack, ExtremeWinter.CONFIG);
-                    require(HeatItems.elapsed(stack) == 0 && !stack.isItemBarVisible() && stack.getItemBarStep() == 13,
+                    require(HeatItems.elapsed(stack) == 0 && !stack.isBarVisible() && stack.getBarWidth() == 13,
                             "fully recovered heat source hides its bar");
                 }
-                player.getInventory().clear();
+                player.getInventory().clearContent();
                 for (int slot = 0; slot < 4; slot++) {
                     var stack = new ItemStack(Items.CAMPFIRE);
                     int fixtureElapsed = new int[]{0, 60, 108, 120}[slot];
                     stack.set(HeatItems.EXPOSURE, fixtureElapsed);
-                    player.getInventory().setStack(slot, stack);
+                    player.getInventory().setItem(slot, stack);
                 }
-                var items = new net.minecraft.item.Item[]{Items.SOUL_CAMPFIRE, Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER};
+                var items = new net.minecraft.world.item.Item[]{Items.SOUL_CAMPFIRE, Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER};
                 for (int slot = 0; slot < items.length; slot++) {
                     var stack = new ItemStack(items[slot]);
                     stack.set(HeatItems.EXPOSURE, HeatItems.limit(items[slot], ExtremeWinter.CONFIG) / 2);
-                    player.getInventory().setStack(slot + 4, stack);
+                    player.getInventory().setItem(slot + 4, stack);
                 }
                 var sword = new ItemStack(Items.STONE_SWORD);
-                sword.setDamage(80);
-                player.getInventory().setStack(8, sword);
-                require(sword.isItemBarVisible(), "ordinary weapon durability is retained");
-                player.getInventory().markDirty();
+                sword.setDamageValue(80);
+                player.getInventory().setItem(8, sword);
+                require(sword.isBarVisible(), "ordinary weapon durability is retained");
+                player.getInventory().setChanged();
             });
             context.waitTicks(2);
             context.runOnClient(client -> {
-                require(client.player.getInventory().getStack(1).getItemBarStep() >= 6
-                        && client.player.getInventory().getStack(1).getItemBarStep() <= 7, "item component and bar sync to client");
+                require(client.player.getInventory().getItem(1).getBarWidth() >= 6
+                        && client.player.getInventory().getItem(1).getBarWidth() <= 7, "item component and bar sync to client");
                 client.setScreen(new InventoryScreen(client.player));
             });
             context.takeScreenshot("heat-charge-inventory-" + System.getProperty("winter.test.profile", "A"));
@@ -156,13 +156,13 @@ public final class StarterAndHeatItemsTest implements FabricClientGameTest {
             game.getServer().runOnServer(server -> {
                 var stored = new ItemStack(Items.CAMPFIRE);
                 stored.set(HeatItems.EXPOSURE, 80);
-                server.getPlayerManager().getPlayerList().getFirst().getInventory().setStack(9, stored);
+                server.getPlayerList().getPlayers().getFirst().getInventory().setItem(9, stored);
             });
         }
         try (var game = first.open()) {
             game.getServer().runOnServer(server -> {
-                var stored = server.getPlayerManager().getPlayerList().getFirst().getInventory().getStack(9);
-                require(stored.isOf(Items.CAMPFIRE) && HeatItems.elapsed(stored) > 0 && HeatItems.elapsed(stored) <= 80,
+                var stored = server.getPlayerList().getPlayers().getFirst().getInventory().getItem(9);
+                require(stored.is(Items.CAMPFIRE) && HeatItems.elapsed(stored) > 0 && HeatItems.elapsed(stored) <= 80,
                         "partially charged inventory item survives save/reopen without becoming full");
             });
         }

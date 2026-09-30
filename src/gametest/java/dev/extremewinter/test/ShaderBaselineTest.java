@@ -9,7 +9,7 @@ public final class ShaderBaselineTest implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
         if (FabricLoader.getInstance().isModLoaded("extreme_winter")) throw new AssertionError("Baseline must exclude Extreme Winter");
         try (var game = context.worldBuilder().create()) {
-            game.getClientWorld().waitForChunksRender();
+            game.getClientLevel().waitForChunksRender();
             context.waitTicks(40);
             context.runOnClient(client -> {
                 try {

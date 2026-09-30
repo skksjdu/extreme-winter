@@ -3,17 +3,17 @@ package dev.extremewinter.temperature;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import dev.extremewinter.ExtremeWinter;
 import dev.extremewinter.config.WinterConfig;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
 
 /** Bounded scan once per player per second, nearest first, never loads chunks. */
 public final class HeatSources {
@@ -42,26 +42,26 @@ public final class HeatSources {
                 }
             }
         }
-        positions.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(BlockPos.ORIGIN)));
+        positions.sort(Comparator.comparingDouble(pos -> pos.distSqr(BlockPos.ZERO)));
         offsets = List.copyOf(positions);
     }
 
-    public double strength(ServerPlayerEntity player) {
-        ServerWorld world = player.getWorld();
-        BlockPos origin = player.getBlockPos();
+    public double strength(ServerPlayer player) {
+        ServerLevel world = player.level();
+        BlockPos origin = player.blockPosition();
         double total = 0;
         for (BlockPos offset : offsets) {
-            BlockPos pos = origin.add(offset);
-            if (world.getChunkManager().getWorldChunk(pos.getX() >> 4, pos.getZ() >> 4) == null) continue;
+            BlockPos pos = origin.offset(offset);
+            if (world.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4) == null) continue;
             var state = world.getBlockState(pos);
             if (!isHeatSource(state)) continue;
-            double distance = player.getPos().distanceTo(Vec3d.ofCenter(pos));
+            double distance = player.position().distanceTo(Vec3.atCenterOf(pos));
             if (distance > radius) continue;
             // Check the small ray corridor before raycasting, so a chunk border cannot cause a load.
-            if (!world.isRegionLoaded(Math.min(pos.getX(), origin.getX()), Math.min(pos.getZ(), origin.getZ()),
+            if (!world.hasChunksAt(Math.min(pos.getX(), origin.getX()), Math.min(pos.getZ(), origin.getZ()),
                     Math.max(pos.getX(), origin.getX()), Math.max(pos.getZ(), origin.getZ()))) continue;
-            var hit = world.raycast(new RaycastContext(player.getEyePos(), Vec3d.ofCenter(pos),
-                    RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player));
+            var hit = world.clip(new ClipContext(player.getEyePosition(), Vec3.atCenterOf(pos),
+                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
             if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(pos)) {
                 double weight = HeatItems.isTorch(state) ? torchStrength : 1;
                 total += weight * (1 - 0.75 * distance / radius);
@@ -72,9 +72,9 @@ public final class HeatSources {
     }
 
     public static boolean isHeatSource(BlockState state) {
-        if (state.isOf(Blocks.LAVA) || HeatItems.isTorch(state)) return true;
-        return (state.isOf(Blocks.CAMPFIRE) || state.isOf(Blocks.SOUL_CAMPFIRE)
-                || state.isOf(Blocks.FURNACE) || state.isOf(Blocks.BLAST_FURNACE)
-                || state.isOf(Blocks.SMOKER)) && state.get(Properties.LIT);
+        if (state.is(Blocks.LAVA) || HeatItems.isTorch(state)) return true;
+        return (state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE)
+                || state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE)
+                || state.is(Blocks.SMOKER)) && state.getValue(BlockStateProperties.LIT);
     }
 }

@@ -1,4 +1,69 @@
-# 1.2.1 验证报告
+# 26.0.0 / Minecraft 26.1 验证报告
+
+2026-09-30，本地单人验收。模组版本 **26.0.0**，游戏版本 **26.1**。
+成品：`outputs/extreme-winter-26.0.0.jar`。本次没有安装到旧 1.21.6 实例，也没有发布到 GitHub。
+Fabric Loader 0.19.5 / Fabric API 0.145.1+26.1 / Gradle 9.8.0 / Loom 1.18.2。
+本机 JDK 26.0.1 构建与运行，以 `--release 25` 输出 Java 25 字节码，游戏最低 Java 25。
+
+## 最终正式 JAR 的完整矩阵
+
+每组使用独立的 26.1 测试实例和正式 JAR；8 个真实游戏测试入口全部通过。
+Windows / Intel Arc Graphics，OpenGL 驱动 32.0.101.8132。可选依赖通过 Modrinth 元数据核对
+Minecraft 26.1 支持范围，并逐个校验 SHA-512；缓存清单为 `work/compat/26.1/versions.json`。
+
+| 配置 | 组合 | 结果 | Gradle 时长 |
+| --- | --- | --- | --- |
+| A | Fabric API | 通过 | 3m 3s |
+| B | A + Sodium 0.8.9 | 通过 | 2m 56s |
+| C | B + Iris 1.10.9，关闭光影 | 通过 | 2m 49s |
+| D | C + Complementary Reimagined r5.9.3，实际启用光影 | 通过 | 3m 55s |
+| E | C + Lithium 0.24.7 / FerriteCore 9.0.0 / Mod Menu 18.0.2 / Cloth Config 26.1.154，关闭光影 | 通过 | 2m 51s |
+
+Iris 启动日志和公开 API 均检查光影状态：D 启用，其余含 Iris 的组合关闭。
+Iris/Sodium 的文件名含 `26.1.1`，实际元数据覆盖 26.1；使用 Iris 声明的准确 Sodium 依赖。
+各组均测试体温/HUD、初始物资、便携热源、火把冷却、气候阶段、积雪移动、
+炉子燃料、岩浆与火把计时保存重进、自然地形以及中英文实际鼠标悬停。
+
+## 新庇护规则与回归
+
+- 头顶被覆盖且周围 **3×3 至少 7/9 列有顶**才提供庇护。单格石头、玻璃、树叶，
+  一格宽横梁、屋檐边缘、正上方洞口及只有 6 列覆盖均按露天处理；7 列及完整屋顶、树冠、洞顶有效。
+- 真实生存玩家在单块玻璃下运行 40 tick 仍失温，在完整玻璃顶下同样运行 40 tick 保温；
+  营火在单格遮挡下增加耗损，完整屋顶下暂停。脚边积雪不计作屋顶，缺失区块不加载。
+- 体温与全部热源耗损共用此判定；积雪生成和水源冻结独立保留直达天空约束。
+- 26.1 移植使用官方名称，适配天气、世界时钟、保存数据、网络、HUD 和物品掉落 API；
+  原有配置字段、组件及附件标识保留。测试中保存重进的体温、炉子、岩浆、火把计时通过。
+- 初始营火不传送玩家、不生成建筑；同一客户端连续新建两个存档都只领取 1 个营火。
+- 火把到期后准确掉落 1 个原版物品；未恢复满时不能放置且不扣数量。营火/炉子回收保留计时，
+  普通石剑的原版耐久条及悬停不变。新庇护说明具有中英文翻译。
+- 积雪行走速度比为 0.8570759，薄雪、满层及堆叠雪一致；地面/雪地跳跃高度均为 1.2522033 格。
+  11 种树叶的 22 项模型/纹理资源在这批 Sodium 0.8.9 组合中均来自 vanilla。
+- 16 项单元测试全部通过（10 项温度、6 项配置），失败、错误和跳过均为 0。
+  PowerShell 构建、依赖准备及矩阵脚本的语法检查通过；`git diff --check` 通过。
+
+## 包与证据
+
+包检查通过：76092 字节、29 个 Java 25 类、4 个通用 Mixin。
+没有测试类、嵌套第三方 JAR、可选模组硬依赖或原版视觉覆盖；HUD 使用 Fabric 公共 API，
+没有客户端渲染 Mixin 或直接 OpenGL 调用。
+SHA-256：`658b4ca0e9f83a94967494dd9270f996bcb5f710333e9f9693c1fe8d42009c5c`。
+
+日志：`work/test-26.0.0-A.log` 至 `work/test-26.0.0-E.log`，汇总 `work/matrix-26.0.0-summary.log`。
+单元报告：`build/reports/tests/test/index.html`；包检查：`outputs/package-26.0.0.json`。
+截图：`outputs/heat-bars-26.0.0-vanilla.png`、`outputs/warmth-hud-26.0.0-vanilla.png`、
+`outputs/visuals-26.0.0-vanilla.png`、`outputs/visuals-26.0.0-complementary.png`、
+`outputs/heat-bars-26.0.0-complementary.png`、`outputs/warmth-hud-26.0.0-complementary.png`。
+这些交付截图已目视检查。
+
+日志中的离线认证/Realms 网络超时、测试窗口 Anisotropic Filtering 选项错误、
+Iris refmap 提示，以及 Complementary 的 `BIOME_SULFUR_CAVES` 和旧 `stone_slab variant`
+映射警告均保留；没有修改第三方光影源文件，具体情况以原始日志为准。
+未验证专用服务器/多人、用户已有存档的跨游戏版本升级、Java 25 运行时、其他显卡和其他光影包。
+本次在 JDK 26 上通过；最低 Java 25 由编译目标与包元数据确认。
+
+---
+
+# 1.2.1 历史验证报告
 
 2026-09-30，本地单人验证；未上传 GitHub。成品：`outputs/extreme-winter-1.2.1.jar`。
 Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。

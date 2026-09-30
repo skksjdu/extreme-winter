@@ -8,7 +8,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 
 public final class ExtremeWinterClient implements ClientModInitializer {
@@ -19,6 +19,6 @@ public final class ExtremeWinterClient implements ClientModInitializer {
                 (payload, context) -> TemperatureHud.update(payload));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> TemperatureHud.clear());
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT,
-                Identifier.of(ExtremeWinter.ID, "temperature_hud"), TemperatureHud::render);
+                Identifier.fromNamespaceAndPath(ExtremeWinter.ID, "temperature_hud"), TemperatureHud::render);
     }
 }

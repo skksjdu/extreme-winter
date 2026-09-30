@@ -14,7 +14,7 @@ import dev.extremewinter.network.TemperatureSync;
 import dev.extremewinter.environment.WinterClimate;
 import dev.extremewinter.environment.WinterEnvironment;
 import dev.extremewinter.environment.WinterBlocks;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import dev.extremewinter.survival.StarterSupplies;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -37,16 +37,16 @@ public final class ExtremeWinter implements ModInitializer {
         TemperatureSync.register(CONFIG);
         WinterClimate.register(CONFIG);
         var environment = new WinterEnvironment(CONFIG);
-        ServerWorldEvents.LOAD.register((server, world) -> environment.onLoad(world));
-        ServerTickEvents.END_WORLD_TICK.register(environment::tick);
+        ServerLevelEvents.LOAD.register((server, world) -> environment.onLoad(world));
+        ServerTickEvents.END_LEVEL_TICK.register(environment::tick);
         var weathering = new HeatWeathering(CONFIG);
-        ServerChunkEvents.CHUNK_LOAD.register(weathering::onChunkLoad);
-        ServerTickEvents.END_WORLD_TICK.register(weathering::tick);
+        ServerChunkEvents.CHUNK_LOAD.register((world, chunk, generated) -> weathering.onChunkLoad(world, chunk));
+        ServerTickEvents.END_LEVEL_TICK.register(weathering::tick);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> StarterSupplies.onJoin(handler.player));
         UseBlockCallback.EVENT.register(HeatItems::pickUpCampfire);
         ServerTickEvents.END_SERVER_TICK.register(HeatItems::tickInventories);
         ServerPlayerEvents.JOIN.register(TemperatureData::get);
         ServerTickEvents.END_SERVER_TICK.register(new TemperatureManager(CONFIG)::tick);
-        LOGGER.info("Extreme Winter initialized for Minecraft 1.21.6");
+        LOGGER.info("Extreme Winter initialized for Minecraft 26.1");
     }
 }

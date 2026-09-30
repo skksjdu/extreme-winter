@@ -1,12 +1,12 @@
 package dev.extremewinter.mixin;
 
 import dev.extremewinter.temperature.HeatItems;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,14 +15,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockItem.class)
 public abstract class HeatPlacementMixin {
-    @Inject(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
+    @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
             at = @At("HEAD"), cancellable = true)
-    private void winter$waitForTorch(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> result) {
-        if (!HeatItems.canPlaceTorch(context.getStack(), context.getPlayer())) result.setReturnValue(ActionResult.FAIL);
+    private void winter$waitForTorch(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> result) {
+        if (!HeatItems.canPlaceTorch(context.getItemInHand(), context.getPlayer())) result.setReturnValue(InteractionResult.FAIL);
     }
 
-    @Inject(method = "copyComponentsToBlockEntity", at = @At("RETURN"))
-    private static void winter$restoreClock(World world, BlockPos pos, ItemStack stack, CallbackInfo info) {
+    @Inject(method = "updateBlockEntityComponents", at = @At("RETURN"))
+    private static void winter$restoreClock(Level world, BlockPos pos, ItemStack stack, CallbackInfo info) {
         HeatItems.onPlaced(world, pos, stack);
     }
 }

@@ -7,6 +7,7 @@
   "hud.extreme_winter.stage.4": "Freezing",
   "block.extreme_winter.snow_drift": "Snow Drift",
   "tooltip.extreme_winter.heat": "Heat source · Range: %s blocks · Stacks",
+  "tooltip.extreme_winter.shelter": "Shelter: covered overhead + 7 of 9 nearby columns",
   "tooltip.extreme_winter.campfire": "Warms while lit; roofs/leaves pause wear",
   "tooltip.extreme_winter.furnace": "Warms while burning; roofs/leaves pause wear",
   "tooltip.extreme_winter.torch": "Weak warmth when placed; cold torches fall",

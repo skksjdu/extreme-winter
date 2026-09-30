@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
 }
 
 version = project.mod_version
@@ -17,16 +17,15 @@ loom {
         }
     }
     runs {
-        client { runDir 'work/run-client' }
-        server { runDir 'work/run-server' }
+        client { runDir "work/run-client-${project.minecraft_version}" }
+        server { runDir "work/run-server-${project.minecraft_version}" }
     }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.12.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -37,13 +36,14 @@ processResources {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(26)
     withSourcesJar()
 }
 tasks.withType(JavaCompile).configureEach {
-    options.release = 21
+    options.release = 25
     options.encoding = 'UTF-8'
 }
+tasks.withType(Jar).configureEach { includeEmptyDirs = false }
 test {
     useJUnitPlatform()
     workingDir = file('work/unit-tests')
@@ -58,9 +58,9 @@ fabricApi.configureTests {
     clearRunDirectory = false
 }
 dependencies {
-    modGametestImplementation fabricApi.module('fabric-client-gametest-api-v1', project.fabric_version)
+    gametestImplementation fabricApi.module('fabric-client-gametest-api-v1', project.fabric_version)
 }
-loom.runs.clientGameTest { runDir 'work/run-gametest' }
+loom.runs.clientGameTest { runDir "work/run-gametest-${project.minecraft_version}" }
 
 // Optional test-only profiles. These files are never included in the distributable JAR.
 def compatProfile = providers.gradleProperty('compatProfile').getOrElse('A')
@@ -68,28 +68,21 @@ if (!(compatProfile in ['A', 'B', 'C', 'D', 'E'])) throw new GradleException('co
 def compatMods = []
 if (compatProfile != 'A') compatMods += 'sodium'
 if (compatProfile in ['C', 'D', 'E']) compatMods += 'iris'
-if (compatProfile == 'E') compatMods += ['lithium', 'ferrite-core', 'modmenu']
+if (compatProfile == 'E') compatMods += ['lithium', 'ferrite-core', 'modmenu', 'cloth-config']
 dependencies {
     productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     productionRuntimeMods fabricApi.module('fabric-client-gametest-api-v1', project.fabric_version)
-    compatMods.each { mod -> productionRuntimeMods fileTree(dir: "work/compat/${mod}", include: '*.jar') }
+    compatMods.each { mod -> productionRuntimeMods fileTree(dir: "work/compat/${project.minecraft_version}/${mod}", include: '*.jar') }
 }
 tasks.register('gametestJar', Jar) {
     from sourceSets.gametest.output
-    archiveClassifier = 'gametest-dev'
-    destinationDirectory = layout.buildDirectory.dir('testmods')
-}
-tasks.register('remapGametestJar', net.fabricmc.loom.task.RemapJarTask) {
-    inputFile = tasks.named('gametestJar').flatMap { it.archiveFile }
     archiveClassifier = 'gametest'
     destinationDirectory = layout.buildDirectory.dir('testmods')
-    classpath.from(sourceSets.gametest.compileClasspath)
-    addNestedDependencies = false
 }
 tasks.register('runProductionGameTest', net.fabricmc.loom.task.prod.ClientProductionRunTask) {
-    mods.from(tasks.named('remapGametestJar'))
-    runDir = file("work/run-production-${compatProfile}")
+    mods.from(tasks.named('gametestJar'))
+    runDir = file("work/run-production-${project.minecraft_version}-${compatProfile}")
     jvmArgs.addAll('-Dfabric.client.gametest', "-Dwinter.test.profile=${compatProfile}",
             "-Dfabric.client.gametest.testModResourcesPath=${file('src/gametest/resources').absolutePath}")
-    programArgs.addAll('--username', 'Player0', '--version', '1.21.6', '--accessToken', '0')
+    programArgs.addAll('--username', 'Player0', '--version', project.minecraft_version, '--accessToken', '0')
 }

@@ -7,13 +7,13 @@ import dev.extremewinter.temperature.HeatWeathering;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.core.BlockPos;
 
 /** Short fixture durations test the same persisted clocks used by normal gameplay. */
 public final class HeatWeatheringTest implements FabricClientGameTest {
@@ -38,73 +38,80 @@ public final class HeatWeatheringTest implements FabricClientGameTest {
         try (var game = context.worldBuilder().create()) {
             save = game.getWorldSave();
             game.getServer().runOnServer(server -> {
-                var world = server.getOverworld();
+                var world = server.overworld();
                 for (BlockPos pos : new BlockPos[]{camp, soul, covered, furnace, blast, smoker, lava, roofedLava}) {
-                    world.setBlockState(pos.down(), Blocks.STONE.getDefaultState(), Block.NOTIFY_ALL);
+                    world.setBlock(pos.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
                 }
-                world.setBlockState(camp, Blocks.CAMPFIRE.getDefaultState());
-                world.setBlockState(soul, Blocks.SOUL_CAMPFIRE.getDefaultState());
-                world.setBlockState(covered, Blocks.CAMPFIRE.getDefaultState());
-                world.setBlockState(covered.up(3), Blocks.GLASS.getDefaultState());
+                world.setBlock(camp, Blocks.CAMPFIRE.defaultBlockState(), 3);
+                world.setBlock(soul, Blocks.SOUL_CAMPFIRE.defaultBlockState(), 3);
+                world.setBlock(covered, Blocks.CAMPFIRE.defaultBlockState(), 3);
+                ExposureTest.roof(world, covered.above(3), Blocks.GLASS.defaultBlockState());
                 for (var pair : new Object[][]{{furnace, Blocks.FURNACE}, {blast, Blocks.BLAST_FURNACE}, {smoker, Blocks.SMOKER}}) {
                     BlockPos pos = (BlockPos) pair[0];
                     var block = (Block) pair[1];
-                    world.setBlockState(pos, block.getDefaultState().with(Properties.LIT, true));
+                    world.setBlock(pos, block.defaultBlockState().setValue(BlockStateProperties.LIT, true), 3);
                     var entity = (AbstractFurnaceBlockEntity) world.getBlockEntity(pos);
-                    entity.setStack(0, new ItemStack(block == Blocks.SMOKER ? Items.BEEF : Items.RAW_IRON, 16));
-                    entity.setStack(1, new ItemStack(Items.COAL, 8));
+                    entity.setItem(0, new ItemStack(block == Blocks.SMOKER ? Items.BEEF : Items.RAW_IRON, 16));
+                    entity.setItem(1, new ItemStack(Items.COAL, 8));
                 }
                 // Enclose each source, so fluid expansion cannot alter the clock fixture.
                 for (BlockPos pos : new BlockPos[]{lava, roofedLava}) {
-                    for (var direction : net.minecraft.util.math.Direction.Type.HORIZONTAL) {
-                        world.setBlockState(pos.offset(direction), Blocks.STONE.getDefaultState());
+                    for (var direction : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+                        world.setBlock(pos.relative(direction), Blocks.STONE.defaultBlockState(), 3);
                     }
-                    world.setBlockState(pos, Blocks.LAVA.getDefaultState());
+                    world.setBlock(pos, Blocks.LAVA.defaultBlockState(), 3);
                 }
                 weather.discoverLava(world, lava);
                 weather.discoverLava(world, roofedLava);
-                world.setBlockState(roofedLava.up(3), Blocks.GLASS.getDefaultState());
+                ExposureTest.roof(world, roofedLava.above(3), Blocks.GLASS.defaultBlockState());
                 for (int second = 0; second < 2; second++) {
                     for (BlockPos pos : new BlockPos[]{camp, soul, covered, furnace, blast, smoker}) {
                         weather.advanceBlockEntity(world, world.getBlockEntity(pos));
                     }
                     weather.advanceLava(world);
                 }
-                require(world.getBlockState(camp).get(Properties.LIT), "campfire remains lit before its limit");
-                require(!world.getBlockState(smoker).get(Properties.LIT), "smoker has the shortest furnace duration");
-                require(world.getBlockState(covered).get(Properties.LIT), "glass-roofed campfire is protected");
+                require(world.getBlockState(camp).getValue(BlockStateProperties.LIT), "campfire remains lit before its limit");
+                require(!world.getBlockState(smoker).getValue(BlockStateProperties.LIT), "smoker has the shortest furnace duration");
+                require(world.getBlockState(covered).getValue(BlockStateProperties.LIT), "glass-roofed campfire is protected");
+                // Pause ordinary live ticks while saving/loading the short-duration fixture.
+                for (var pos : new BlockPos[]{camp, soul, furnace, blast, lava}) {
+                    ExposureTest.roof(world, pos.above(3), Blocks.GLASS.defaultBlockState());
+                }
             });
             // Save/reopen inside the running regression, without resetting partially elapsed timers.
         }
         try (var reopened = save.open()) {
                 reopened.getServer().runOnServer(server -> {
-                    var world = server.getOverworld();
+                    var world = server.overworld();
+                    for (var pos : new BlockPos[]{camp, soul, furnace, blast, lava}) {
+                        ExposureTest.roof(world, pos.above(3), Blocks.AIR.defaultBlockState());
+                    }
                     weather.advanceBlockEntity(world, world.getBlockEntity(camp));
                     weather.advanceBlockEntity(world, world.getBlockEntity(furnace));
-                    require(!world.getBlockState(camp).get(Properties.LIT), "campfire timer survives save/reopen");
-                    require(!world.getBlockState(furnace).get(Properties.LIT), "furnace actually extinguishes");
+                    require(!world.getBlockState(camp).getValue(BlockStateProperties.LIT), "campfire timer survives save/reopen");
+                    require(!world.getBlockState(furnace).getValue(BlockStateProperties.LIT), "furnace actually extinguishes");
                     require(!HeatSources.isHeatSource(world.getBlockState(furnace)), "cold furnace no longer provides warmth");
                     var entity = (AbstractFurnaceBlockEntity) world.getBlockEntity(furnace);
-                    require(entity.getStack(0).getCount() > 0 && entity.getStack(1).getCount() > 0, "extinguishing retains input and fuel");
+                    require(entity.getItem(0).getCount() > 0 && entity.getItem(1).getCount() > 0, "extinguishing retains input and fuel");
                     for (int i = 0; i < 6; i++) {
-                        AbstractFurnaceBlockEntity.tick(world, furnace, world.getBlockState(furnace), entity);
+                        AbstractFurnaceBlockEntity.serverTick(world, furnace, world.getBlockState(furnace), entity);
                     }
-                    require(!world.getBlockState(furnace).get(Properties.LIT), "exposed furnace cannot auto-reignite");
-                    world.setBlockState(furnace.up(3), Blocks.GLASS.getDefaultState());
-                    AbstractFurnaceBlockEntity.tick(world, furnace, world.getBlockState(furnace), entity);
-                    require(world.getBlockState(furnace).get(Properties.LIT), "roof allows furnace to resume with retained fuel");
+                    require(!world.getBlockState(furnace).getValue(BlockStateProperties.LIT), "exposed furnace cannot auto-reignite");
+                    ExposureTest.roof(world, furnace.above(3), Blocks.GLASS.defaultBlockState());
+                    AbstractFurnaceBlockEntity.serverTick(world, furnace, world.getBlockState(furnace), entity);
+                    require(world.getBlockState(furnace).getValue(BlockStateProperties.LIT), "roof allows furnace to resume with retained fuel");
                     for (int i = 0; i < 2; i++) weather.advanceBlockEntity(world, world.getBlockEntity(blast));
-                    require(!world.getBlockState(blast).get(Properties.LIT), "blast furnace uses its own duration");
+                    require(!world.getBlockState(blast).getValue(BlockStateProperties.LIT), "blast furnace uses its own duration");
                     for (int i = 0; i < 2; i++) weather.advanceBlockEntity(world, world.getBlockEntity(soul));
-                    require(world.getBlockState(soul).get(Properties.LIT), "soul campfire lasts longer than regular campfire");
+                    require(world.getBlockState(soul).getValue(BlockStateProperties.LIT), "soul campfire lasts longer than regular campfire");
                     weather.advanceBlockEntity(world, world.getBlockEntity(soul));
-                    require(!world.getBlockState(soul).get(Properties.LIT), "soul campfire expires at its own limit");
+                    require(!world.getBlockState(soul).getValue(BlockStateProperties.LIT), "soul campfire expires at its own limit");
                     for (int i = 0; i < 4; i++) weather.advanceLava(world);
-                    require(world.getBlockState(lava).isOf(Blocks.OBSIDIAN), "source lava clock survives reload and becomes obsidian");
-                    require(world.getBlockState(roofedLava).isOf(Blocks.LAVA), "covered lava does not cool");
-                    world.setBlockState(camp, Blocks.CAMPFIRE.getDefaultState());
+                    require(world.getBlockState(lava).is(Blocks.OBSIDIAN), "source lava clock survives reload and becomes obsidian");
+                    require(world.getBlockState(roofedLava).is(Blocks.LAVA), "covered lava does not cool");
+                    world.setBlock(camp, Blocks.CAMPFIRE.defaultBlockState(), 3);
                     weather.advanceBlockEntity(world, world.getBlockEntity(camp));
-                    require(world.getBlockState(camp).get(Properties.LIT), "manually relit campfire gets a new lifetime");
+                    require(world.getBlockState(camp).getValue(BlockStateProperties.LIT), "manually relit campfire gets a new lifetime");
                     require(ExtremeWinter.CONFIG.lavaExposureSeconds == 3600, "normal lava default is three game days");
                 });
         }

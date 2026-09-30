@@ -13,7 +13,8 @@ with zipfile.ZipFile(path) as jar:
     names = jar.namelist()
     meta = json.loads(jar.read('fabric.mod.json'))
     assert meta['version'] == version
-    assert meta['depends']['minecraft'] == '1.21.6'
+    assert meta['depends']['minecraft'] == '26.1'
+    assert meta['depends']['java'] == '>=25'
     assert set(meta['depends']) == {'fabricloader', 'minecraft', 'java', 'fabric-api'}
     assert meta['mixins'] == ['extreme_winter.mixins.json']
     mixins = json.loads(jar.read('extreme_winter.mixins.json'))
@@ -22,7 +23,7 @@ with zipfile.ZipFile(path) as jar:
     classes = [p for p in names if p.endswith('.class')]
     assert classes
     for name in classes:
-        assert struct.unpack('>H', jar.read(name)[6:8])[0] == 65, name
+        assert struct.unpack('>H', jar.read(name)[6:8])[0] == 69, name
     for name in names:
         if name.endswith('.json'): json.loads(jar.read(name))
     assert not any('starter_shelter' in name or '/shelter/' in name for name in names)
@@ -30,7 +31,7 @@ with zipfile.ZipFile(path) as jar:
     chinese = json.loads(jar.read('assets/extreme_winter/lang/zh_cn.json'))
     english = json.loads(jar.read('assets/extreme_winter/lang/en_us.json'))
     assert set(chinese) == set(english), 'Translations must have matching keys'
-    for key in ('durability', 'campfire_pickup', 'furnace_pickup', 'torch_cooldown', 'lava_cooling'):
+    for key in ('durability', 'campfire_pickup', 'furnace_pickup', 'torch_cooldown', 'lava_cooling', 'shelter'):
         assert 'tooltip.extreme_winter.' + key in chinese
     assert 'assets/extreme_winter/blockstates/snow_drift.json' in names
     assert 'data/extreme_winter/loot_table/blocks/snow_drift.json' in names
@@ -42,7 +43,7 @@ with zipfile.ZipFile(path) as jar:
     assert not visuals, 'Vanilla visuals must not be overridden'
 print(json.dumps({'file': str(path), 'bytes': path.stat().st_size,
                   'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
-                  'classes': len(classes), 'bytecode_java': 21,
+                  'classes': len(classes), 'bytecode_java': 25,
                   'minecraft': meta['depends']['minecraft'], 'test_classes_in_release': False,
                   'mixins': mixins['mixins'], 'shelter_generation': False, 'optional_mod_dependencies': False,
                   'heat_tooltip_languages': ['zh_cn', 'en_us'],

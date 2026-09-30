@@ -7,6 +7,7 @@
   "hud.extreme_winter.stage.4": "冻伤",
   "block.extreme_winter.snow_drift": "重力积雪",
   "tooltip.extreme_winter.heat": "热源 · 范围：%s 格 · 可叠加",
+  "tooltip.extreme_winter.shelter": "庇护：头顶有遮挡，周围 3×3 至少 7 格有顶",
   "tooltip.extreme_winter.campfire": "点燃后供暖；屋顶/树冠遮蔽时暂停损耗",
   "tooltip.extreme_winter.furnace": "燃烧时供暖；屋顶/树冠遮蔽时暂停损耗",
   "tooltip.extreme_winter.torch": "放置后提供少量温暖；露天过冷会掉落",
@@ -19,7 +20,7 @@
   "tooltip.extreme_winter.torch_recovery": "掉落或背包中约 %s 秒恢复满后可再放置",
   "tooltip.extreme_winter.torch_cooldown": "剩余放置冷却：%s 秒",
   "tooltip.extreme_winter.lava": "放置岩浆源供暖；露天冷却后变为黑曜石",
-  "tooltip.extreme_winter.lava_cooling": "岩浆源露天冷却时长：%s 秒（有顶暂停）",
+  "tooltip.extreme_winter.lava_cooling": "岩浆源露天冷却时长：%s 秒（有效庇护下暂停）",
   "tooltip.extreme_winter.lava_pickup": "回收：用空桶收集岩浆源",
   "tooltip.extreme_winter.weather_disabled": "当前配置已关闭热源受冷损耗",
   "message.extreme_winter.torch_cold": "火把过冷，约 %s 秒恢复后可重新放置"

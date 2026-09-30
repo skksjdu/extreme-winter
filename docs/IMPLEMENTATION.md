@@ -1,3 +1,44 @@
+# 26.0.0 / Minecraft 26.1
+
+Current target: Minecraft **26.1**, Fabric Loader **0.19.5**, Fabric API **0.145.1+26.1**.
+Gradle 9.8.0 and Loom 1.18.2 are retained. Use the unobfuscated
+`net.fabricmc.fabric-loom` plugin, normal `implementation` dependencies and `jar`.
+The locally installed JDK 26 compiles with `--release 25`; game metadata requires Java 25+.
+Yarn and remapping tasks are removed. Client and common source sets remain separate.
+
+26.1 API adaptations include `Identifier`, `ServerLevelEvents`, `END_LEVEL_TICK`,
+`PayloadTypeRegistry.clientboundPlay`, `GuiGraphicsExtractor`, record-based `ChunkPos`,
+`WeatherData`, the Overworld clock, namespaced `SavedDataType`, and the drop-method
+`ItemInstance` descriptor. Saved data retains the default-namespace legacy names
+`minecraft:extreme_winter_lava_cooling` and `minecraft:extreme_winter_torch_cooling`.
+Existing attachments/component identifiers and configuration fields are retained.
+
+Shelter checks require center coverage and >=7 covered columns in a 3x3 area.
+At most 10 heightmap lookups per check (center plus nine columns), using loaded
+chunks only. Temperature uses the air above the player's feet to exclude snow
+underfoot; heat wear checks above the source block. Glass and broad foliage are
+recognized. No wall/room-volume simulation. Snow/ice placement separately keeps
+the direct-sky constraint, so precipitation cannot pass through a single top block.
+
+HUD uses Fabric's public API and vanilla GUI sprites. Terrain and falling snow
+use vanilla models/renderers. Four common mixins remain scoped to exact vanilla
+heat items and gameplay; no client render mixins or direct OpenGL calls. Optional
+mods and shaders are test-only, downloaded with SHA512 checks under `work/compat/26.1`.
+Test instances have separate 26.1 paths and do not reuse 1.21.6 saves.
+
+Primary references:
+- [Fabric 26.1 changes](https://fabricmc.net/2026/03/14/261.html)
+- [Official mapping migration](https://wiki.fabricmc.net/tutorial:migratemappings)
+- [Fabric API version metadata](https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml)
+- [Iris 1.10.9](https://modrinth.com/mod/iris/version/MwcLS51S)
+- [Sodium 0.8.9](https://modrinth.com/mod/sodium/version/uGvVQBnw)
+
+Runtime results and limitations: [TESTING.md](TESTING.md).
+
+---
+
+# 1.21.6 historical implementation record
+
 # Extreme Winter — implementation notes
 
 Target: Minecraft Java Edition **1.21.6** only. User clarified that this is a
