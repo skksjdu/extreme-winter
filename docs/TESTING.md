@@ -1,3 +1,61 @@
+# 26.0.1 / Minecraft 26.1.2 移植验证
+
+2026-09-30，以 `mvp-26.0.0` 固定的最新版 MVP 为基础，移植到 **Minecraft 26.1.2 / Fabric / 单人**。
+成品：`outputs/extreme-winter-26.0.1.jar`；原 26.0.0 成品与标签保留。
+Loader **0.19.5** / Fabric API **0.155.3+26.1.2** / Gradle 9.8.0 / Loom 1.18.2。
+使用本机 JDK 26.0.1 构建与运行，输出 Java 25 字节码；游戏最低 Java 25。
+
+## 移植范围与构建
+
+- 更新游戏目标、Fabric API 及模组版本；游戏依赖严格限定为 `26.1.2`。
+- 玩法源码、配置默认值、方块/物品/附件标识和存档格式保持基线。
+  两版 JAR 的 **31 个玩法类与全部资源逐字节一致**，只有 `fabric.mod.json` 和
+  `META-INF/MANIFEST.MF` 中的游戏版本等元数据不同；文件集合无增删。
+  比较记录：`work/port-26.0.1-content-comparison.json`。
+- `build compileGametestJava` 通过，17 项单元测试通过，失败、错误、跳过均为 0。
+  包检查同时核对 `gradle.properties` 中的 Minecraft、Loader、Fabric API 版本，
+  并保留全部原有资源、Mixin、Java 字节码及测试代码隔离检查。
+- `Prepare-Compat.ps1` 默认从项目配置读取游戏版本；测试截图使用 26.0.1 后缀。
+
+## 正式 JAR 单人兼容矩阵
+
+每组使用独立 `work/run-production-26.1.2-A` 至 `-E` 实例及正式 JAR，注册的
+9 个真实游戏测试入口全部通过，共 45 次入口回归，覆盖树冠慢速降雪、96 层跨格积雪、最高层边界、屋顶保护、
+原版粒子、庇护边界、热源/火把计时与回收、寒冷阶段、雪地移动、初始营火、
+体温/HUD、自然地形、中英文悬停和存档保存重进。
+
+可选组件沿用基线版本，逐个在线核对其 26.1.2 支持范围及 SHA-512，并验证复制文件。
+清单：`work/compat/26.1.2/versions.json`；这些组件仅用于测试，不进入模组成品。
+本轮实际渲染器为 NVIDIA GeForce RTX 4060 Laptop GPU，OpenGL 驱动 591.86。
+
+| 配置 | 组合 | 结果 | Gradle 时长 |
+| --- | --- | --- | --- |
+| A | Fabric API | 通过 | 2m 54s |
+| B | A + Sodium 0.8.9 | 通过 | 2m 37s |
+| C | B + Iris 1.10.9，关闭光影 | 通过 | 2m 41s |
+| D | C + Complementary Reimagined r5.9.3，实际启用光影 | 通过 | 2m 39s |
+| E | C + Lithium 0.24.7 / FerriteCore 9.0.0 / Mod Menu 18.0.2 / Cloth Config 26.1.154，关闭光影 | 通过 | 2m 30s |
+
+D 的光影状态由 Iris 公共 API 断言和 `Using shaderpack: ComplementaryReimagined_r5.9.3.zip`
+日志同时确认；其余含 Iris 的组合关闭光影。基础与光影截图已目视检查。
+
+## 交付与限制
+
+成品 79859 字节、31 个 Java 25 类、4 个通用 Mixin；无测试类、嵌套第三方 JAR、
+可选模组硬依赖或原版视觉覆盖。包清单 `outputs/package-26.0.1.json`，
+SHA-256：`89ef011558e6a8d46c9071e0ca37d9bebcd4ee8b82208d531c54c4db14d7f969`。
+日志：`work/test-26.0.1-A.log` 至 `-E.log`；汇总 `work/matrix-26.0.1-summary.log`。
+单元报告：`build/reports/tests/test/index.html`。
+截图：`outputs/canopy-snow-26.0.1-vanilla.png` / `-complementary.png`，以及
+`heat-bars`、`warmth-hud`、`visuals` 的相同版本与组合后缀。
+
+离线测试的认证/Realms 日志、Iris refmap、Sodium 驱动规避与 Complementary
+`BIOME_SULFUR_CAVES` 警告保留，另有 Gradle/Java API 弃用警告；未修改第三方文件或关闭检查。
+本轮未测试多人/专用服务器、用户旧存档跨游戏版本升级、Java 25 运行时或其他光影包。
+未安装到用户游戏实例或发布到 GitHub。
+
+---
+
 # 26.0.0 MVP / 树冠降雪与无上限积雪验证
 
 2026-09-30，模组 **26.0.0** 作为后续开发的 MVP 基线，目标 **Minecraft 26.1 / Fabric / 单人**。

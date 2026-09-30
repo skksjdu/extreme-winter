@@ -1,20 +1,21 @@
-# Extreme Winter · 极寒生存 26.0.0
+# Extreme Winter · 极寒生存 26.0.1
 
-面向 **Minecraft Java 26.1 / Fabric / 单人世界**的小型冬季生存模组。
+面向 **Minecraft Java 26.1.2 / Fabric / 单人世界**的小型冬季生存模组。
 核心体验是在雪地收集资源、逐渐失温，再回到屋顶下或热源旁恢复。
 
 ## 安装与开始
 
-1. 使用 **Minecraft 26.1**，安装 Fabric Loader **0.19.5**，游戏运行时使用 **Java 25 或更新版本**。
-2. 将 **Fabric API 0.145.1+26.1** 与 `extreme-winter-26.0.0.jar` 放进该游戏实例的 `mods` 文件夹。同一实例只保留一个本模组 JAR。
+1. 使用 **Minecraft 26.1.2**，安装 Fabric Loader **0.19.5**，游戏运行时使用 **Java 25 或更新版本**。
+2. 将 **Fabric API 0.155.3+26.1.2** 与 `extreme-winter-26.0.1.jar` 放进该游戏实例的 `mods` 文件夹。同一实例只保留一个本模组 JAR。
 3. 创建一个新的普通生存世界。出生点遵循原版规则，初始背包只有 **1 个营火**作为额外物资。
 4. 放置营火取暖，寻找或搭建屋顶；留意饱食度上方的十枚火焰。火焰越少，身体越冷。
 
-成品在 `outputs/extreme-winter-26.0.0.jar`。不要安装 `-sources.jar` 或测试 JAR。
-**26.0.0 为本地交付版本，尚未发布到 GitHub。**
-本版确定为 **MVP 基线**，后续功能和机制在此基础上增加。范围与维护约定见 [MVP 基线](docs/MVP.md)。
+成品在 `outputs/extreme-winter-26.0.1.jar`。不要安装 `-sources.jar` 或测试 JAR。
+**26.0.1 为本地交付版本，尚未发布到 GitHub。**
+本版以 **26.0.0 MVP 基线**移植到 Minecraft 26.1.2，保留全部玩法和配置默认值。
+原基线标签与交付文件继续保留。范围与维护约定见 [MVP 基线](docs/MVP.md)。
 历史版本：[1.1.0 发布页](https://github.com/skksjdu/extreme-winter/releases/tag/v1.1.0)。
-无需安装 Sodium、Iris 或光影包；它们是可选项。其他模组也要选择明确支持 26.1 的版本；旧版游戏的模组不能直接复用。
+无需安装 Sodium、Iris 或光影包；它们是可选项。其他模组也要选择明确支持 26.1.2 的版本；旧版游戏的模组不能直接复用。
 
 ## 已实现玩法
 
@@ -88,7 +89,7 @@
 火焰整排及单颗内部均从左向右变空，半颗火焰保留右侧。
 
 可选光影为 **Complementary Reimagined r5.9.3**，搭配 **Sodium 0.8.9 / Iris 1.10.9**。
-这两个组件的文件名含 `26.1.1`，官方元数据明确支持 **26.1 / 26.1.1 / 26.1.2**；本模组仅针对 **26.1** 构建和验收。
+这两个组件的文件名含 `26.1.1`，官方元数据明确支持 **26.1 / 26.1.1 / 26.1.2**；本版仅针对 **26.1.2** 构建和验收。
 兼容性实测的光影、模组版本及结果见 [验证报告](docs/TESTING.md)。
 光影包保留自己的光照、积雪覆盖和树叶摆动设置，本模组不修改其源文件。
 
@@ -128,7 +129,7 @@
 # 开发模式单人回归：
 .\scripts\Build.ps1 runClientGameTest
 
-# 首次准备独立测试依赖（只写 work/compat/26.1）：
+# 首次准备独立测试依赖（默认读取 gradle.properties，当前写 work/compat/26.1.2）：
 .\scripts\Prepare-Compat.ps1
 
 # 正式 JAR 回归（A=基础，B=+Sodium，C=+Iris，D=+光影，E=更多性能模组）：
@@ -140,7 +141,7 @@
 `-Porg.gradle.java.installations.paths=C:\你的路径\jdk-26`。无需全局安装 Gradle。
 `gradlew.bat build` 输出到 `build/libs`；`scripts/Build.ps1` 将下载缓存限制在项目 `work` 目录。
 
-正式测试 B–E 需要 `work/compat/26.1` 中的可选模组；`Test-Matrix.ps1` 自动为 D 配置 Complementary 光影，其他组合关闭光影。
+正式测试 B–E 需要 `work/compat/26.1.2` 中的可选模组；`Test-Matrix.ps1` 自动为 D 配置 Complementary 光影，其他组合关闭光影。
 这些第三方文件仅用于本地测试，不与模组打包分发。
 
 源码按 `temperature`、`environment`、`survival`、`network`、`config` 分离，客户端代码在 `src/client`。

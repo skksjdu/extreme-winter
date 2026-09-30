@@ -59,17 +59,17 @@ public final class HeatTooltipTest implements FabricClientGameTest {
             context.waitTicks(2);
             context.setScreen(() -> new InventoryScreen(net.minecraft.client.Minecraft.getInstance().player));
             context.getInput().setCursorPos(10, 10);
-            context.takeScreenshot("heat-bars-26.0.0-" + profile);
+            context.takeScreenshot("heat-bars-26.0.1-" + profile);
             hover(context, 1);
-            context.takeScreenshot("campfire-tooltip-en-26.0.0-" + profile);
+            context.takeScreenshot("campfire-tooltip-en-26.0.1-" + profile);
             language(context, "zh_cn");
             context.runOnClient(client -> require(text(new ItemStack(Items.CAMPFIRE).getTooltipLines(
                     Item.TooltipContext.of(client.level), client.player, TooltipFlag.NORMAL)).stream()
                     .anyMatch(line -> line.contains("蹲下空手右键")), "Chinese pickup instructions are translated"));
             hover(context, 1);
-            context.takeScreenshot("campfire-tooltip-zh-26.0.0-" + profile);
+            context.takeScreenshot("campfire-tooltip-zh-26.0.1-" + profile);
             hover(context, 3);
-            context.takeScreenshot("furnace-tooltip-zh-26.0.0-" + profile);
+            context.takeScreenshot("furnace-tooltip-zh-26.0.1-" + profile);
             game.getServer().runOnServer(server -> {
                 var inventory = server.getPlayerList().getPlayers().getFirst().getInventory();
                 var cold = new ItemStack(Items.TORCH);
@@ -79,7 +79,7 @@ public final class HeatTooltipTest implements FabricClientGameTest {
             });
             context.waitTicks(2);
             hover(context, 5);
-            context.takeScreenshot("torch-tooltip-zh-26.0.0-" + profile);
+            context.takeScreenshot("torch-tooltip-zh-26.0.1-" + profile);
             context.setScreen(() -> null);
             language(context, "en_us");
         }

@@ -1,10 +1,21 @@
-# 26.0.0 / Minecraft 26.1
+# 26.0.1 / Minecraft 26.1.2
 
-Current target: Minecraft **26.1**, Fabric Loader **0.19.5**, Fabric API **0.145.1+26.1**.
+Current target: Minecraft **26.1.2**, Fabric Loader **0.19.5**, Fabric API **0.155.3+26.1.2**.
 Gradle 9.8.0 and Loom 1.18.2 are retained. Use the unobfuscated
 `net.fabricmc.fabric-loom` plugin, normal `implementation` dependencies and `jar`.
 The locally installed JDK 26 compiles with `--release 25`; game metadata requires Java 25+.
 Yarn and remapping tasks are removed. Client and common source sets remain separate.
+
+26.0.1 ports the tagged 26.0.0 MVP to the exact Minecraft 26.1.2 target. Common
+and client gameplay source, identifiers, configuration defaults and save formats
+are unchanged. The newer game and Fabric API compile with the existing code.
+Package auditing now compares all versioned dependencies with `gradle.properties`;
+compatibility preparation defaults to that same game target. Original 26.0.0
+outputs and the `mvp-26.0.0` tag remain intact.
+Comparing the final JAR with the MVP confirms all 31 gameplay classes and every
+asset are byte-for-byte identical; only `fabric.mod.json` and the manifest's
+Minecraft version differ. The comparison is recorded in
+`work/port-26.0.1-content-comparison.json`.
 
 26.1 API adaptations include `Identifier`, `ServerLevelEvents`, `END_LEVEL_TICK`,
 `PayloadTypeRegistry.clientboundPlay`, `GuiGraphicsExtractor`, record-based `ChunkPos`,
@@ -39,10 +50,13 @@ also disables these particles. [MVP baseline and extension rules](MVP.md).
 HUD uses Fabric's public API and vanilla GUI sprites. Terrain and falling snow
 use vanilla models/renderers. Four common mixins remain scoped to exact vanilla
 heat items and gameplay; no client render mixins or direct OpenGL calls. Optional
-mods and shaders are test-only, downloaded with SHA512 checks under `work/compat/26.1`.
-Test instances have separate 26.1 paths and do not reuse 1.21.6 saves.
+mods and shaders are test-only, checked against live release metadata and SHA512
+under `work/compat/26.1.2`. The port tests retain the baseline optional component
+versions that explicitly support 26.1.2. Test instances have separate 26.1.2 paths
+and do not reuse 26.1 or 1.21.6 saves.
 
 Primary references:
+- [Fabric 26.1.2 porting documentation](https://docs.fabricmc.net/26.1.2/develop/porting/)
 - [Fabric 26.1 changes](https://fabricmc.net/2026/03/14/261.html)
 - [Official mapping migration](https://wiki.fabricmc.net/tutorial:migratemappings)
 - [Fabric API version metadata](https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml)

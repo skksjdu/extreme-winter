@@ -6,14 +6,17 @@ import struct
 import zipfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
-version = next(line.split('=', 1)[1].strip() for line in (root / 'gradle.properties').read_text().splitlines()
-               if line.startswith('mod_version='))
+properties = dict(line.split('=', 1) for line in (root / 'gradle.properties').read_text().splitlines()
+                  if line and not line.startswith('#'))
+version = properties['mod_version']
 path = root / f'build/libs/extreme-winter-{version}.jar'
 with zipfile.ZipFile(path) as jar:
     names = jar.namelist()
     meta = json.loads(jar.read('fabric.mod.json'))
     assert meta['version'] == version
-    assert meta['depends']['minecraft'] == '26.1'
+    assert meta['depends']['minecraft'] == properties['minecraft_version']
+    assert meta['depends']['fabricloader'] == '>=' + properties['loader_version']
+    assert meta['depends']['fabric-api'] == '>=' + properties['fabric_version']
     assert meta['depends']['java'] == '>=25'
     assert set(meta['depends']) == {'fabricloader', 'minecraft', 'java', 'fabric-api'}
     assert meta['mixins'] == ['extreme_winter.mixins.json']

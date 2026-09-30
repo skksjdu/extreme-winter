@@ -1,8 +1,11 @@
-param([string]$MinecraftVersion = '26.1')
+param([string]$MinecraftVersion)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+$properties = Get-Content (Join-Path $root 'gradle.properties')
+if (!$MinecraftVersion) { $MinecraftVersion = ($properties | Where-Object { $_ -like 'minecraft_version=*' }).Split('=')[1] }
+$modVersion = ($properties | Where-Object { $_ -like 'mod_version=*' }).Split('=')[1]
 $destination = Join-Path $root "work/compat/$MinecraftVersion"
-$headers = @{'User-Agent' = 'ExtremeWinter-compat-tests/26.0.0'}
+$headers = @{'User-Agent' = "ExtremeWinter-compat-tests/$modVersion"}
 $records = [System.Collections.Generic.List[object]]::new()
 
 function Find-Version([string]$Project) {

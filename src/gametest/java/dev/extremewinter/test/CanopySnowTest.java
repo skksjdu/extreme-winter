@@ -99,7 +99,7 @@ public final class CanopySnowTest implements FabricClientGameTest {
             context.waitTicks(20);
             context.runOnClient(client -> require(Integer.parseInt(client.particleEngine.countParticles()) > 0,
                     "native particles actually enter the client particle engine"));
-            context.takeScreenshot("canopy-snow-26.0.0-" + System.getProperty("winter.test.profile", "A"));
+            context.takeScreenshot("canopy-snow-26.0.1-" + System.getProperty("winter.test.profile", "A"));
             game.getServer().runOnServer(server -> {
                 for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++)
                     server.overworld().setBlock(new BlockPos(x, 114, z), Blocks.GLASS.defaultBlockState(), 3);
