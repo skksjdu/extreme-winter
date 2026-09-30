@@ -23,7 +23,7 @@ public final class WinterConfig {
     public int freezeIntervalTicks = 40;
     public int samplesPerPass = 16;
     public int simulationRadiusChunks = 4;
-    public int maxSnowLayers = 64;
+    public int maxSnowLayers = 0; // Zero leaves thickness limited only by physical space/world height.
     public boolean persistentWeather = true;
     public boolean coldVanillaBiomes = true;
     public boolean snowAccumulation = true;
@@ -79,7 +79,7 @@ public final class WinterConfig {
         finiteRange("freezeIntervalTicks", freezeIntervalTicks, 20, 72000);
         finiteRange("samplesPerPass", samplesPerPass, 1, 64);
         finiteRange("simulationRadiusChunks", simulationRadiusChunks, 0, 8);
-        finiteRange("maxSnowLayers", maxSnowLayers, 1, 4096);
+        finiteRange("maxSnowLayers", maxSnowLayers, 0, 4096);
         finiteRange("campfireExposureSeconds", campfireExposureSeconds, 1, 604800);
         finiteRange("soulCampfireExposureSeconds", soulCampfireExposureSeconds, 1, 604800);
         finiteRange("furnaceExposureSeconds", furnaceExposureSeconds, 1, 604800);

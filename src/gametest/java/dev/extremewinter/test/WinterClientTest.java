@@ -7,6 +7,7 @@ import dev.extremewinter.environment.Exposure;
 import dev.extremewinter.environment.WinterEnvironment;
 import dev.extremewinter.environment.WinterBlocks;
 import dev.extremewinter.environment.SnowDriftBlock;
+import dev.extremewinter.config.WinterConfig;
 import dev.extremewinter.temperature.HeatSources;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Block;
@@ -39,16 +40,28 @@ public final class WinterClientTest implements FabricClientGameTest {
             game.getServer().runOnServer(server -> {
                 var player = server.getPlayerList().getPlayers().getFirst();
                 var world = server.overworld();
-                var environment = new WinterEnvironment(ExtremeWinter.CONFIG);
+                var snowConfig = new WinterConfig();
+                snowConfig.maxSnowLayers = 64;
+                var environment = new WinterEnvironment(snowConfig);
                 BlockPos snow = new BlockPos(20, 100, 0);
                 world.setBlock(snow.below(), Blocks.STONE.defaultBlockState(), 3);
                 require(environment.trySnow(world, snow), "snow forms on exposed natural terrain");
-                for (int i = 0; i < ExtremeWinter.CONFIG.maxSnowLayers + 5; i++) environment.trySnow(world, snow);
+                for (int i = 0; i < snowConfig.maxSnowLayers + 5; i++) environment.trySnow(world, snow);
                 int total = 0;
                 for (int y = 0; y < 10; y++) total += SnowDriftBlock.layers(world.getBlockState(snow.above(y)));
-                require(total == ExtremeWinter.CONFIG.maxSnowLayers && total > 8,
+                require(total == snowConfig.maxSnowLayers && total > 8,
                         "snow stacks across blocks and stops at configured column cap");
                 for (int y = 0; y < 10; y++) world.setBlock(snow.above(y), Blocks.AIR.defaultBlockState(), 3);
+                var unlimited = new WinterEnvironment(new WinterConfig());
+                for (int i = 0; i < 96; i++) require(unlimited.trySnow(world, snow), "uncapped snow keeps growing past 64 layers");
+                total = 0;
+                for (int y = 0; y < 12; y++) total += SnowDriftBlock.layers(world.getBlockState(snow.above(y)));
+                require(total == 96, "unlimited default preserves every layer across twelve blocks");
+                for (int y = 0; y < 12; y++) world.setBlock(snow.above(y), Blocks.AIR.defaultBlockState(), 3);
+                var high = new BlockPos(27, world.getMaxY(), 0);
+                world.setBlock(high.below(), Blocks.STONE.defaultBlockState(), 3);
+                for (int i = 0; i < 8; i++) require(unlimited.trySnow(world, high), "snow can fill the top buildable block");
+                require(!unlimited.trySnow(world, high) && !world.isInWorldBounds(high.above()), "unlimited snow respects world height");
                 world.setBlock(snow.above(3), Blocks.GLASS.defaultBlockState(), 3);
                 world.setBlock(snow, Blocks.AIR.defaultBlockState(), 3);
                 require(!environment.trySnow(world, snow), "snow does not form under a glass roof");

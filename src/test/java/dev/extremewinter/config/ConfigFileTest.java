@@ -15,6 +15,7 @@ class ConfigFileTest {
         config.validate();
         assertTrue(Files.readString(path).contains("\n  \"baseLoss\""));
         assertEquals(100, config.maxTemperature);
+        assertEquals(0, config.maxSnowLayers);
     }
 
     @Test void partialConfigPreservesDefaultsAndUserFile() throws Exception {
@@ -34,9 +35,12 @@ class ConfigFileTest {
                 "{\"heatSourceRadius\":999}", "{\"coldThreshold\":10}", "{\"baseLoss\":\"NaN\"}",
                 "{\"lavaExposureSeconds\":0}", "{\"campfireExposureSeconds\":-1}", "{\"heatRecoverySeconds\":0}",
                 "{\"torchExposureSeconds\":0}", "{\"torchRecoverySeconds\":0}", "{\"winterStageDays\":0}",
-                "{\"maxWinterStages\":-1}", "{\"maxHeatStrength\":0.5}"}) {
+                "{\"maxWinterStages\":-1}", "{\"maxHeatStrength\":0.5}", "{\"maxSnowLayers\":-1}"}) {
             Files.writeString(path, invalid);
-            assertEquals(0.32, ConfigFile.load(path).baseLoss);
+            var loaded = ConfigFile.load(path);
+            assertEquals(0.32, loaded.baseLoss);
+            assertEquals(0, loaded.maxSnowLayers);
+            loaded.validate();
             assertEquals(invalid, Files.readString(path));
         }
     }
@@ -59,7 +63,7 @@ class ConfigFileTest {
         assertEquals(0.32, config.baseLoss);
         assertEquals(0.18, config.weatherPenalty);
         assertEquals(2.5, config.waterPenalty);
-        assertEquals(64, config.maxSnowLayers);
+        assertEquals(0, config.maxSnowLayers);
         assertEquals(6, config.freezingDamage);
         assertEquals(original, Files.readString(directory.resolve("winter.json.v1.bak")));
         assertTrue(Files.readString(path).contains("keep"));
@@ -74,5 +78,15 @@ class ConfigFileTest {
         var config = ConfigFile.load(path);
         assertEquals(0, config.freezingDamage);
         assertEquals(0, config.minimumFreezingDamage);
+    }
+
+    @Test void explicitSnowLimitsAndUnlimitedOptInArePreserved() throws Exception {
+        Path path = directory.resolve("winter.json");
+        for (int cap : new int[]{0, 64, 4096}) {
+            String json = "{\"configVersion\":2,\"maxSnowLayers\":" + cap + "}";
+            Files.writeString(path, json);
+            assertEquals(cap, ConfigFile.load(path).maxSnowLayers);
+            assertEquals(json, Files.readString(path));
+        }
     }
 }

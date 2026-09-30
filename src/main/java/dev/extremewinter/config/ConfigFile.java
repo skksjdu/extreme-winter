@@ -41,7 +41,7 @@ public final class ConfigFile {
                 migrateDefault(json, "waterPenalty", 0.6, 1.4);
                 migrateDefault(json, "damageIntervalSeconds", 5, 4);
                 migrateDefault(json, "freezingDamage", 1, 6);
-                migrateDefault(json, "maxSnowLayers", 3, 64);
+                migrateDefault(json, "maxSnowLayers", 3, 0);
                 if (!json.has("damageThreshold")) json.addProperty("damageThreshold", config.damageThreshold);
                 if (!json.has("minimumFreezingDamage")) json.addProperty("minimumFreezingDamage", config.minimumFreezingDamage);
                 json.addProperty("configVersion", 2);

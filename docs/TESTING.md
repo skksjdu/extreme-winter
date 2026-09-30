@@ -1,7 +1,64 @@
-# 26.0.0 / Minecraft 26.1 验证报告
+# 26.0.0 MVP / 树冠降雪与无上限积雪验证
+
+2026-09-30，模组 **26.0.0** 作为后续开发的 MVP 基线，目标 **Minecraft 26.1 / Fabric / 单人**。
+成品：`outputs/extreme-winter-26.0.0.jar`；范围与后续维护约定见 [MVP.md](MVP.md)。
+Loader 0.19.5 / Fabric API 0.145.1+26.1 / Gradle 9.8.0 / Loom 1.18.2。
+JDK 26.0.1 构建与运行，Java 25 字节码；游戏最低 Java 25。
+
+## 本轮真实行为
+
+- 树冠下的地面增加额外积雪采样，每第四个普通积雪批次运行一次，即约为露天的四分之一频率。
+  检查的是同一批已加载列；树冠上已经堆积的雪不妨碍找到树下地面。
+- 默认 `maxSnowLayers=0`，露天和树冠下均不设人为厚度上限。两种场景真实累积到 **96 层 / 12 格**，
+  超过之前的 64 层；跨格层数守恒。最高可放置层可填满，之后不越过世界高度。
+  已升级配置中的正数上限继续生效，原有 64 层封顶断言保留；1.0 的旧默认值仍按既有规则迁移并备份。
+- 真实服务器 tick 检查：在普通的采样批次中树下地面不增长，到第四批次后增长。
+  玻璃、石头等实心屋顶阻止树下积雪；农作物、机器、水源以及未加载区块继续受保护。
+- 雨雪中的寒冷主世界树叶下增加原版 `SNOWFLAKE` 粒子，每 5 tick 最多尝试 4 个候选位置，
+  位于玩家周围水平 6 格。真实客户端粒子引擎已收到粒子；晴天和叶片下的玻璃屋顶均不新增粒子。
+  不修改天气渲染器、光影源文件或原版材质。背景露天仍由原版/光影自身绘制降水。
+- 冻结水源继续要求直达天空；体温及热源的 3×3 / 7 列庇护规则不变。
+  其他初始物资、物品时钟、火把、寒冷阶段、雪地移动、HUD、中英文悬停和存档重进回归均通过。
+
+## 最终正式 JAR 的兼容矩阵
+
+每组独立实例、**9 个真实游戏测试入口全部通过**；Windows / Intel Arc Graphics，驱动 32.0.101.8132。
+测试实例的积雪配置显式设为 0；原值备份在 `work/pre-canopy-26.0.0/config-A.json` 至 `config-E.json`。
+可选依赖文件沿用上一轮已按 SHA-512 校验的 26.1 组合；D 的光影启用状态由 Iris API 及日志确认。
+
+| 配置 | 组合 | 结果 | Gradle 时长 |
+| --- | --- | --- | --- |
+| A | Fabric API | 通过 | 2m 33s |
+| B | A + Sodium 0.8.9 | 通过 | 2m 33s |
+| C | B + Iris 1.10.9，关闭光影 | 通过 | 2m 30s |
+| D | C + Complementary Reimagined r5.9.3，实际启用光影 | 通过 | 2m 37s |
+| E | C + Lithium 0.24.7 / FerriteCore 9.0.0 / Mod Menu 18.0.2 / Cloth Config 26.1.154，关闭光影 | 通过 | 2m 31s |
+
+17 项单元测试全部通过（10 项温度、7 项配置），失败、错误、跳过均为 0。
+新增配置回归验证 `0`、显式 `64/4096` 及负数处理，文件原文保留。
+首次 A 中新增世界高度测试把最高层错设为 `getMaxY()-1`；核对 26.1 字节码确认其为包含上界后，
+改用 `getMaxY()` 并重跑，原越界断言保留。失败日志为 `work/test-26.0.0-canopy-A-first-failure.log`。
+
+## 交付与限制
+
+包检查通过：79857 字节、31 个 Java 25 类、4 个通用 Mixin。
+无测试类、嵌套第三方 JAR、可选模组硬依赖或原版视觉覆盖。
+SHA-256：`2bc0c2d78889543369126a256c787fbe627ebdd7654c412541c9059391090f72`。
+日志 `work/test-26.0.0-A.log` 至 `work/test-26.0.0-E.log`，汇总 `work/matrix-26.0.0-mvp-summary.log`。
+单元报告 `build/reports/tests/test/index.html`；包清单 `outputs/package-26.0.0.json`。
+`outputs/canopy-snow-26.0.0-vanilla.png` 和 `outputs/canopy-snow-26.0.0-complementary.png`
+展示树下积雪及雪花；其他最终截图使用 `heat-bars`、`warmth-hud`、`visuals` 的相同版本/组合后缀。
+
+离线认证、Realms、测试窗口选项和第三方 Iris/Complementary 警告保留，没有修改第三方源文件。
+未测试专用服务器/多人、用户已有存档跨游戏版本升级、Java 25 运行时、其他 GPU 与其他光影包。
+当前在 JDK 26 上验收；未安装到用户的旧 1.21.6 实例或发布到 GitHub。
+
+---
+
+# 26.0.0 初次移植历史验证（树冠补充前）
 
 2026-09-30，本地单人验收。模组版本 **26.0.0**，游戏版本 **26.1**。
-成品：`outputs/extreme-winter-26.0.0.jar`。本次没有安装到旧 1.21.6 实例，也没有发布到 GitHub。
+成品：`work/pre-canopy-26.0.0/outputs/extreme-winter-26.0.0.jar`。本次没有安装到旧 1.21.6 实例，也没有发布到 GitHub。
 Fabric Loader 0.19.5 / Fabric API 0.145.1+26.1 / Gradle 9.8.0 / Loom 1.18.2。
 本机 JDK 26.0.1 构建与运行，以 `--release 25` 输出 Java 25 字节码，游戏最低 Java 25。
 
@@ -48,11 +105,11 @@ Iris/Sodium 的文件名含 `26.1.1`，实际元数据覆盖 26.1；使用 Iris 
 没有客户端渲染 Mixin 或直接 OpenGL 调用。
 SHA-256：`658b4ca0e9f83a94967494dd9270f996bcb5f710333e9f9693c1fe8d42009c5c`。
 
-日志：`work/test-26.0.0-A.log` 至 `work/test-26.0.0-E.log`，汇总 `work/matrix-26.0.0-summary.log`。
-单元报告：`build/reports/tests/test/index.html`；包检查：`outputs/package-26.0.0.json`。
-截图：`outputs/heat-bars-26.0.0-vanilla.png`、`outputs/warmth-hud-26.0.0-vanilla.png`、
-`outputs/visuals-26.0.0-vanilla.png`、`outputs/visuals-26.0.0-complementary.png`、
-`outputs/heat-bars-26.0.0-complementary.png`、`outputs/warmth-hud-26.0.0-complementary.png`。
+日志：`work/pre-canopy-26.0.0/test-A.log` 至 `work/pre-canopy-26.0.0/test-E.log`，汇总 `work/pre-canopy-26.0.0/matrix-summary.log`。
+单元报告：`build/reports/tests/test/index.html`；包检查：`work/pre-canopy-26.0.0/outputs/package-26.0.0.json`。
+截图：`work/pre-canopy-26.0.0/outputs/heat-bars-26.0.0-vanilla.png`、`work/pre-canopy-26.0.0/outputs/warmth-hud-26.0.0-vanilla.png`、
+`work/pre-canopy-26.0.0/outputs/visuals-26.0.0-vanilla.png`、`work/pre-canopy-26.0.0/outputs/visuals-26.0.0-complementary.png`、
+`work/pre-canopy-26.0.0/outputs/heat-bars-26.0.0-complementary.png`、`work/pre-canopy-26.0.0/outputs/warmth-hud-26.0.0-complementary.png`。
 这些交付截图已目视检查。
 
 日志中的离线认证/Realms 网络超时、测试窗口 Anisotropic Filtering 选项错误、

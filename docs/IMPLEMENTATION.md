@@ -17,8 +17,24 @@ Shelter checks require center coverage and >=7 covered columns in a 3x3 area.
 At most 10 heightmap lookups per check (center plus nine columns), using loaded
 chunks only. Temperature uses the air above the player's feet to exclude snow
 underfoot; heat wear checks above the source block. Glass and broad foliage are
-recognized. No wall/room-volume simulation. Snow/ice placement separately keeps
-the direct-sky constraint, so precipitation cannot pass through a single top block.
+recognized. No wall/room-volume simulation. Solid roofs still block snow and ice;
+foliage permits the sparse snowfall described below. Ice keeps the direct-sky constraint.
+
+The 26.0.0 MVP adds `CanopySnow`: an extra downward lookup in the same loaded
+sampled column finds the forest floor even when snow covers the leaves. Only the
+`minecraft:leaves` tag, air and snow above those leaves are permeable; solid roofs
+remain blocking. Extra canopy growth runs every fourth snow sampling pass. Default
+`maxSnowLayers=0` imposes no thickness cap; explicit positive legacy/user limits
+remain supported. Uncapped growth skips the old downward layer-count walk and
+ends at occupied space or world height. Vertical foliage scans stay within world
+bounds and one already-loaded column, without an artificial scan-height limit.
+
+`CanopySnowflakes` uses Fabric `ClientTickEvents.END_LEVEL_TICK` and native
+`SNOWFLAKE` particles, at most four nearby candidates per five ticks. Snowflakes
+only spawn in rainy, cold Overworld foliage columns with air at the spawn point.
+The native particle API respects particle settings and optional renderers; there
+are no new shaders, textures, renderer hooks or mixins. Disabling additional snow
+also disables these particles. [MVP baseline and extension rules](MVP.md).
 
 HUD uses Fabric's public API and vanilla GUI sprites. Terrain and falling snow
 use vanilla models/renderers. Four common mixins remain scoped to exact vanilla
