@@ -5,5 +5,22 @@
   "hud.extreme_winter.stage.2": "Chilled",
   "hud.extreme_winter.stage.3": "Hypothermia",
   "hud.extreme_winter.stage.4": "Freezing",
-  "block.extreme_winter.snow_drift": "Snow Drift"
+  "block.extreme_winter.snow_drift": "Snow Drift",
+  "tooltip.extreme_winter.heat": "Heat source · Range: %s blocks · Stacks",
+  "tooltip.extreme_winter.campfire": "Warms while lit; roofs/leaves pause wear",
+  "tooltip.extreme_winter.furnace": "Warms while burning; roofs/leaves pause wear",
+  "tooltip.extreme_winter.torch": "Weak warmth when placed; cold torches fall",
+  "tooltip.extreme_winter.durability": "Durability: %s%% (%s / %s seconds)",
+  "tooltip.extreme_winter.recovery": "Recharges from empty in ~%s seconds in inventory",
+  "tooltip.extreme_winter.campfire_pickup": "Pick up: sneak + empty-hand right-click",
+  "tooltip.extreme_winter.cooking_drop": "Keeps durability; cooking ingredients drop",
+  "tooltip.extreme_winter.furnace_pickup": "Mine with a pickaxe; keeps remaining durability",
+  "tooltip.extreme_winter.torch_pickup": "Mine directly or collect the fallen torch",
+  "tooltip.extreme_winter.torch_recovery": "Recharges on ground/in inventory in ~%s seconds",
+  "tooltip.extreme_winter.torch_cooldown": "Ready to place in: %s seconds",
+  "tooltip.extreme_winter.lava": "Placed sources warm; outdoor cooling makes obsidian",
+  "tooltip.extreme_winter.lava_cooling": "Source cooling time: %s seconds; roofs pause it",
+  "tooltip.extreme_winter.lava_pickup": "Collect source lava with an empty bucket",
+  "tooltip.extreme_winter.weather_disabled": "Outdoor heat wear is disabled in this configuration",
+  "message.extreme_winter.torch_cold": "Torch too cold: ready to place in ~%s seconds"
 }

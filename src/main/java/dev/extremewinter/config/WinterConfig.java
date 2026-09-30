@@ -36,9 +36,23 @@ public final class WinterConfig {
     public int smokerExposureSeconds = 150;
     public int lavaExposureSeconds = 3600;
     public int heatRecoverySeconds = 30;
+    public int torchExposureSeconds = 45;
+    public int torchRecoverySeconds = 5;
+    public double torchHeatStrength = 0.35;
+    public double maxHeatStrength = 4;
+    public int winterStageDays = 3;
+    public double winterStageLossIncrease = 0.1;
+    public int maxWinterStages = 10;
 
     public void validate() {
         finiteRange("heatRecoverySeconds", heatRecoverySeconds, 1, 3600);
+        finiteRange("torchExposureSeconds", torchExposureSeconds, 1, 604800);
+        finiteRange("torchRecoverySeconds", torchRecoverySeconds, 1, 3600);
+        finiteRange("torchHeatStrength", torchHeatStrength, 0, 1);
+        finiteRange("maxHeatStrength", maxHeatStrength, 1, 20);
+        finiteRange("winterStageDays", winterStageDays, 1, 365);
+        finiteRange("winterStageLossIncrease", winterStageLossIncrease, 0, 1);
+        finiteRange("maxWinterStages", maxWinterStages, 0, 100);
         finiteRange("minTemperature", minTemperature, -10000, 10000);
         finiteRange("maxTemperature", maxTemperature, -10000, 10000);
         if (!(minTemperature < fatigueThreshold && fatigueThreshold < slownessThreshold

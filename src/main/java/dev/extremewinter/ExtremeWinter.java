@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import dev.extremewinter.survival.StarterSupplies;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,9 @@ public final class ExtremeWinter implements ModInitializer {
         var environment = new WinterEnvironment(CONFIG);
         ServerWorldEvents.LOAD.register((server, world) -> environment.onLoad(world));
         ServerTickEvents.END_WORLD_TICK.register(environment::tick);
-        ServerTickEvents.END_WORLD_TICK.register(new HeatWeathering(CONFIG)::tick);
+        var weathering = new HeatWeathering(CONFIG);
+        ServerChunkEvents.CHUNK_LOAD.register(weathering::onChunkLoad);
+        ServerTickEvents.END_WORLD_TICK.register(weathering::tick);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> StarterSupplies.onJoin(handler.player));
         UseBlockCallback.EVENT.register(HeatItems::pickUpCampfire);
         ServerTickEvents.END_SERVER_TICK.register(HeatItems::tickInventories);

@@ -41,10 +41,33 @@ class TemperatureModelTest {
         assertEquals(4, TemperatureModel.stage(0, config));
     }
 
-    @Test void heatRecoversGraduallyAndNeverStacksBeyondTheStrongestSource() {
+    @Test void heatRecoversAccordingToCombinedSourceStrength() {
         assertEquals(51.2, TemperatureModel.step(50, false, false, false, false, 1, config), 1e-8);
         assertEquals(50.3, TemperatureModel.step(50, false, false, false, false, 0.25, config), 1e-8);
+        assertEquals(52.4, TemperatureModel.step(50, false, false, false, false, 2, config), 1e-8);
         assertTrue(TemperatureModel.step(50, true, true, true, false, 1, config) > 50);
+    }
+
+    @Test void winterStagesFollowCalendarDaysAndStopAtConfiguredMaximum() {
+        assertEquals(1, WinterProgression.lossMultiplier(3 * 24000 - 1, config));
+        assertEquals(1.1, WinterProgression.lossMultiplier(3 * 24000, config), 1e-8);
+        assertEquals(1.2, WinterProgression.lossMultiplier(6 * 24000, config), 1e-8);
+        assertEquals(2, WinterProgression.lossMultiplier(Long.MAX_VALUE, config), 1e-8);
+        assertEquals(1, WinterProgression.lossMultiplier(-1, config));
+        config.maxWinterStages = 0;
+        assertEquals(1, WinterProgression.lossMultiplier(Long.MAX_VALUE, config));
+    }
+
+    @Test void lateWinterSpeedsUpLossButKeepsDryShelterSafe() {
+        double multiplier = WinterProgression.lossMultiplier(30 * 24000, config);
+        double value = 100;
+        for (int second = 0; second < 60; second++) {
+            value = TemperatureModel.step(value, true, true, false, false, 0, multiplier, config);
+        }
+        assertEquals(40, value, 1e-8);
+        assertEquals(80, TemperatureModel.step(80, false, true, true, false, 0, multiplier, config));
+        assertEquals(77.2, TemperatureModel.step(80, false, false, false, true, 0, multiplier, config), 1e-8);
+        assertTrue(TemperatureModel.step(50, true, true, true, false, 2, multiplier, config) > 50);
     }
 
     @Test void freezingStartsBelowFortyAndIncreasesAsTemperatureFalls() {

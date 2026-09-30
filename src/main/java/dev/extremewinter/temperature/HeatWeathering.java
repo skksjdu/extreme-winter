@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.WorldChunk;
 
 public final class HeatWeathering {
     public static final AttachmentType<Integer> EXPOSURE = AttachmentRegistry.create(
@@ -33,8 +34,11 @@ public final class HeatWeathering {
             Identifier.of(ExtremeWinter.ID, "heat_was_lit"), b -> b.initializer(() -> true).persistent(Codec.BOOL));
     private final WinterConfig config;
     private int lavaChunkCursor;
+    private final TorchWeathering torches;
 
-    public HeatWeathering(WinterConfig config) { this.config = config; }
+    public HeatWeathering(WinterConfig config) { this.config = config; this.torches = new TorchWeathering(config); }
+
+    public void onChunkLoad(ServerWorld world, WorldChunk chunk) { torches.discoverChunk(world, chunk); }
 
     public void tick(ServerWorld world) {
         if (!config.outdoorHeatExtinguishing || !world.getRegistryKey().equals(World.OVERWORLD)
@@ -59,12 +63,14 @@ public final class HeatWeathering {
             var positions = new ArrayList<>(chunks);
             var pos = positions.get(Math.floorMod(lavaChunkCursor++, positions.size()));
             var chunk = world.getChunkManager().getWorldChunk(pos.x, pos.z);
+            torches.discoverChunk(world, chunk);
             for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
                 int y = chunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING, x, z);
                 discoverLava(world, new BlockPos(pos.getStartX() + x, y, pos.getStartZ() + z));
             }
         }
         advanceLava(world);
+        torches.advance(world, chunks);
     }
 
     public int exposureLimit(BlockState state) {

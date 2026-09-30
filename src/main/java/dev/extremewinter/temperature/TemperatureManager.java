@@ -12,7 +12,7 @@ public final class TemperatureManager {
 
     public TemperatureManager(WinterConfig config) {
         this.config = config;
-        this.heatSources = new HeatSources(config.heatSourceRadius);
+        this.heatSources = new HeatSources(config);
     }
 
     public void tick(MinecraftServer server) {
@@ -28,7 +28,8 @@ public final class TemperatureManager {
                 value = TemperatureModel.clamp(previous + config.recoveryRate, config);
             } else {
                 value = TemperatureModel.step(previous, Exposure.outdoors(world, player.getBlockPos()),
-                        world.isRaining(), world.isNight(), player.isTouchingWater(), heatSources.strength(player), config);
+                        world.isRaining(), world.isNight(), player.isTouchingWater(), heatSources.strength(player),
+                        WinterProgression.lossMultiplier(world.getTimeOfDay(), config), config);
             }
             TemperatureData.set(player, value);
             Hypothermia.apply(player, value, server.getTicks(), config);

@@ -119,11 +119,12 @@ public final class StarterAndHeatItemsTest implements FabricClientGameTest {
                         Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER}) {
                     var stack = new ItemStack(item);
                     int limit = HeatItems.limit(item, ExtremeWinter.CONFIG);
+                    require(!stack.isItemBarVisible(), "unused heat source has no persistent bar");
                     stack.set(HeatItems.EXPOSURE, limit);
                     require(stack.isItemBarVisible() && stack.getItemBarStep() == 0, "depleted source displays empty bar");
                     for (int second = 0; second < 30; second++) HeatItems.recover(stack, ExtremeWinter.CONFIG);
-                    require(HeatItems.elapsed(stack) == 0 && stack.getItemBarStep() == 13 && stack.getItemBarColor() == 0x00ff00,
-                            "each source fully recovers in at most 30 seconds");
+                    require(HeatItems.elapsed(stack) == 0 && !stack.isItemBarVisible() && stack.getItemBarStep() == 13,
+                            "fully recovered heat source hides its bar");
                 }
                 player.getInventory().clear();
                 for (int slot = 0; slot < 4; slot++) {

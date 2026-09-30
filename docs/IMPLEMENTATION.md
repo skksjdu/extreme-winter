@@ -86,7 +86,9 @@ share one set of values; JSON loading/validation was added in phase 10.
   Climate/weather settings are explicit switches because another climate mod may
   wish to own those same properties. No rendering classes are replaced.
 - Heat line-of-sight uses collision shapes, so windows and walls obstruct it, while
-  gaps or an open doorway can admit heat. There is no room-volume simulation.
+  gaps or an open doorway can admit heat. Visible source strengths add up to a configured
+  cap (4 by default); torches contribute 35% before distance attenuation. There is no
+  room-volume simulation.
 - Snow and ice obey ordinary block light and vanilla melting. Natural vanilla
   weather ticks remain active in addition to this mod's small sampling budget.
 - Effects refresh for 40 ticks and expire naturally, preserving stronger/longer
@@ -193,3 +195,42 @@ No Iris internals or mod gameplay were changed to work around the test launcher.
 - StarterAndHeatItemsTest covers two new saves in one process, reopened receipts,
   pickup with cooking food, real loot/placement, depleted placement, real inventory
   recovery, five item bars and client sync, weapon durability and item save/reopen.
+
+## 1.2.1 changes
+
+- Supported items display their normal durability bar only while elapsed exposure is
+  positive. Fresh creative/catalog stacks and fully recovered items no longer show a
+  permanent full bar. Original non-heat item durability is unchanged.
+- The public Fabric ItemTooltipCallback appends localized Chinese/English descriptions
+  for campfires, furnaces, normal/soul torches and lava buckets. Percent and remaining /
+  total exposure seconds come from the item's synced component. Pickup, recovery and
+  cover rules are explained; lava has a source cooling description, not fictitious
+  per-bucket durability.
+- Normal/soul floor and wall torches provide weak warmth. A position-based PersistentState
+  retains outdoor seconds with a chunk index. Chunk-load palette checks only scan sections
+  containing torches; one already-loaded nearby chunk per second discovers command/legacy
+  torches. Item placement registers immediately. Only nearby loaded chunk indexes advance.
+- At 45 exposed seconds a torch block is removed without normal loot, then one vanilla
+  ItemEntity with an exhausted clock is spawned. Block loot preserves partial clocks for
+  ordinary mining/support loss. Torches recover on the ground or in player inventory in
+  about five seconds; a common BlockItem.place HEAD check denies placement until full and
+  does not consume the item. Campfire/furnace dropped items still do not recover.
+- Loaded torch item entities are tracked through Fabric load/unload events in a weak map.
+  Recovery waits for twenty actual entity ticks since its last step; a copied tracked
+  ItemStack synchronizes progress. Unticked/unloaded entities and offline time do not
+  receive repeated or catch-up recovery. Full/removed items are discarded from tracking.
+- Calendar stages use persisted vanilla timeOfDay / 24000, including sleep advancement.
+  Every three completed days adds 0.1 to the loss multiplier, capped at ten stages (2x).
+  TemperatureManager supplies this multiplier to the pure temperature model only in the
+  Overworld; dry shelter remains protected and warming rates are unchanged. Existing
+  worlds use their existing calendar days; time commands also alter progression.
+- HeatSources sums only visible, distance-attenuated sources and stops at its cap. The
+  scan sphere, loaded-region guards and collision ray checks are unchanged.
+- Campfire wear has no creative-mode exemption. Runtime comparisons cover creative and
+  survival players, frozen daylight, tree cover/removal and save/reopen. Covered and paused
+  worlds intentionally stop exposure; the user's unspecified intermittent case has not
+  been reproduced, so no particular save or mode is declared the cause.
+- WinterProgressionTest exercises real drops, cooldown/placement, ground/inventory recovery,
+  stacked heat, walls, calendar loss and persistence. HeatTooltipTest exercises the actual
+  ItemStack tooltip callback and mouse hover, language reloads and screenshots. Pure unit
+  checks cover stage boundaries/caps, safe shelter, combined heat and invalid config fields.

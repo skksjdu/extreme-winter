@@ -20,6 +20,6 @@ public abstract class HeatDropMixin {
             at = @At("RETURN"))
     private static void winter$preserveClock(BlockState state, ServerWorld world, BlockPos pos,
             BlockEntity entity, Entity breaker, ItemStack tool, CallbackInfoReturnable<List<ItemStack>> result) {
-        if (entity != null) for (var stack : result.getReturnValue()) HeatItems.copyToDrop(entity, stack);
+        for (var stack : result.getReturnValue()) HeatItems.copyToDrop(world, pos, entity, stack);
     }
 }

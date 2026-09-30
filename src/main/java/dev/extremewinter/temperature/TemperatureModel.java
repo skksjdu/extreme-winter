@@ -8,11 +8,17 @@ public final class TemperatureModel {
 
     public static double step(double value, boolean outdoors, boolean badWeather,
                               boolean night, boolean wet, double heat, WinterConfig config) {
+        return step(value, outdoors, badWeather, night, wet, heat, 1, config);
+    }
+
+    public static double step(double value, boolean outdoors, boolean badWeather,
+                              boolean night, boolean wet, double heat, double climateLoss, WinterConfig config) {
         value = clamp(value, config);
         double loss = (outdoors ? config.baseLoss
                 + (badWeather ? config.weatherPenalty : 0)
                 + (night ? config.nighttimePenalty : 0) : 0)
                 + (wet ? config.waterPenalty : 0);
+        loss *= climateLoss;
         double gain = heat * config.recoveryRate;
         if (!outdoors && !wet && heat == 0 && value < config.coldThreshold) {
             gain = Math.min(config.shelteredRecoveryRate, config.coldThreshold - value);

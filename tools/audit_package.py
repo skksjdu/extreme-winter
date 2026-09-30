@@ -27,6 +27,11 @@ with zipfile.ZipFile(path) as jar:
         if name.endswith('.json'): json.loads(jar.read(name))
     assert not any('starter_shelter' in name or '/shelter/' in name for name in names)
     assert 'assets/extreme_winter/lang/zh_cn.json' in names
+    chinese = json.loads(jar.read('assets/extreme_winter/lang/zh_cn.json'))
+    english = json.loads(jar.read('assets/extreme_winter/lang/en_us.json'))
+    assert set(chinese) == set(english), 'Translations must have matching keys'
+    for key in ('durability', 'campfire_pickup', 'furnace_pickup', 'torch_cooldown', 'lava_cooling'):
+        assert 'tooltip.extreme_winter.' + key in chinese
     assert 'assets/extreme_winter/blockstates/snow_drift.json' in names
     assert 'data/extreme_winter/loot_table/blocks/snow_drift.json' in names
     for icon in ('empty', 'half', 'full'):
@@ -40,4 +45,5 @@ print(json.dumps({'file': str(path), 'bytes': path.stat().st_size,
                   'classes': len(classes), 'bytecode_java': 21,
                   'minecraft': meta['depends']['minecraft'], 'test_classes_in_release': False,
                   'mixins': mixins['mixins'], 'shelter_generation': False, 'optional_mod_dependencies': False,
+                  'heat_tooltip_languages': ['zh_cn', 'en_us'],
                   'visual_overrides': len(visuals), 'snow_overrides': False, 'wood_overrides': False}, indent=2))

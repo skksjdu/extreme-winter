@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class HeatItemBarMixin {
     @Inject(method = "isItemBarVisible", at = @At("HEAD"), cancellable = true)
     private void winter$visible(ItemStack stack, CallbackInfoReturnable<Boolean> result) {
-        if (HeatItems.supported(stack)) result.setReturnValue(true);
+        if (HeatItems.supported(stack)) result.setReturnValue(HeatItems.elapsed(stack) > 0);
     }
     @Inject(method = "getItemBarStep", at = @At("HEAD"), cancellable = true)
     private void winter$step(ItemStack stack, CallbackInfoReturnable<Integer> result) {

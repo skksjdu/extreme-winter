@@ -32,7 +32,9 @@ class ConfigFileTest {
         Path path = directory.resolve("winter.json");
         for (String invalid : new String[]{"{broken", "null", "{\"snowIntervalTicks\":0}",
                 "{\"heatSourceRadius\":999}", "{\"coldThreshold\":10}", "{\"baseLoss\":\"NaN\"}",
-                "{\"lavaExposureSeconds\":0}", "{\"campfireExposureSeconds\":-1}", "{\"heatRecoverySeconds\":0}"}) {
+                "{\"lavaExposureSeconds\":0}", "{\"campfireExposureSeconds\":-1}", "{\"heatRecoverySeconds\":0}",
+                "{\"torchExposureSeconds\":0}", "{\"torchRecoverySeconds\":0}", "{\"winterStageDays\":0}",
+                "{\"maxWinterStages\":-1}", "{\"maxHeatStrength\":0.5}"}) {
             Files.writeString(path, invalid);
             assertEquals(0.32, ConfigFile.load(path).baseLoss);
             assertEquals(invalid, Files.readString(path));

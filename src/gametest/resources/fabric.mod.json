@@ -5,6 +5,6 @@
   "name": "Extreme Winter tests (development only)",
   "environment": "client",
   "entrypoints": {
-    "fabric-client-gametest": ["dev.extremewinter.test.StarterAndHeatItemsTest", "dev.extremewinter.test.SnowMovementTest", "dev.extremewinter.test.WinterClientTest", "dev.extremewinter.test.HeatWeatheringTest", "dev.extremewinter.test.NaturalWorldTest"]
+    "fabric-client-gametest": ["dev.extremewinter.test.StarterAndHeatItemsTest", "dev.extremewinter.test.WinterProgressionTest", "dev.extremewinter.test.SnowMovementTest", "dev.extremewinter.test.WinterClientTest", "dev.extremewinter.test.HeatWeatheringTest", "dev.extremewinter.test.NaturalWorldTest", "dev.extremewinter.test.HeatTooltipTest"]
   }
 }
