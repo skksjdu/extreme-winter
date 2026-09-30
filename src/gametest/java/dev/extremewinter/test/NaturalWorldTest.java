@@ -4,7 +4,6 @@ import java.util.Set;
 import dev.extremewinter.ExtremeWinter;
 import dev.extremewinter.client.hud.TemperatureHud;
 import dev.extremewinter.environment.Exposure;
-import dev.extremewinter.shelter.ShelterState;
 import dev.extremewinter.temperature.HeatSources;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -33,18 +32,14 @@ public final class NaturalWorldTest implements FabricClientGameTest {
             context.waitTicks(40);
             game.getServer().runOnServer(server -> {
                 var world = server.getOverworld();
-                var shelter = ShelterState.get(world);
-                require(shelter.generated(), "natural terrain shelter: " + shelter.outcome());
                 var player = server.getPlayerManager().getPlayerList().getFirst();
-                require(!Exposure.outdoors(world, player.getBlockPos()), "natural terrain spawn is sheltered");
+                require(player.getInventory().count(net.minecraft.item.Items.CAMPFIRE) == 1,
+                        "natural world receives one campfire");
+                require(world.getStructureTemplateManager().getTemplate(
+                        net.minecraft.util.Identifier.of(ExtremeWinter.ID, "starter_shelter")).isEmpty(),
+                        "shelter template is removed");
                 var heat = new HeatSources(ExtremeWinter.CONFIG.heatSourceRadius);
-                require(heat.strength(player) > 0, "natural terrain spawn has heat");
-                require(world.getBlockState(shelter.at(4, 6, 7)).isIn(
-                        net.minecraft.registry.tag.BlockTags.BASE_STONE_OVERWORLD), "mountain surrounds the room");
-                require(world.getBlockState(shelter.at(4, 3, 3)).isOf(Blocks.LANTERN)
-                        && world.getBlockState(shelter.at(6, 3, 7)).isOf(Blocks.LANTERN), "ceiling supports both hanging lanterns");
-                require(world.getLightLevel(net.minecraft.world.LightType.BLOCK, player.getBlockPos()) >= 9,
-                        "interior stays lit after real ticks");
+                require(heat.strength(player) == 0, "carried campfire does not warm the player");
                 long start = System.nanoTime();
                 for (int i = 0; i < 100; i++) heat.strength(player);
                 ExtremeWinter.LOGGER.info("TEST {}: heat scan mean {} microseconds (100 warm calls)",
@@ -63,22 +58,20 @@ public final class NaturalWorldTest implements FabricClientGameTest {
                     }
                 }
             });
-            context.takeScreenshot("natural-shelter-interior-" + profile);
+            context.takeScreenshot("natural-spawn-" + profile);
             game.getServer().runOnServer(server -> {
                 var world = server.getOverworld();
-                var shelter = ShelterState.get(world);
-                var origin = shelter.at(4, 0, -6);
                 var player = server.getPlayerManager().getPlayerList().getFirst();
                 player.changeGameMode(GameMode.CREATIVE);
                 player.getAbilities().flying = true;
                 player.sendAbilitiesUpdate();
-                var view = shelter.at(18, 10, -20);
+                var view = world.getSpawnPos().add(18, 15, -20);
                 player.teleport(world, view.getX() + 0.5, view.getY(), view.getZ() + 0.5,
-                        Set.of(), shelter.arrivalYaw() + 180 + 30, 18, true);
+                        Set.of(), 30, 18, true);
             });
             context.waitTicks(30);
             game.getClientWorld().waitForChunksRender();
-            context.takeScreenshot("natural-shelter-exterior-" + profile);
+            context.takeScreenshot("natural-terrain-" + profile);
             game.getServer().runOnServer(server -> {
                 var world = server.getOverworld();
                 world.setTimeOfDay(6000);

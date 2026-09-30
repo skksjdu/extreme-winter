@@ -9,14 +9,15 @@ import dev.extremewinter.config.ConfigFile;
 import net.fabricmc.loader.api.FabricLoader;
 import dev.extremewinter.temperature.TemperatureManager;
 import dev.extremewinter.temperature.HeatWeathering;
+import dev.extremewinter.temperature.HeatItems;
 import dev.extremewinter.network.TemperatureSync;
 import dev.extremewinter.environment.WinterClimate;
 import dev.extremewinter.environment.WinterEnvironment;
 import dev.extremewinter.environment.WinterBlocks;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import dev.extremewinter.shelter.StarterShelter;
+import dev.extremewinter.survival.StarterSupplies;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,8 @@ public final class ExtremeWinter implements ModInitializer {
     @Override
     public void onInitialize() {
         WinterBlocks.initialize();
+        HeatItems.initialize();
+        StarterSupplies.initialize();
         TemperatureData.initialize();
         TemperatureSync.register(CONFIG);
         WinterClimate.register(CONFIG);
@@ -36,9 +39,9 @@ public final class ExtremeWinter implements ModInitializer {
         ServerWorldEvents.LOAD.register((server, world) -> environment.onLoad(world));
         ServerTickEvents.END_WORLD_TICK.register(environment::tick);
         ServerTickEvents.END_WORLD_TICK.register(new HeatWeathering(CONFIG)::tick);
-        var shelter = new StarterShelter(CONFIG);
-        ServerLifecycleEvents.SERVER_STARTED.register(shelter::onStarted);
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> shelter.onJoin(handler.player));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> StarterSupplies.onJoin(handler.player));
+        UseBlockCallback.EVENT.register(HeatItems::pickUpCampfire);
+        ServerTickEvents.END_SERVER_TICK.register(HeatItems::tickInventories);
         ServerPlayerEvents.JOIN.register(TemperatureData::get);
         ServerTickEvents.END_SERVER_TICK.register(new TemperatureManager(CONFIG)::tick);
         LOGGER.info("Extreme Winter initialized for Minecraft 1.21.6");

@@ -8,9 +8,6 @@ import dev.extremewinter.environment.WinterEnvironment;
 import dev.extremewinter.environment.WinterBlocks;
 import dev.extremewinter.environment.SnowDriftBlock;
 import dev.extremewinter.temperature.HeatSources;
-import dev.extremewinter.shelter.ShelterState;
-import dev.extremewinter.shelter.StarterShelter;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
@@ -29,38 +26,16 @@ public final class WinterClientTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
         TestWorldSave save;
-        BlockPos[] shelterOrigin = new BlockPos[1];
         float[] mildDamage = new float[1];
         try (var game = context.worldBuilder().create()) {
             save = game.getWorldSave();
-            game.getServer().runOnServer(server -> {
-                var world = server.getOverworld();
-                var state = ShelterState.get(world);
-                require(state.generated(), "new world generates starter shelter: " + state.outcome());
-                shelterOrigin[0] = state.origin();
-                var player = server.getPlayerManager().getPlayerList().getFirst();
-                require(player.getBlockPos().equals(state.at(4, 1, 7)), "first arrival is inside shelter");
-                require(!Exposure.outdoors(world, player.getBlockPos()), "starter shelter has a protective roof");
-                require(new HeatSources(ExtremeWinter.CONFIG.heatSourceRadius).strength(player) > 0,
-                        "starter shelter provides heat at spawn");
-                for (int x = 0; x < 9; x++) for (int z = 0; z < 11; z++) for (int y = 0; y < 6; y++) {
-                    var block = world.getBlockState(state.at(x, y, z));
-                    require(!block.isOf(Blocks.FARMLAND) && !block.isOf(Blocks.WHEAT) && !block.isOf(Blocks.WATER),
-                            "mountain shelter has no farm");
-                }
-                require(world.getBlockState(state.at(4, 7, 7)).isOf(Blocks.STONE), "room is enclosed in rock above the roof");
-                var chest = (ChestBlockEntity) world.getBlockEntity(state.at(1, 1, 3));
-                require(chest != null && chest.getStack(0).isOf(Items.BREAD) && chest.getStack(0).getCount() == 3
-                        && chest.getStack(1).isOf(Items.APPLE) && chest.getStack(1).getCount() == 2,
-                        "starter chest has only three bread and two apples");
-                for (int slot = 2; slot < chest.size(); slot++) require(chest.getStack(slot).isEmpty(), "no extra starter supplies");
-                chest.removeStack(0);
-                chest.markDirty();
-                new StarterShelter(ExtremeWinter.CONFIG).onStarted(server);
-                require(chest.getStack(0).isEmpty(), "generation does not replenish loot");
-            });
             game.getClientWorld().waitForChunksRender();
-            context.takeScreenshot("starter-shelter-interior");
+            game.getServer().runOnServer(server -> {
+                var player = server.getPlayerManager().getPlayerList().getFirst();
+                require(player.getInventory().count(Items.CAMPFIRE) == 1, "new save receives exactly one campfire");
+                dev.extremewinter.survival.StarterSupplies.onJoin(player);
+                require(player.getInventory().count(Items.CAMPFIRE) == 1, "starter supply is not duplicated");
+            });
             game.getServer().runOnServer(server -> {
                 var player = server.getPlayerManager().getPlayerList().getFirst();
                 var world = server.getOverworld();
@@ -240,12 +215,9 @@ public final class WinterClientTest implements FabricClientGameTest {
         }
         try (var game = save.open()) {
             game.getServer().runOnServer(server -> {
-                var state = ShelterState.get(server.getOverworld());
-                require(state.generated() && state.origin().equals(shelterOrigin[0]), "shelter marker survives reload");
-                var chest = (ChestBlockEntity) server.getOverworld().getBlockEntity(state.at(1, 1, 3));
-                require(chest != null && chest.getStack(0).isEmpty(), "reload does not replenish starter chest");
-                require(server.getPlayerManager().getPlayerList().getFirst().getBlockY() == 100,
-                        "rejoin does not teleport player back to shelter");
+                var player = server.getPlayerManager().getPlayerList().getFirst();
+                require(player.getBlockY() == 100, "rejoin keeps saved player position");
+                require(player.getInventory().count(Items.CAMPFIRE) == 0, "rejoin does not replenish used starter supply");
             });
             game.getServer().runOnServer(server -> require(
                     TemperatureData.get(server.getPlayerManager().getPlayerList().getFirst()) == 80,

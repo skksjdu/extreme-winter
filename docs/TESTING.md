@@ -1,4 +1,30 @@
-# 1.1.2 验证报告
+# 1.2.0 验证报告
+
+2026-09-30，本地单人验证；未上传 GitHub。成品：`outputs/extreme-winter-1.2.0.jar`。
+Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
+
+- `build` 通过，14 项单元测试通过，0 失败、错误或跳过。最终正式 JAR 的基础回归 A 通过，2m 9s。
+- 光影组合 D 通过，1m 52s，使用 Sodium 0.7.3 / Iris 1.9.6 / Complementary Reimagined r5.9.3；日志与 Iris 公共 API 均确认光影启用。
+- 同一客户端进程连续创建两个新存档，分别领取且只领取 **1 个营火**；重复 JOIN 和存档重进不补发，领取不改变玩家位置或世界出生点。
+- 普通地形世界也收到 1 个营火；安全屋模板缺失，携带营火不提供取暖效果。包中没有安全屋生成器、蓝图或结构资源。
+- 蹲下空手右键收回营火，实际移除方块、保留已用 100 秒的时钟，烹饪中的 1 个牛肉准确掉落一次。
+- 熔炉真实掉落及 `BlockItem.place` 保留已用 200 秒的时钟；耗尽的营火放置后立即熄灭。
+- 背包中真实运行 40 tick，营火已用时长从 100 降到 92，恢复 8 秒；五种便携热源从耗尽最多 30 次每秒恢复后充满。
+- 原版物品条 API 在耗尽时为 0 格、满时为 13 格绿色；部分时间组件同步到客户端，普通石剑的耐久条保留。截图确认显示正常。
+- 背包内部分恢复的营火保存重进后仍有消耗，未被重置为满时长；方块时钟、温度及原有热源/燃料保存回归通过。
+- 积雪下陷、掉落合并、慢行和跳跃回归通过；步行速度比仍为 0.85708，地面/雪地跳跃最高点均 1.25220 格。
+- 包检查通过：60281 字节，25 个 Java 21 类，四个通用 Mixin；无测试类、内嵌第三方 JAR、可选模组硬依赖或原版视觉覆盖。
+  SHA-256：`8d3fb24fbcc8dc593f6f05f748fe3e9298745753d5f5e40040bc5d8827acbbfb`。
+
+复查日志：`work/test-1.2.0-A-final.log`、`work/test-1.2.0-D-final.log`；单元报告：`build/reports/tests/test/index.html`；包检查：`python tools/audit_package.py`，结果在 `outputs/package-1.2.0.json`。
+截图：`outputs/heat-charge-1.2.0-vanilla.png`、`outputs/heat-charge-1.2.0-complementary.png`、`outputs/spawn-1.2.0-vanilla.png`、`outputs/spawn-1.2.0-complementary.png`；物品时间条、自然出生地及 HUD 已目视检查。
+Complementary 保留既有 `BIOME_SULFUR_CAVES`、`endFlashIntensityM/endFlashFactor1`、旧 `stone_slab variant` 警告；主世界测试通过，未出现此前 Eclipse 的 OpenGL 错误。测试器还记录空音频设备选项警告，未修改用户选项。
+
+最终文件已安装至 `D:\迅雷下载\PCL 正式版 2.12.7.3\.minecraft\versions\1.21.6-Fabric 0.19.5\mods\extreme-winter-1.2.0.jar`，哈希与上述成品一致；只替换本模组，核验其他三个模组与三份配置哈希不变。
+原始 1.1.2 在 `work/install-backup-1.2.0-20260930-080813`，清单为 `outputs/installation-1.2.0.json`。原配置中的 `starterShelter` 已忽略，缺省恢复时长自动为 30 秒。
+本版只验收单人，未做专用服务器或多人连接测试。旧存档已建建筑保留，已有玩家不补发营火；岩浆桶没有物品时间条。
+
+# 1.1.2 历史验证报告
 
 2026-09-30，本地验证；未上传 GitHub。成品：`outputs/extreme-winter-1.1.2.jar`。
 Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。

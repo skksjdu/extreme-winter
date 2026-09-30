@@ -25,10 +25,12 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 
 public final class HeatWeathering {
-    private static final AttachmentType<Integer> EXPOSURE = AttachmentRegistry.create(
+    public static final AttachmentType<Integer> EXPOSURE = AttachmentRegistry.create(
             Identifier.of(ExtremeWinter.ID, "heat_exposure_seconds"), b -> b.initializer(() -> 0).persistent(Codec.INT));
-    private static final AttachmentType<Boolean> BLOCKED = AttachmentRegistry.create(
+    public static final AttachmentType<Boolean> BLOCKED = AttachmentRegistry.create(
             Identifier.of(ExtremeWinter.ID, "furnace_weather_blocked"), b -> b.initializer(() -> false).persistent(Codec.BOOL));
+    public static final AttachmentType<Boolean> WAS_LIT = AttachmentRegistry.create(
+            Identifier.of(ExtremeWinter.ID, "heat_was_lit"), b -> b.initializer(() -> true).persistent(Codec.BOOL));
     private final WinterConfig config;
     private int lavaChunkCursor;
 
@@ -66,12 +68,7 @@ public final class HeatWeathering {
     }
 
     public int exposureLimit(BlockState state) {
-        if (state.isOf(Blocks.CAMPFIRE)) return config.campfireExposureSeconds;
-        if (state.isOf(Blocks.SOUL_CAMPFIRE)) return config.soulCampfireExposureSeconds;
-        if (state.isOf(Blocks.FURNACE)) return config.furnaceExposureSeconds;
-        if (state.isOf(Blocks.BLAST_FURNACE)) return config.blastFurnaceExposureSeconds;
-        if (state.isOf(Blocks.SMOKER)) return config.smokerExposureSeconds;
-        return 0;
+        return HeatItems.limit(state.getBlock().asItem(), config);
     }
 
     public void advanceBlockEntity(ServerWorld world, BlockEntity entity) {
@@ -80,11 +77,15 @@ public final class HeatWeathering {
         int limit = exposureLimit(state);
         if (limit == 0) return;
         if (!state.get(Properties.LIT)) {
-            if (!entity.getAttachedOrCreate(BLOCKED)) setExposure(entity, 0);
+            entity.setAttached(WAS_LIT, false);
             return;
         }
+        if (!entity.getAttachedOrCreate(WAS_LIT) && !(entity instanceof AbstractFurnaceBlockEntity)) {
+            setExposure(entity, 0); // An explicit manual relight starts a new campfire period.
+        }
+        entity.setAttached(WAS_LIT, true);
         if (!WinterEnvironment.isExposedSurface(world, pos)) return;
-        int seconds = Math.min(limit, entity.getAttachedOrCreate(EXPOSURE) + 1);
+        int seconds = Math.min(limit, HeatItems.elapsed(entity) + 1);
         setExposure(entity, seconds);
         if (seconds < limit) return;
         if (entity instanceof AbstractFurnaceBlockEntity furnace) {
@@ -96,9 +97,9 @@ public final class HeatWeathering {
             furnace.setAttached(BLOCKED, true);
         } else {
             CampfireBlock.extinguish(null, world, pos, state);
-            setExposure(entity, 0); // Manual re-lighting starts a fresh exposure period.
         }
         world.setBlockState(pos, state.with(Properties.LIT, false), Block.NOTIFY_ALL);
+        entity.setAttached(WAS_LIT, false);
         entity.markDirty();
     }
 
@@ -112,9 +113,8 @@ public final class HeatWeathering {
     }
 
     private static void setExposure(BlockEntity entity, int seconds) {
-        if (entity.getAttachedOrCreate(EXPOSURE) == seconds) return;
-        entity.setAttached(EXPOSURE, seconds);
-        entity.markDirty();
+        if (HeatItems.elapsed(entity) == seconds) return;
+        HeatItems.writeExposure(entity, seconds);
     }
 
     public void discoverLava(ServerWorld world, BlockPos pos) {

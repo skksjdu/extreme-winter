@@ -17,7 +17,7 @@ with zipfile.ZipFile(path) as jar:
     assert set(meta['depends']) == {'fabricloader', 'minecraft', 'java', 'fabric-api'}
     assert meta['mixins'] == ['extreme_winter.mixins.json']
     mixins = json.loads(jar.read('extreme_winter.mixins.json'))
-    assert mixins['mixins'] == ['FurnaceWeatheringMixin'] and 'client' not in mixins
+    assert mixins['mixins'] == ['FurnaceWeatheringMixin', 'HeatItemBarMixin', 'HeatPlacementMixin', 'HeatDropMixin'] and 'client' not in mixins
     assert not any('gametest' in p.lower() or '/test/' in p or p.startswith('META-INF/jars/') for p in names)
     classes = [p for p in names if p.endswith('.class')]
     assert classes
@@ -25,7 +25,7 @@ with zipfile.ZipFile(path) as jar:
         assert struct.unpack('>H', jar.read(name)[6:8])[0] == 65, name
     for name in names:
         if name.endswith('.json'): json.loads(jar.read(name))
-    assert 'data/extreme_winter/structure/starter_shelter.nbt' in names
+    assert not any('starter_shelter' in name or '/shelter/' in name for name in names)
     assert 'assets/extreme_winter/lang/zh_cn.json' in names
     assert 'assets/extreme_winter/blockstates/snow_drift.json' in names
     assert 'data/extreme_winter/loot_table/blocks/snow_drift.json' in names
@@ -39,5 +39,5 @@ print(json.dumps({'file': str(path), 'bytes': path.stat().st_size,
                   'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                   'classes': len(classes), 'bytecode_java': 21,
                   'minecraft': meta['depends']['minecraft'], 'test_classes_in_release': False,
-                  'server_furnace_mixin_only': True, 'optional_mod_dependencies': False,
+                  'mixins': mixins['mixins'], 'shelter_generation': False, 'optional_mod_dependencies': False,
                   'visual_overrides': len(visuals), 'snow_overrides': False, 'wood_overrides': False}, indent=2))

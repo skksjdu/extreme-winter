@@ -38,7 +38,7 @@ Sources:
 - Use server tick events with bounded scheduled work. No client gameplay authority.
 - Use normal status effects with short lifetimes. Never remove another mod's
   effects when temperature recovers.
-- Use vanilla blocks, placement checks, weather and structure templates.
+- Use vanilla blocks, placement checks and weather; 1.2.0 leaves spawn placement entirely to vanilla.
 - Use `HudElementRegistry`, the API introduced for 1.21.6. No renderer replacement.
 - Use Fabric's public biome modification API to set vanilla Overworld biomes to
   a cold, precipitation-enabled climate. This changes data, not biome classes or
@@ -78,12 +78,10 @@ share one set of values; JSON loading/validation was added in phase 10.
 - Environmental sampling has one shared per-world budget, not a full scan per
   player. Defaults are 16 columns each 20 ticks; freezing shares the sampled
   columns every 40 ticks. Sampling never loads a missing chunk.
-- Shelter generation is startup-only: two bounded searches, at most 289 anchors x four
-  orientations each. Only already loaded chunks are considered. The 9 x 6 x 11 template
-  carves natural terrain, rejects fluids, trees and block entities, and records rotation.
-- A safe open-site fallback encloses the same room in a bounded snow-capped rock mound.
-  The entrance is a short level tunnel or a three-step hillside exit. Furniture and food
-  live in the editable JSON/NBT. Existing shelters and arrival markers remain valid.
+- Shelter generation and its templates were removed in 1.2.0. A persistent, copy-on-death
+  player receipt grants one campfire on the first join of a new save, independently for
+  each save. Legacy arrival receipts and nonzero play-time prevent upgrades from adding
+  a second starter kit. No code changes world spawn or teleports arriving players.
 - `POST_PROCESSING` is Fabric's documented phase for changing biome properties.
   Climate/weather settings are explicit switches because another climate mod may
   wish to own those same properties. No rendering classes are replaced.
@@ -167,3 +165,31 @@ No Iris internals or mod gameplay were changed to work around the test launcher.
   thin/full/stacked snow, jump height, walking speed recovery and vanilla leaf resources.
 - Optional shader setup uses Complementary Reimagined r5.9.3, Iris 1.9.6 and Sodium 0.7.3.
   Exact official Modrinth 1.21.6 compatibility metadata and SHA-512 hashes are checked.
+
+## 1.2.0 changes
+
+- Remove the starter shelter generator, persistent world state, template/tag, blueprint
+  and generator tool. Existing built terrain is untouched; a legacy player arrival
+  receipt is still registered for migration. Vanilla spawn selection is unchanged.
+  Starter receipt types are registered during mod initialization, before player save
+  data is read, rather than waiting for the first JOIN callback.
+- A registered integer data component with a persistent codec and packet codec carries
+  elapsed outdoor seconds between campfire/furnace block entities and their item stacks.
+  Legacy block-entity attachments remain readable. Unlit states retain elapsed time.
+- Common-side BlockItem placement and Block loot-return injections restore/preserve
+  the clock. A depleted campfire is immediately unlit; partial recovery cannot be
+  converted into a full lifetime by simply placing it again.
+- Sneaking with an empty main hand and right-clicking a campfire returns its item with
+  the clock intact. Vanilla block removal drops the cooking ingredients; world/player
+  modification permissions are checked. Other mining loot behavior is unchanged.
+- Once per second, the server restores ceil(exposureLimit / heatRecoverySeconds) seconds
+  for each supported item in player inventory, hotbar and offhand. Zero elapsed time
+  removes the component so fully charged items stack with unused ones. Dropped items,
+  container inventories and offline time do not recover. Carried items do not heat players.
+- Item bar methods use vanilla durability width/color calculations (13 steps,
+  green-to-red HSV), retaining ordinary weapon durability. There is no GUI renderer
+  injection, OpenGL call or optional-mod internal dependency. Lava remains a world
+  cooling mechanic and has no bucket charge component.
+- StarterAndHeatItemsTest covers two new saves in one process, reopened receipts,
+  pickup with cooking food, real loot/placement, depleted placement, real inventory
+  recovery, five item bars and client sync, weapon durability and item save/reopen.

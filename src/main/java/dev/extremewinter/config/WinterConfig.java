@@ -26,7 +26,6 @@ public final class WinterConfig {
     public int maxSnowLayers = 64;
     public boolean persistentWeather = true;
     public boolean coldVanillaBiomes = true;
-    public boolean starterShelter = true;
     public boolean snowAccumulation = true;
     public boolean waterFreezing = true;
     public boolean outdoorHeatExtinguishing = true;
@@ -36,8 +35,10 @@ public final class WinterConfig {
     public int blastFurnaceExposureSeconds = 300;
     public int smokerExposureSeconds = 150;
     public int lavaExposureSeconds = 3600;
+    public int heatRecoverySeconds = 30;
 
     public void validate() {
+        finiteRange("heatRecoverySeconds", heatRecoverySeconds, 1, 3600);
         finiteRange("minTemperature", minTemperature, -10000, 10000);
         finiteRange("maxTemperature", maxTemperature, -10000, 10000);
         if (!(minTemperature < fatigueThreshold && fatigueThreshold < slownessThreshold
