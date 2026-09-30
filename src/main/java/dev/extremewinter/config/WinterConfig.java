@@ -26,6 +26,7 @@ public final class WinterConfig {
     public int maxSnowLayers = 0; // Zero leaves thickness limited only by physical space/world height.
     public boolean persistentWeather = true;
     public boolean coldVanillaBiomes = true;
+    public boolean coldModdedBiomes = false;
     public boolean snowAccumulation = true;
     public boolean waterFreezing = true;
     public boolean outdoorHeatExtinguishing = true;

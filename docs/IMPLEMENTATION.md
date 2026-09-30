@@ -1,10 +1,18 @@
-# 26.0.1 / Minecraft 26.1.2
+# 26.0.2 / Minecraft 26.1.2
 
 Current target: Minecraft **26.1.2**, Fabric Loader **0.19.5**, Fabric API **0.155.3+26.1.2**.
 Gradle 9.8.0 and Loom 1.18.2 are retained. Use the unobfuscated
 `net.fabricmc.fabric-loom` plugin, normal `implementation` dependencies and `jar`.
 The locally installed JDK 26 compiles with `--release 25`; game metadata requires Java 25+.
 Yarn and remapping tasks are removed. Client and common source sets remain separate.
+
+26.0.2 adds `coldModdedBiomes=false`, an independent opt-in for non-Minecraft
+Overworld biome namespaces. The existing `coldVanillaBiomes` switch keeps its
+meaning and default. Both selections use Fabric's `foundInOverworld` boundary,
+so Nether and End climates remain intact. No world data or biome IDs are replaced.
+The user's Terralith Yellowstone biome previously retained temperature 0.24775,
+making persistent precipitation rain and rejecting snow/ice sampling; enabling
+the new option applies the same -0.5 climate as the vanilla winter biomes.
 
 26.0.1 ports the tagged 26.0.0 MVP to the exact Minecraft 26.1.2 target. Common
 and client gameplay source, identifiers, configuration defaults and save formats
@@ -114,7 +122,8 @@ Sources:
 - Use Fabric's public biome modification API to set vanilla Overworld biomes to
   a cold, precipitation-enabled climate. This changes data, not biome classes or
   renderer code, and lets vanilla and shader packs render normal snow. Modded
-  biomes retain their original climate. `coldVanillaBiomes=false` disables this
+  biomes retain their original climate by default; `coldModdedBiomes=true` opts
+  their Overworld climates into the same change. `coldVanillaBiomes=false` disables the vanilla
   change for climate/world-generation modpacks; warm biomes may then show rain.
   Vanilla light-based snow/ice melting is retained.
 

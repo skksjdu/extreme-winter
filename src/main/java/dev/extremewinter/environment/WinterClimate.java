@@ -11,13 +11,14 @@ public final class WinterClimate {
     private WinterClimate() { }
 
     public static void register(WinterConfig config) {
-        if (!config.coldVanillaBiomes) return;
+        if (!config.coldVanillaBiomes && !config.coldModdedBiomes) return;
         // Public registry modification, not a biome replacement or renderer hook.
-        // Modded biomes retain their authors' climate. Can be disabled in the config.
+        // Modded Overworld climates are an explicit opt-in; other dimensions stay intact.
         BiomeModifications.create(Identifier.fromNamespaceAndPath(ExtremeWinter.ID, "winter_climate")).add(
                 ModificationPhase.POST_PROCESSING,
                 BiomeSelectors.foundInOverworld().and(context ->
-                        context.getBiomeKey().identifier().getNamespace().equals("minecraft")),
+                        context.getBiomeKey().identifier().getNamespace().equals("minecraft")
+                                ? config.coldVanillaBiomes : config.coldModdedBiomes),
                 context -> {
                     context.getWeather().setTemperature(-0.5f);
                     context.getWeather().setPrecipitation(true);

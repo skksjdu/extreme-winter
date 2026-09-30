@@ -31,6 +31,7 @@
 | `maxSnowLayers` | 0 | 0 表示不设厚度上限，只受实际空间和世界高度限制；正数 1–4096 为自选整列层数上限，8 层 = 1 格；不削减已有雪 |
 | `persistentWeather` | true | 主世界开始时及每 60 游戏秒延长原版降水，不触发雷暴 |
 | `coldVanillaBiomes` | true | 通过 Fabric API 降低原版主世界生物群系气温并启用降水 |
+| `coldModdedBiomes` | false | 26.0.2 新增：将模组新增的主世界生物群系也降温并启用降水；Terralith 等扩展群系需开启此项才统一降雪，下界和末地不变 |
 | `snowAccumulation` | true | 开启本模组的额外积雪采样 |
 | `waterFreezing` | true | 开启本模组的额外水源结冰采样 |
 | `outdoorHeatExtinguishing` | true | 主世界露天热源熄灭 / 岩浆源冷却 |
@@ -65,8 +66,10 @@
 `persistentWeather=true` 会在睡觉或天气命令清空降水后，最迟约 60 游戏秒重新维持降水。
 
 数据包可扩展 `extreme_winter:snow_surfaces` 方块标签，使其他模组的普通地表接受雪层。
-方块实体、非雪非空气目标、实心屋顶下、水中及过亮位置仍受保护。模组生物群系的气候不会自动修改，
+方块实体、非雪非空气目标、实心屋顶下、水中及过亮位置仍受保护。
+模组生物群系默认保留原气候；设 `coldModdedBiomes=true` 后，主世界扩展群系统一接受降温。
 只有实际寒冷的生物群系接受额外雪/冰采样；体温系统则在整个主世界生效。
+该开关在游戏启动时注册，修改后需完全重启游戏；无需重建存档或改写已有地形。
 
 积雪使用 `extreme_winter:snow_drift`，每格保持 1–8 层并跨格堆叠。
 无支撑时生成原版下落方块实体；薄雪会合并。实体与邻居变化使用计划 tick，不逐 tick 扫描整个雪堆。

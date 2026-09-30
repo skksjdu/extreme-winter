@@ -1,4 +1,36 @@
-# 26.0.1 / Minecraft 26.1.2 移植验证
+# 26.0.2 / Minecraft 26.1.2 模组群系气候修复验证
+
+2026-09-30，修复指定实例使用 Terralith 时，主世界扩展群系仍下雨且不形成真实积雪的问题。
+只读检查存档玩家所在区块确认其群系为 `terralith:yellowstone`；安装包定义温度为 **0.24775**。
+旧版仅修改 `minecraft:` 群系，实际日志只修改 160 个群系中的 54 个。
+
+新增独立开关 `coldModdedBiomes=false`，缺省配置保留原行为；指定实例已启用该项。
+开启后同样通过 Fabric API 将模组主世界群系降至 -0.5 并启用降水，不替换群系 ID 或存档地形。
+
+- `build compileGametestJava` 通过；**18 项单元测试**通过，0 失败、0 错误。
+- 默认配置正式 JAR 的原版 A 组 **9 个游戏测试入口全部通过**，2m 25s。
+- 指定实例中的 **Terralith 2.6.1 / Tectonic 3.0.28 / Lithostitched 1.8.0 / Sodium 0.9.1 / Iris 1.11.4 / Eclipse Unstable**，在独立普通地形世界中分别测试开关关闭与开启，均通过，各 59s。
+- 关闭：Yellowstone 温度 0.24775，服务器与客户端均为 `RAIN`，实际采样 0 雪层，水源保留。
+- 开启：温度 -0.5，客户端为 `SNOW`，实际 tick 形成 **625 层**积雪，水源结冰；屋顶下无雪，下界与末地温度不变，存档重进后气候与雪层正确。
+  新测试为稳定采样，将半径临时设为 0、每批设为 64，仅影响测试内存；用户实例仍使用半径 4、每批 16 的原配置。因此该层数不代表默认存档的积雪速度。
+- 开启后日志为 **149/160** 群系修改，新增覆盖 Terralith 的 95 个群系；没有增加 Terralith 硬依赖或客户端渲染 Mixin。
+- Eclipse 日志与截图确认实际启用。原光影设置保留；光影可能给雨天地表绘制白色覆盖，测试以服务器真实雪方块与客户端降水类型为依据。
+
+成品：`outputs/extreme-winter-26.0.2.jar`，SHA-256：
+`d7d8d4f0bf695ae4832d961b8c71746318a8b36aec7a75ffdac72bfd7ee9410c`。
+包检查通过：31 个玩法类、Java 25 字节码、原有四个 Mixin、测试代码隔离、无资源覆盖或可选模组硬依赖。
+
+已安装到 `D:\迅雷下载\PCL 正式版 2.12.7.3\.minecraft\versions\26.1.2-Fabric 0.19.5`，
+只替换本模组并启用新开关；旧 JAR 和原配置备份在 `work/terralith-climate/install-backup`。
+29 个其他模组/光影/游戏配置文件哈希一致；未修改用户存档。
+无需创建新存档，完整重启游戏后继续原存档，积雪会逐步生成。
+
+日志：`work/build-26.0.2.log`、`work/test-26.0.2-A.log`、`work/terralith-climate/review-off.log` 和 `review-on.log`。
+截图：`outputs/terralith-climate-off/on-26.0.2.png` 与 `terralith-climate-comparison-26.0.2.png`。
+包与安装记录：`outputs/package-26.0.2.json`、`outputs/installation-26.0.2.json`。
+尚未验收指定实例的全部界面/性能模组及 Voxy 远景缓存刷新，也未覆盖其他主世界群系模组或多人。
+
+# 26.0.1 / Minecraft 26.1.2 移植验证（历史记录）
 
 2026-09-30，以 `mvp-26.0.0` 固定的最新版 MVP 为基础，移植到 **Minecraft 26.1.2 / Fabric / 单人**。
 成品：`outputs/extreme-winter-26.0.1.jar`；原 26.0.0 成品与标签保留。

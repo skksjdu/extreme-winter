@@ -89,4 +89,18 @@ class ConfigFileTest {
             assertEquals(json, Files.readString(path));
         }
     }
+
+    @Test void moddedClimateIsOptInAndIndependentOfVanillaClimate() throws Exception {
+        Path path = directory.resolve("winter.json");
+        String legacy = "{\"configVersion\":2,\"coldVanillaBiomes\":true}";
+        Files.writeString(path, legacy);
+        assertFalse(ConfigFile.load(path).coldModdedBiomes);
+        assertEquals(legacy, Files.readString(path));
+        String custom = "{\"configVersion\":2,\"coldVanillaBiomes\":false,\"coldModdedBiomes\":true,\"extra\":\"keep\"}";
+        Files.writeString(path, custom);
+        var config = ConfigFile.load(path);
+        assertFalse(config.coldVanillaBiomes);
+        assertTrue(config.coldModdedBiomes);
+        assertEquals(custom, Files.readString(path));
+    }
 }
