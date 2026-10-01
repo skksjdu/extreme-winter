@@ -1,0 +1,19 @@
+{
+  "criteria": {
+    "supplies": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:bowl"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "extreme_winter:warming_stew_pork"
+    ]
+  }
+}

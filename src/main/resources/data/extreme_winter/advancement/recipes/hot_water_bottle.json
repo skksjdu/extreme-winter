@@ -1,0 +1,19 @@
+{
+  "criteria": {
+    "supplies": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:leather"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "extreme_winter:hot_water_bottle"
+    ]
+  }
+}

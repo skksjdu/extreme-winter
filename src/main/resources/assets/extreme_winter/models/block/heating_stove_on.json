@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "extreme_winter:block/stove_front_on",
+    "side": "extreme_winter:block/stove_side",
+    "top": "extreme_winter:block/stove_top"
+  }
+}

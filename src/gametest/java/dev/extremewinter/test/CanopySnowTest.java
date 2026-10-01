@@ -18,8 +18,14 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public final class CanopySnowTest implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
+        String oldWeatherMode=ExtremeWinter.CONFIG.weatherMode;
+        ExtremeWinter.CONFIG.weatherMode="legacy";
+        try {
         int radius = ExtremeWinter.CONFIG.simulationRadiusChunks;
         int samples = ExtremeWinter.CONFIG.samplesPerPass;
+        int interval = ExtremeWinter.CONFIG.snowIntervalTicks;
+        // Short intervals exercise four real passes; release defaults remain 80 ticks.
+        ExtremeWinter.CONFIG.snowIntervalTicks = 20;
         var origin = new BlockPos(8, 110, 8);
         int[] wait = new int[1];
         try (var game = context.worldBuilder().create()) {
@@ -43,7 +49,9 @@ public final class CanopySnowTest implements FabricClientGameTest {
                 world.setBlock(origin, WinterBlocks.SNOW_DRIFT.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 4), 3);
                 require(snow.trySnow(world, origin) && SnowDriftBlock.layers(world.getBlockState(origin)) == 5,
                         "existing deeper snow continues growing");
-                var unlimited = new WinterEnvironment(new dev.extremewinter.config.WinterConfig());
+                var unlimitedConfig = new dev.extremewinter.config.WinterConfig();
+                unlimitedConfig.maxSnowLayers = 0;
+                var unlimited = new WinterEnvironment(unlimitedConfig);
                 for (int i = 0; i < 91; i++) require(unlimited.trySnow(world, origin), "canopy snow keeps growing beyond the old cap");
                 int deep = 0;
                 for (int y = 0; y < 12; y++) deep += SnowDriftBlock.layers(world.getBlockState(origin.above(y)));
@@ -113,8 +121,10 @@ public final class CanopySnowTest implements FabricClientGameTest {
         } finally {
             ExtremeWinter.CONFIG.simulationRadiusChunks = radius;
             ExtremeWinter.CONFIG.samplesPerPass = samples;
+            ExtremeWinter.CONFIG.snowIntervalTicks = interval;
         }
         ExtremeWinter.LOGGER.info("TEST canopy snow, quarter-rate real sampling, uncapped thickness, roof protection and native flakes PASSED");
+        } finally { ExtremeWinter.CONFIG.weatherMode=oldWeatherMode; }
     }
 
     private static int layers(ServerLevel world) {

@@ -37,6 +37,9 @@ public final class ExposureTest implements FabricClientGameTest {
         world.clockManager().setTotalTicks(clock, value);
     }
     @Override public void runTest(ClientGameTestContext context) {
+        String oldWeatherMode=ExtremeWinter.CONFIG.weatherMode;
+        ExtremeWinter.CONFIG.weatherMode="legacy";
+        try {
         var pos = new BlockPos(4, 110, 4);
         var top = pos.above(3);
         try (var game = context.worldBuilder().create()) {
@@ -98,6 +101,7 @@ public final class ExposureTest implements FabricClientGameTest {
             game.getServer().runOnServer(server -> require(TemperatureData.get(server.getPlayerList().getPlayers().getFirst()) == 80, "actual player ticks stay warm under a proper roof"));
         }
         ExtremeWinter.LOGGER.info("TEST 3x3 shelter, lone blocks, beams, roof edges, gaps, canopy, cave, snow and real heat/player ticks PASSED");
+        } finally { ExtremeWinter.CONFIG.weatherMode=oldWeatherMode; }
     }
     private static void require(boolean value, String message) { if (!value) throw new AssertionError(message); }
 }

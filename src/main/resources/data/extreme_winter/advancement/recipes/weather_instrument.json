@@ -1,0 +1,19 @@
+{
+  "criteria": {
+    "supplies": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "extreme_winter:warmth_meter"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "extreme_winter:weather_instrument"
+    ]
+  }
+}

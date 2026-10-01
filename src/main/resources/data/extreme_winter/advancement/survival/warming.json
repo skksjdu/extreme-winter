@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "performed": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:campfire"
+    },
+    "title": {
+      "translate": "advancement.extreme_winter.warming"
+    },
+    "description": {
+      "translate": "advancement.extreme_winter.warming.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "parent": "extreme_winter:survival/roof"
+}

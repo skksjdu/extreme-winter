@@ -21,6 +21,9 @@ public abstract class HeatDropMixin {
             at = @At("RETURN"))
     private static void winter$preserveClock(BlockState state, ServerLevel world, BlockPos pos,
             BlockEntity entity, Entity breaker, ItemInstance tool, CallbackInfoReturnable<List<ItemStack>> result) {
-        for (var stack : result.getReturnValue()) HeatItems.copyToDrop(world, pos, entity, stack);
+        for (var stack : result.getReturnValue()) {
+            HeatItems.copyToDrop(world, pos, entity, stack);
+            if (entity instanceof dev.extremewinter.survival.HeatingStoveBlockEntity stove) stove.copyToDrop(stack);
+        }
     }
 }

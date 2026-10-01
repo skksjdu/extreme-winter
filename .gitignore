@@ -6,3 +6,4 @@ outputs/
 *.iml
 .codex-project-state.json
 logs/
+__pycache__/

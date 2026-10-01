@@ -18,7 +18,11 @@ import net.minecraft.core.BlockPos;
 /** Short fixture durations test the same persisted clocks used by normal gameplay. */
 public final class HeatWeatheringTest implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
+        boolean oldfurnaceWeathering=ExtremeWinter.CONFIG.furnaceWeathering; ExtremeWinter.CONFIG.furnaceWeathering=true;
+        try {
         var config = new WinterConfig();
+        config.furnaceWeathering = true;
+        config.lavaCooling = true;
         config.campfireExposureSeconds = 3;
         config.soulCampfireExposureSeconds = 5;
         config.furnaceExposureSeconds = 3;
@@ -114,6 +118,9 @@ public final class HeatWeatheringTest implements FabricClientGameTest {
                     require(world.getBlockState(camp).getValue(BlockStateProperties.LIT), "manually relit campfire gets a new lifetime");
                     require(ExtremeWinter.CONFIG.lavaExposureSeconds == 3600, "normal lava default is three game days");
                 });
+        }
+        } finally {
+            ExtremeWinter.CONFIG.furnaceWeathering=oldfurnaceWeathering;
         }
         ExtremeWinter.LOGGER.info("TEST heat weathering, furnace fuel preservation and persistent lava cooling PASSED");
     }

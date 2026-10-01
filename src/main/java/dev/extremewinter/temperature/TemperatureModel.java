@@ -13,10 +13,15 @@ public final class TemperatureModel {
 
     public static double step(double value, boolean outdoors, boolean badWeather,
                               boolean night, boolean wet, double heat, double climateLoss, WinterConfig config) {
+        return step(value, outdoors, badWeather, night, wet, heat, climateLoss, 1, config);
+    }
+
+    public static double step(double value, boolean outdoors, boolean badWeather, boolean night, boolean wet,
+                              double heat, double climateLoss, double airMultiplier, WinterConfig config) {
         value = clamp(value, config);
         double loss = (outdoors ? config.baseLoss
                 + (badWeather ? config.weatherPenalty : 0)
-                + (night ? config.nighttimePenalty : 0) : 0)
+                + (night ? config.nighttimePenalty : 0) : 0) * airMultiplier
                 + (wet ? config.waterPenalty : 0);
         loss *= climateLoss;
         double gain = heat * config.recoveryRate;
@@ -32,6 +37,12 @@ public final class TemperatureModel {
                 : config.maxTemperature;
     }
 
+    public static double gearAirMultiplier(double leatherWeight, double liningWeight, boolean stew) {
+        double leather = Double.isFinite(leatherWeight) ? Math.clamp(leatherWeight, 0, 1) : 0;
+        double lining = Double.isFinite(liningWeight) ? Math.clamp(liningWeight, 0, 1) : 0;
+        return (1 - .15 * leather - .35 * lining) * (stew ? .8 : 1);
+    }
+
     /** Health points per damage pulse; one point is half a heart. */
     public static float freezingDamage(double value, WinterConfig config) {
         value = clamp(value, config);
@@ -39,6 +50,10 @@ public final class TemperatureModel {
         double severity = (config.damageThreshold - value) / (config.damageThreshold - config.minTemperature);
         return (float) (config.minimumFreezingDamage
                 + severity * (config.freezingDamage - config.minimumFreezingDamage));
+    }
+
+    public static float allowedColdDamage(double value, float health, WinterConfig config) {
+        return Math.min(freezingDamage(value, config), Math.max(0, health - config.minimumColdHealth));
     }
 
     public static int stage(double value, WinterConfig config) {

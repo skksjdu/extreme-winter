@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "performed": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:wheat"
+    },
+    "title": {
+      "translate": "advancement.extreme_winter.harvest"
+    },
+    "description": {
+      "translate": "advancement.extreme_winter.harvest.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "parent": "extreme_winter:survival/storm"
+}

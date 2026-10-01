@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "performed": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "extreme_winter:heating_stove"
+    },
+    "title": {
+      "translate": "advancement.extreme_winter.home"
+    },
+    "description": {
+      "translate": "advancement.extreme_winter.home.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "parent": "extreme_winter:survival/harvest"
+}

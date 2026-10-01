@@ -2,6 +2,6 @@
   "required": true,
   "package": "dev.extremewinter.mixin",
   "compatibilityLevel": "JAVA_25",
-  "mixins": ["FurnaceWeatheringMixin", "HeatItemBarMixin", "HeatPlacementMixin", "HeatDropMixin"],
+  "mixins": ["FurnaceWeatheringMixin", "HeatItemBarMixin", "HeatPlacementMixin", "HeatDropMixin", "RepairInsulationMixin", "AnvilInsulationMixin", "HeatSourceIndexMixin", "WinterCropGrowthMixin", "WinterHarvestMixin", "BerryHarvestMixin", "WinterRoofProgressMixin", "WinterCraftingProgressMixin"],
   "injectors": {"defaultRequire": 1}
 }

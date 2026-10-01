@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "extreme_winter:block/weather_instrument"
+    }
+  }
+}

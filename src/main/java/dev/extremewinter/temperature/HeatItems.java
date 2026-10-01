@@ -58,6 +58,9 @@ public final class HeatItems {
     }
 
     public static int limit(Item item, WinterConfig config) {
+        if (!config.outdoorHeatExtinguishing) return 0;
+        if ((item == Items.FURNACE || item == Items.BLAST_FURNACE || item == Items.SMOKER) && !config.furnaceWeathering) return 0;
+        if ((item == Items.TORCH || item == Items.SOUL_TORCH) && !config.torchWeathering) return 0;
         if (item == Items.CAMPFIRE) return config.campfireExposureSeconds;
         if (item == Items.SOUL_CAMPFIRE) return config.soulCampfireExposureSeconds;
         if (item == Items.FURNACE) return config.furnaceExposureSeconds;
@@ -94,7 +97,15 @@ public final class HeatItems {
     }
 
     public static void onPlaced(Level world, BlockPos pos, ItemStack stack) {
-        if (!(world instanceof ServerLevel) || !supported(stack)) return;
+        if (!(world instanceof ServerLevel)) return;
+        if (!supported(stack)) {
+            var disabled = world.getBlockEntity(pos);
+            if (disabled instanceof AbstractFurnaceBlockEntity) {
+                disabled.setAttached(HeatWeathering.BLOCKED, false);
+                writeExposure(disabled, 0);
+            }
+            return;
+        }
         if (isTorch(stack)) {
             TorchCoolingState.get((ServerLevel) world).track(pos, 0);
             return;
@@ -115,7 +126,8 @@ public final class HeatItems {
     public static void recover(ItemStack stack, WinterConfig config) {
         int limit = limit(stack.getItem(), config);
         int seconds = elapsed(stack);
-        if (limit == 0 || seconds == 0) return;
+        if (limit == 0) { stack.remove(EXPOSURE); return; }
+        if (seconds == 0) return;
         int recovered = recoveryPerSecond(stack, config);
         int remaining = Math.max(0, seconds - recovered);
         if (remaining == 0) stack.remove(EXPOSURE);
@@ -132,7 +144,7 @@ public final class HeatItems {
     }
 
     public static boolean canPlaceTorch(ItemStack stack, Player player) {
-        if (!isTorch(stack) || elapsed(stack) == 0) return true;
+        if (!isTorch(stack) || !supported(stack) || elapsed(stack) == 0) return true;
         if (player != null) player.sendOverlayMessage(Component.translatable("message.extreme_winter.torch_cold",
                 cooldownSeconds(stack, ExtremeWinter.CONFIG)).withStyle(ChatFormatting.YELLOW));
         return false;

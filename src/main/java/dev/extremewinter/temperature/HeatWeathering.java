@@ -64,12 +64,12 @@ public final class HeatWeathering {
             var pos = positions.get(Math.floorMod(lavaChunkCursor++, positions.size()));
             var chunk = world.getChunkSource().getChunkNow(pos.x(), pos.z());
             torches.discoverChunk(world, chunk);
-            for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+            if (config.lavaCooling) for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
                 int y = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
                 discoverLava(world, new BlockPos(pos.getMinBlockX() + x, y, pos.getMinBlockZ() + z));
             }
         }
-        advanceLava(world);
+        if (config.lavaCooling) advanceLava(world);
         torches.advance(world, chunks);
     }
 
@@ -111,7 +111,7 @@ public final class HeatWeathering {
 
     public static boolean furnaceBlocked(ServerLevel world, BlockPos pos, AbstractFurnaceBlockEntity furnace) {
         if (!furnace.getAttachedOrCreate(BLOCKED)) return false;
-        if (ExtremeWinter.CONFIG.outdoorHeatExtinguishing && world.dimension().equals(Level.OVERWORLD)
+        if (ExtremeWinter.CONFIG.outdoorHeatExtinguishing && ExtremeWinter.CONFIG.furnaceWeathering && world.dimension().equals(Level.OVERWORLD)
                 && Exposure.outdoors(world, pos.above())) return true;
         furnace.setAttached(BLOCKED, false);
         setExposure(furnace, 0);
@@ -124,7 +124,7 @@ public final class HeatWeathering {
     }
 
     public void discoverLava(ServerLevel world, BlockPos pos) {
-        if (!world.hasChunkAt(pos)) return;
+        if (!config.outdoorHeatExtinguishing || !config.lavaCooling || !world.hasChunkAt(pos)) return;
         var state = world.getBlockState(pos);
         if (!state.is(Blocks.LAVA) || !state.getFluidState().isSource()
                 || !Exposure.outdoors(world, pos.above())) return;
@@ -133,6 +133,7 @@ public final class HeatWeathering {
     }
 
     public void advanceLava(ServerLevel world) {
+        if (!config.outdoorHeatExtinguishing || !config.lavaCooling) return;
         var cooling = LavaCoolingState.get(world);
         var entries = cooling.seconds.entrySet().iterator();
         while (entries.hasNext()) {

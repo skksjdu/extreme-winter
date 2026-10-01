@@ -1,0 +1,19 @@
+{
+  "criteria": {
+    "supplies": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:book"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "extreme_winter:survival_manual"
+    ]
+  }
+}

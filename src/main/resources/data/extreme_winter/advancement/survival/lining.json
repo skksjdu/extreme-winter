@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "performed": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "extreme_winter:thermal_lining"
+    },
+    "title": {
+      "translate": "advancement.extreme_winter.lining"
+    },
+    "description": {
+      "translate": "advancement.extreme_winter.lining.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "parent": "extreme_winter:survival/warming"
+}

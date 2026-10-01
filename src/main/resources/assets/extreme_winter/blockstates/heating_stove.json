@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,lit=false": {
+      "model": "extreme_winter:block/heating_stove",
+      "y": 0
+    },
+    "facing=north,lit=true": {
+      "model": "extreme_winter:block/heating_stove_on",
+      "y": 0
+    },
+    "facing=east,lit=false": {
+      "model": "extreme_winter:block/heating_stove",
+      "y": 90
+    },
+    "facing=east,lit=true": {
+      "model": "extreme_winter:block/heating_stove_on",
+      "y": 90
+    },
+    "facing=south,lit=false": {
+      "model": "extreme_winter:block/heating_stove",
+      "y": 180
+    },
+    "facing=south,lit=true": {
+      "model": "extreme_winter:block/heating_stove_on",
+      "y": 180
+    },
+    "facing=west,lit=false": {
+      "model": "extreme_winter:block/heating_stove",
+      "y": 270
+    },
+    "facing=west,lit=true": {
+      "model": "extreme_winter:block/heating_stove_on",
+      "y": 270
+    }
+  }
+}

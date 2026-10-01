@@ -15,6 +15,10 @@ import net.minecraft.network.chat.Component;
 
 public final class HeatTooltipTest implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
+        boolean oldtorchWeathering=ExtremeWinter.CONFIG.torchWeathering; ExtremeWinter.CONFIG.torchWeathering=true;
+        boolean oldfurnaceWeathering=ExtremeWinter.CONFIG.furnaceWeathering; ExtremeWinter.CONFIG.furnaceWeathering=true;
+        boolean oldlavaCooling=ExtremeWinter.CONFIG.lavaCooling; ExtremeWinter.CONFIG.lavaCooling=true;
+        try {
         String profile = System.getProperty("winter.test.profile", "A");
         try (var game = context.worldBuilder().create()) {
             game.getClientLevel().waitForChunksRender();
@@ -82,6 +86,11 @@ public final class HeatTooltipTest implements FabricClientGameTest {
             context.takeScreenshot("torch-tooltip-zh-26.0.1-" + profile);
             context.setScreen(() -> null);
             language(context, "en_us");
+        }
+        } finally {
+            ExtremeWinter.CONFIG.torchWeathering=oldtorchWeathering;
+            ExtremeWinter.CONFIG.furnaceWeathering=oldfurnaceWeathering;
+            ExtremeWinter.CONFIG.lavaCooling=oldlavaCooling;
         }
         ExtremeWinter.LOGGER.info("TEST used-only bars, heat tooltips, Chinese/English hover and ordinary item preservation PASSED");
     }

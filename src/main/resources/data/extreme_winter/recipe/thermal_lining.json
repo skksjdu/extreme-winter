@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "extreme_winter:thermal_lining"
+  }
+}

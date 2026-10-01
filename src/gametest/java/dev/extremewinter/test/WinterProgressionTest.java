@@ -36,6 +36,11 @@ public final class WinterProgressionTest implements FabricClientGameTest {
     private static final BlockPos SOUL = new BlockPos(18, 101, 3);
 
     @Override public void runTest(ClientGameTestContext context) {
+        String oldWeatherMode=ExtremeWinter.CONFIG.weatherMode;
+        ExtremeWinter.CONFIG.weatherMode="legacy";
+        try {
+        boolean oldtorchWeathering=ExtremeWinter.CONFIG.torchWeathering; ExtremeWinter.CONFIG.torchWeathering=true;
+        try {
         TestWorldSave save;
         int[] clock = new int[1];
         double[] earlyLoss = new double[1];
@@ -151,6 +156,7 @@ public final class WinterProgressionTest implements FabricClientGameTest {
                 double weak = heat.strength(player);
                 require(weak > 0 && weak < single, "placed torch provides weaker warmth than a campfire");
                 world.setBlock(first, Blocks.AIR.defaultBlockState(), 3);
+                dev.extremewinter.temperature.WinterWorldState.get(world).setElapsedTicks(60 * 1200);
                 ExposureTest.time(world, 2 * 24000 + 6000);
                 TemperatureData.set(player, 80);
             });
@@ -159,6 +165,7 @@ public final class WinterProgressionTest implements FabricClientGameTest {
                 var player = server.getPlayerList().getPlayers().getFirst();
                 earlyLoss[0] = 80 - TemperatureData.get(player);
                 require(earlyLoss[0] > 0, "early calendar stage loses heat outdoors");
+                dev.extremewinter.temperature.WinterWorldState.get(server.overworld()).setElapsedTicks(120 * 1200);
                 ExposureTest.time(server.overworld(), 3 * 24000 + 6000);
                 TemperatureData.set(player, 80);
             });
@@ -167,8 +174,8 @@ public final class WinterProgressionTest implements FabricClientGameTest {
                 var world = server.overworld();
                 var player = server.getPlayerList().getPlayers().getFirst();
                 double lateLoss = 80 - TemperatureData.get(player);
-                require(Math.abs(lateLoss / earlyLoss[0] - 1.1) < 0.001,
-                        "third completed game day increases real player heat loss by ten percent");
+                require(Math.abs(lateLoss / earlyLoss[0] - 1.25) < 0.001,
+                        "running-clock stage changes real player loss independently of calendar time");
                 world.setBlock(TORCH, Blocks.TORCH.defaultBlockState(), 3);
                 ExposureTest.roof(world, TORCH.above(3), Blocks.GLASS.defaultBlockState());
                 TorchCoolingState.get(world).track(TORCH, 12);
@@ -182,8 +189,8 @@ public final class WinterProgressionTest implements FabricClientGameTest {
                 var world = server.overworld();
                 require(TorchCoolingState.get(world).elapsed(TORCH) == 12, "placed torch clock survives save/reopen");
                 require(HeatItems.elapsed(world.getBlockEntity(CAMP)) == 30, "covered campfire clock survives save/reopen");
-                require(WinterProgression.stage(world.getOverworldClockTime(), ExtremeWinter.CONFIG) == 1,
-                        "winter stage follows saved calendar time");
+                require(WinterProgression.stage(dev.extremewinter.temperature.WinterWorldState.get(world).elapsedTicks(), ExtremeWinter.CONFIG) == 2,
+                        "winter stage follows saved running ticks");
                 ExposureTest.roof(world, CAMP.above(3), Blocks.AIR.defaultBlockState());
             });
             context.waitTicks(40);
@@ -191,7 +198,11 @@ public final class WinterProgressionTest implements FabricClientGameTest {
                     HeatItems.elapsed(server.overworld().getBlockEntity(CAMP)) == 32,
                     "reopened campfire resumes consumption when uncovered"));
         }
+        } finally {
+            ExtremeWinter.CONFIG.torchWeathering=oldtorchWeathering;
+        }
         ExtremeWinter.LOGGER.info("TEST torch fall/cooldown, stacked warmth, winter stages and creative/survival campfire clocks PASSED");
+        } finally { ExtremeWinter.CONFIG.weatherMode=oldWeatherMode; }
     }
 
     private static boolean place(net.minecraft.server.level.ServerPlayer player, ItemStack stack, BlockPos pos) {

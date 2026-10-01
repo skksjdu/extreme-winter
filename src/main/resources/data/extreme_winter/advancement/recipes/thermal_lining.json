@@ -1,0 +1,19 @@
+{
+  "criteria": {
+    "supplies": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#minecraft:wool"
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "extreme_winter:thermal_lining"
+    ]
+  }
+}

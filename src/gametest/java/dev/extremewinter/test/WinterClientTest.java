@@ -26,6 +26,9 @@ import dev.extremewinter.temperature.TemperatureData;
 public final class WinterClientTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
+        String oldWeatherMode=ExtremeWinter.CONFIG.weatherMode;
+        ExtremeWinter.CONFIG.weatherMode="legacy";
+        try {
         TestWorldSave save;
         float[] mildDamage = new float[1];
         try (var game = context.worldBuilder().create()) {
@@ -52,11 +55,13 @@ public final class WinterClientTest implements FabricClientGameTest {
                 require(total == snowConfig.maxSnowLayers && total > 8,
                         "snow stacks across blocks and stops at configured column cap");
                 for (int y = 0; y < 10; y++) world.setBlock(snow.above(y), Blocks.AIR.defaultBlockState(), 3);
-                var unlimited = new WinterEnvironment(new WinterConfig());
+                var unlimitedConfig = new WinterConfig();
+                unlimitedConfig.maxSnowLayers = 0;
+                var unlimited = new WinterEnvironment(unlimitedConfig);
                 for (int i = 0; i < 96; i++) require(unlimited.trySnow(world, snow), "uncapped snow keeps growing past 64 layers");
                 total = 0;
                 for (int y = 0; y < 12; y++) total += SnowDriftBlock.layers(world.getBlockState(snow.above(y)));
-                require(total == 96, "unlimited default preserves every layer across twelve blocks");
+                require(total == 96, "unlimited opt-in preserves every layer across twelve blocks");
                 for (int y = 0; y < 12; y++) world.setBlock(snow.above(y), Blocks.AIR.defaultBlockState(), 3);
                 var high = new BlockPos(27, world.getMaxY(), 0);
                 world.setBlock(high.below(), Blocks.STONE.defaultBlockState(), 3);
@@ -107,6 +112,7 @@ public final class WinterClientTest implements FabricClientGameTest {
                 player.teleportTo(world, 0.5, 100, 0.5, Set.of(), 0, 0, true);
                 ExposureTest.time(world, 6000);
                 ExposureTest.weather(world, 0, 6000, true, false);
+                dev.extremewinter.temperature.WinterWorldState.get(world).setElapsedTicks(120 * 1200);
                 TemperatureData.set(player, 80);
                 require(Exposure.outdoors(world, player.blockPosition()), "open sky is exposed");
             });
@@ -157,23 +163,27 @@ public final class WinterClientTest implements FabricClientGameTest {
             game.getServer().runOnServer(server -> {
                 var player = server.getPlayerList().getPlayers().getFirst();
                 require(player.hasEffect(MobEffects.SLOWNESS), "severe hypothermia slows movement");
-                require(player.hasEffect(MobEffects.MINING_FATIGUE), "severe hypothermia slows mining");
+                require(!player.hasEffect(MobEffects.MINING_FATIGUE), "beginner hypothermia keeps mining available");
                 for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) {
                     server.overworld().setBlock(new BlockPos(x, 103, z), Blocks.AIR.defaultBlockState(), 3);
                 }
                 player.setHealth(20);
                 player.getFoodData().setFoodLevel(16);
-                TemperatureData.set(player, 35);
+                TemperatureData.set(player, 24);
+                player.setAttached(TemperatureData.PROTECTION, 0);
+                player.setAttached(TemperatureData.LOW_TICKS, 1200);
+                player.setAttached(TemperatureData.DAMAGE_TICKS, 180);
             });
             context.waitTicks(100);
             game.getServer().runOnServer(server -> {
                 var player = server.getPlayerList().getPlayers().getFirst();
                 mildDamage[0] = 20 - player.getHealth();
-                require(mildDamage[0] > 0 && mildDamage[0] < 5, "temperature below 40 causes gradual damage");
+                require(mildDamage[0] > 0 && mildDamage[0] < 5, "temperature below 25 causes gradual damage after the warning");
                 player.setHealth(20);
+                player.setAttached(TemperatureData.DAMAGE_TICKS, 180);
                 TemperatureData.set(player, 0);
             });
-            context.waitTicks(120);
+            context.waitTicks(220);
             game.getServer().runOnServer(server -> {
                 var player = server.getPlayerList().getPlayers().getFirst();
                 require(player.getHealth() < 20, "minimum temperature causes periodic freezing damage");
@@ -240,6 +250,8 @@ public final class WinterClientTest implements FabricClientGameTest {
                     && TemperatureHud.current().value() == 80, "HUD resynchronizes after rejoin"));
         }
         context.runOnClient(client -> require(TemperatureHud.current() == null, "HUD resets on disconnect"));
+        } finally { ExtremeWinter.CONFIG.weatherMode=oldWeatherMode; }
+        ExtremeWinter.LOGGER.info("TEST winter client snow, temperature, underwater HUD and saved starter receipt PASSED");
     }
 
     private static void require(boolean condition, String description) {

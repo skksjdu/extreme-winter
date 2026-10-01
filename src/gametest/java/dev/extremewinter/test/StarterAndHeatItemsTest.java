@@ -29,6 +29,8 @@ import net.minecraft.world.level.GameType;
 
 public final class StarterAndHeatItemsTest implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext context) {
+        boolean oldfurnaceWeathering=ExtremeWinter.CONFIG.furnaceWeathering; ExtremeWinter.CONFIG.furnaceWeathering=true;
+        try {
         // Two fresh saves in one Minecraft process, followed by a reopen of the first save.
         TestWorldSave first = null;
         for (int index = 0; index < 2; index++) {
@@ -114,7 +116,7 @@ public final class StarterAndHeatItemsTest implements FabricClientGameTest {
             game.getServer().runOnServer(server -> {
                 var player = server.getPlayerList().getPlayers().getFirst();
                 int elapsed = HeatItems.elapsed(player.getInventory().getItem(0));
-                require(elapsed == 92, "two real seconds of backpack recovery restore eight seconds: " + elapsed);
+                require(elapsed == 60, "two real seconds recover forty of six hundred exposure seconds: " + elapsed);
                 for (var item : new net.minecraft.world.item.Item[]{Items.CAMPFIRE, Items.SOUL_CAMPFIRE,
                         Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER}) {
                     var stack = new ItemStack(item);
@@ -129,7 +131,7 @@ public final class StarterAndHeatItemsTest implements FabricClientGameTest {
                 player.getInventory().clearContent();
                 for (int slot = 0; slot < 4; slot++) {
                     var stack = new ItemStack(Items.CAMPFIRE);
-                    int fixtureElapsed = new int[]{0, 60, 108, 120}[slot];
+                    int fixtureElapsed = new int[]{0, 300, 540, 600}[slot];
                     stack.set(HeatItems.EXPOSURE, fixtureElapsed);
                     player.getInventory().setItem(slot, stack);
                 }
@@ -165,6 +167,9 @@ public final class StarterAndHeatItemsTest implements FabricClientGameTest {
                 require(stored.is(Items.CAMPFIRE) && HeatItems.elapsed(stored) > 0 && HeatItems.elapsed(stored) <= 80,
                         "partially charged inventory item survives save/reopen without becoming full");
             });
+        }
+        } finally {
+            ExtremeWinter.CONFIG.furnaceWeathering=oldfurnaceWeathering;
         }
         ExtremeWinter.LOGGER.info("TEST vanilla spawn, two new saves, one starter campfire, portable clocks and inventory bars PASSED");
     }

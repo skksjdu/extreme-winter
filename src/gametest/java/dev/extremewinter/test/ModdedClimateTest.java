@@ -27,10 +27,12 @@ public final class ModdedClimateTest implements FabricClientGameTest {
         require(ExtremeWinter.CONFIG.coldModdedBiomes == enabled, "startup opt-in matches profile");
         int radius = ExtremeWinter.CONFIG.simulationRadiusChunks;
         int samples = ExtremeWinter.CONFIG.samplesPerPass;
+        String weatherMode = ExtremeWinter.CONFIG.weatherMode;
         TestWorldSave save;
         try {
             ExtremeWinter.CONFIG.simulationRadiusChunks = 0;
             ExtremeWinter.CONFIG.samplesPerPass = 64;
+            ExtremeWinter.CONFIG.weatherMode = "scheduled";
             try (var game = context.worldBuilder().setUseConsistentSettings(false)
                     .adjustSettings(creator -> creator.setSeed("20260930")).create()) {
                 save = game.getWorldSave();
@@ -62,6 +64,8 @@ public final class ModdedClimateTest implements FabricClientGameTest {
                     for (int x = 11; x <= 13; x++) for (int z = 9; z <= 11; z++)
                         world.setBlock(new BlockPos(x, 84, z), Blocks.STONE.defaultBlockState(), 3);
                     world.setBlock(WATER, Blocks.WATER.defaultBlockState(), 3);
+                    for(int x=3;x<=6;x++) for(int z=8;z<=11;z++)
+                        world.setBlock(new BlockPos(x,79,z),Blocks.WATER.defaultBlockState(),3);
                     server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
                             "fillbiome 0 60 0 15 127 15 terralith:yellowstone");
                     require(world.getBiome(PROBE).is(ResourceKey.create(Registries.BIOME,
@@ -69,6 +73,9 @@ public final class ModdedClimateTest implements FabricClientGameTest {
                             "fixture uses the user's exact warm Terralith biome");
                     ExposureTest.time(world, 6000);
                     ExposureTest.weather(world, 0, 12000, true, false);
+                    dev.extremewinter.temperature.WinterWorldState.get(world).setElapsedTicks(90*1200);
+                    var controller=new dev.extremewinter.environment.WinterWeatherController(ExtremeWinter.CONFIG);
+                    controller.update(world);controller.applyVanilla(world);
                     var player = server.getPlayerList().getPlayers().getFirst();
                     player.setGameMode(GameType.CREATIVE);
                     player.teleportTo(world, 8.5, 80, 2.5, Set.of(), 0, 12, true);
@@ -76,21 +83,43 @@ public final class ModdedClimateTest implements FabricClientGameTest {
                             enabled, yellowstone.getBaseTemperature(), yellowstone.getPrecipitationAt(PROBE, world.getSeaLevel()));
                 });
                 game.getClientLevel().waitForChunksRender();
-                context.waitTicks(200);
+                context.waitTicks(400);
                 game.getServer().runOnServer(server -> {
                     var world = server.overworld();
                     int snow = snowLayers(world);
                     require(enabled ? snow > 0 : snow == 0, "real ticks accumulate snow only in cold climate: " + snow);
-                    require(world.getBlockState(WATER).is(enabled ? Blocks.ICE : Blocks.WATER),
-                            "exposed water freezes only in cold climate");
+                    int sourceIce=0;
+                    for(int x=3;x<=6;x++)for(int z=8;z<=11;z++)
+                        if(world.getBlockState(new BlockPos(x,79,z)).is(Blocks.ICE))sourceIce++;
+                    require(enabled ? sourceIce>0 : sourceIce==0,"exposed source water freezes only in cold climate: "+sourceIce);
                     require(world.getBlockState(COVERED).isAir(), "solid roof protects the floor from snow");
                     ExtremeWinter.LOGGER.info("TEST Terralith real ticks: optIn={}, snowLayers={}, water={}",
                             enabled, snow, world.getBlockState(WATER));
+                    ExtremeWinter.LOGGER.info("TEST Terralith scheduled blizzard: sourceIce={}, extraSnowFactor={}, extraFreezeFactor={}",sourceIce,
+                            dev.extremewinter.environment.WinterWeatherController.snowFactor(world,ExtremeWinter.CONFIG),
+                            dev.extremewinter.environment.WinterWeatherController.freezingFactor(world,ExtremeWinter.CONFIG));
+                });
+                context.runOnClient(client->{
+                    dev.extremewinter.client.hud.TemperatureHud.updateWinter(new dev.extremewinter.network.WinterStatusPayload(1,3,0,180,90*1200));
+                    int particles=dev.extremewinter.client.SnowstormEffects.emit(client.level,PROBE,net.minecraft.util.RandomSource.create(42));
+                    require(enabled?particles>0:particles==0,"extra storm snowflakes follow actual cold biome opt-in");
                 });
                 context.runOnClient(client -> require(client.level.getBiome(PROBE).value()
                         .getPrecipitationAt(PROBE, client.level.getSeaLevel())
                         == (enabled ? Biome.Precipitation.SNOW : Biome.Precipitation.RAIN),
                         "client registry renders snow instead of rain"));
+                context.runOnClient(client -> {
+                    try {
+                        Class<?> api = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+                        Object iris = api.getMethod("getInstance").invoke(null);
+                        require((boolean) api.getMethod("isShaderPackInUse").invoke(iris), "Eclipse shader is actually active");
+                        String pack = (String) Class.forName("net.irisshaders.iris.Iris").getMethod("getCurrentPackName").invoke(null);
+                        require(pack.equals("Eclipse-Shader-Unstable.zip"), "the active shader is the supplied Eclipse pack: " + pack);
+                        ExtremeWinter.LOGGER.info("TEST Terralith Iris shader active=true pack={} optIn={}", pack, enabled);
+                    } catch (ReflectiveOperationException exception) {
+                        throw new AssertionError("Could not verify actual Eclipse shader activation", exception);
+                    }
+                });
                 context.takeScreenshot("terralith-climate-" + (enabled ? "snow" : "rain"));
             }
             try (var game = save.open()) {
@@ -106,6 +135,7 @@ public final class ModdedClimateTest implements FabricClientGameTest {
         } finally {
             ExtremeWinter.CONFIG.simulationRadiusChunks = radius;
             ExtremeWinter.CONFIG.samplesPerPass = samples;
+            ExtremeWinter.CONFIG.weatherMode = weatherMode;
         }
         ExtremeWinter.LOGGER.info("TEST Terralith climate optIn={}: client precipitation, real snow/ice ticks, roof, dimensions and reload PASSED", enabled);
     }

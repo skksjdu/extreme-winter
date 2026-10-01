@@ -20,6 +20,9 @@ foreach ($profile in $Profiles) {
     $enabled = if ($profile -eq 'D') { 'true' } else { 'false' }
     @("enableShaders=$enabled", "shaderPack=$shaderName", 'maxShadowRenderDistance=32') | Set-Content (Join-Path $config 'iris.properties') -Encoding ascii
     $log = Join-Path $root ("work/test-$modVersion-$profile.log")
+    if (Test-Path -LiteralPath $log) {
+        Copy-Item -LiteralPath $log -Destination ($log + '.' + [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss-fff') + '.previous')
+    }
     Write-Output ('Starting singleplayer profile ' + $profile)
     & (Join-Path $PSScriptRoot 'Build.ps1') build runProductionGameTest ('-PcompatProfile=' + $profile) > $log 2>&1
     if ($LASTEXITCODE -ne 0) {

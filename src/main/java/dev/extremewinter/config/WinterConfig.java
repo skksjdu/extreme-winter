@@ -2,36 +2,42 @@ package dev.extremewinter.config;
 
 /** Rates are temperature units per second (20 game ticks). Loaded once at game startup. */
 public final class WinterConfig {
-    public int configVersion = 2;
+    public int configVersion = 3;
+    public String weatherMode = "scheduled";
+    public boolean blizzardParticles = true;
+    public boolean blizzardWind = true;
+    public boolean blizzardHaze = true;
+    public boolean blizzardFrost = true;
+    public boolean structureSupplies = true;
     public double minTemperature = 0;
     public double maxTemperature = 100;
     public double coldThreshold = 70;
-    public double slownessThreshold = 40;
-    public double fatigueThreshold = 20;
-    public double baseLoss = 0.32;
-    public double weatherPenalty = 0.18;
-    public double nighttimePenalty = 0.18;
-    public double waterPenalty = 1.4;
+    public double slownessThreshold = 25;
+    public double fatigueThreshold = 10;
+    public double baseLoss = 0.04;
+    public double weatherPenalty = 0.015;
+    public double nighttimePenalty = 0.01;
+    public double waterPenalty = 0.20;
     public double recoveryRate = 1.2;
-    public double shelteredRecoveryRate = 0.03;
+    public double shelteredRecoveryRate = 0.30;
     public int heatSourceRadius = 4;
-    public int damageIntervalSeconds = 4;
-    public double damageThreshold = 40;
-    public float minimumFreezingDamage = 1;
-    public float freezingDamage = 6;
-    public int snowIntervalTicks = 20;
-    public int freezeIntervalTicks = 40;
+    public int damageIntervalSeconds = 10;
+    public double damageThreshold = 25;
+    public float minimumFreezingDamage = 0.5f;
+    public float freezingDamage = 1;
+    public int snowIntervalTicks = 80;
+    public int freezeIntervalTicks = 200;
     public int samplesPerPass = 16;
     public int simulationRadiusChunks = 4;
-    public int maxSnowLayers = 0; // Zero leaves thickness limited only by physical space/world height.
+    public int maxSnowLayers = 16; // Zero opts into unlimited weather accumulation.
     public boolean persistentWeather = true;
     public boolean coldVanillaBiomes = true;
     public boolean coldModdedBiomes = false;
     public boolean snowAccumulation = true;
     public boolean waterFreezing = true;
     public boolean outdoorHeatExtinguishing = true;
-    public int campfireExposureSeconds = 120;
-    public int soulCampfireExposureSeconds = 180;
+    public int campfireExposureSeconds = 600;
+    public int soulCampfireExposureSeconds = 900;
     public int furnaceExposureSeconds = 240;
     public int blastFurnaceExposureSeconds = 300;
     public int smokerExposureSeconds = 150;
@@ -45,7 +51,19 @@ public final class WinterConfig {
     public double winterStageLossIncrease = 0.1;
     public int maxWinterStages = 10;
 
+    public float minimumColdHealth = 6;
+    public int damageWarningSeconds = 60;
+    public int respawnProtectionSeconds = 180;
+    public boolean miningFatigue = false;
+    public boolean torchWeathering = false;
+    public boolean furnaceWeathering = false;
+    public boolean lavaCooling = false;
+
     public void validate() {
+        if (!java.util.Set.of("scheduled", "legacy", "vanilla").contains(weatherMode)) throw new IllegalArgumentException("weatherMode must be scheduled, legacy or vanilla");
+        finiteRange("minimumColdHealth", minimumColdHealth, 0, 20);
+        finiteRange("damageWarningSeconds", damageWarningSeconds, 0, 3600);
+        finiteRange("respawnProtectionSeconds", respawnProtectionSeconds, 0, 3600);
         finiteRange("heatRecoverySeconds", heatRecoverySeconds, 1, 3600);
         finiteRange("torchExposureSeconds", torchExposureSeconds, 1, 604800);
         finiteRange("torchRecoverySeconds", torchRecoverySeconds, 1, 3600);

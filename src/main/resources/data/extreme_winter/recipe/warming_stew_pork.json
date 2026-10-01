@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:baked_potato",
+    "minecraft:cooked_porkchop",
+    "minecraft:carrot"
+  ],
+  "result": {
+    "id": "extreme_winter:warming_stew"
+  }
+}

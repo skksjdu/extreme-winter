@@ -22,26 +22,19 @@ public final class WinterEnvironment {
 
     public WinterEnvironment(WinterConfig config) { this.config = config; }
 
-    public void onLoad(ServerLevel world) {
-        if (world.dimension().equals(Level.OVERWORLD) && config.persistentWeather) {
-            var weather = world.getWeatherData();
-            weather.setClearWeatherTime(0);
-            weather.setRainTime(12000);
-            weather.setThunderTime(12000);
-            weather.setRaining(true);
-            weather.setThundering(false);
-        }
-    }
-
     public void tick(ServerLevel world) {
         if (!world.dimension().equals(Level.OVERWORLD)) return;
-        if (config.persistentWeather && world.getGameTime() % 1200 == 0) onLoad(world);
-        boolean snow = config.snowAccumulation && world.getGameTime() % config.snowIntervalTicks == 0;
-        boolean freeze = config.waterFreezing && world.getGameTime() % config.freezeIntervalTicks == 0;
-        if (snow || freeze) sample(world, snow, freeze);
+
+        double snowFactor = WinterWeatherController.snowFactor(world, config);
+        double freezeFactor = WinterWeatherController.freezingFactor(world, config);
+        int snowInterval = snowFactor > 0 ? Math.max(1, (int) (config.snowIntervalTicks / snowFactor)) : 0;
+        int freezeInterval = freezeFactor > 0 ? Math.max(1, (int) (config.freezeIntervalTicks / freezeFactor)) : 0;
+        boolean snow = config.snowAccumulation && snowInterval > 0 && world.getGameTime() % snowInterval == 0;
+        boolean freeze = config.waterFreezing && freezeInterval > 0 && world.getGameTime() % freezeInterval == 0;
+        if (snow || freeze) sample(world, snow, freeze, snowInterval);
     }
 
-    private void sample(ServerLevel world, boolean snow, boolean freeze) {
+    private void sample(ServerLevel world, boolean snow, boolean freeze, int snowInterval) {
         var players = world.players();
         if (players.isEmpty()) return;
         int radius = config.simulationRadiusChunks;
@@ -59,7 +52,7 @@ public final class WinterEnvironment {
             if (SnowDriftBlock.layers(world.getBlockState(surface.below())) > 0) surface = surface.below();
             if (freeze) tryFreeze(world, surface.below());
             if (snow) trySnow(world, surface);
-            if (snow && world.getGameTime() % ((long) config.snowIntervalTicks * CanopySnow.INTERVAL_MULTIPLIER) == 0) {
+            if (snow && world.getGameTime() % ((long) snowInterval * CanopySnow.INTERVAL_MULTIPLIER) == 0) {
                 var floor = CanopySnow.floorBelowLeaves(world, surface.getX(), surface.getZ());
                 if (floor != null && floor.getY() < surface.getY()) trySnow(world, floor);
             }

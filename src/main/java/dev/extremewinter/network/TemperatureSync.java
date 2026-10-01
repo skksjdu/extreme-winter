@@ -17,9 +17,15 @@ public final class TemperatureSync {
     }
 
     public static void send(ServerPlayer player, WinterConfig config) {
+        send(player, config, 0, 0);
+    }
+
+    public static void send(ServerPlayer player, WinterConfig config, int trend, int reasons) {
         if (!ServerPlayNetworking.canSend(player, TemperaturePayload.ID)) return;
         double value = TemperatureModel.clamp(TemperatureData.get(player), config);
         ServerPlayNetworking.send(player, new TemperaturePayload(value, config.minTemperature,
-                config.maxTemperature, TemperatureModel.stage(value, config)));
+                config.maxTemperature, TemperatureModel.stage(value, config), trend, reasons,
+                value < config.damageThreshold ? Math.max(0, config.damageWarningSeconds - player.getAttachedOrCreate(TemperatureData.LOW_TICKS) / 20) : -1,
+                (player.getAttachedOrCreate(TemperatureData.PROTECTION) + 19) / 20));
     }
 }

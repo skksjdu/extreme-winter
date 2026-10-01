@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "extreme_winter:warmth_meter",
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:redstone",
+    "minecraft:redstone",
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "#minecraft:planks"
+  ],
+  "result": {
+    "id": "extreme_winter:weather_instrument"
+  }
+}

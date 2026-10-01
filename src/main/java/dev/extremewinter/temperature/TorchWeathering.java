@@ -18,7 +18,7 @@ public final class TorchWeathering {
     public TorchWeathering(WinterConfig config) { this.config = config; }
 
     public void discoverChunk(ServerLevel world, LevelChunk chunk) {
-        if (!config.outdoorHeatExtinguishing || !world.dimension().equals(Level.OVERWORLD)) return;
+        if (!config.outdoorHeatExtinguishing || !config.torchWeathering || !world.dimension().equals(Level.OVERWORLD)) return;
         var cooling = TorchCoolingState.get(world);
         var sections = chunk.getSections();
         for (int sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
@@ -34,6 +34,7 @@ public final class TorchWeathering {
     }
 
     public void advance(ServerLevel world, Set<ChunkPos> loadedChunks) {
+        if (!config.outdoorHeatExtinguishing || !config.torchWeathering) return;
         var cooling = TorchCoolingState.get(world);
         for (var chunk : loadedChunks) for (var key : cooling.inChunk(chunk)) {
             var pos = BlockPos.of(Long.parseLong(key));

@@ -1,17 +1,18 @@
 package dev.extremewinter.temperature;
-
 import dev.extremewinter.config.WinterConfig;
 
-/** Calendar time follows vanilla game days, including nights skipped by sleeping. */
+/** Running ticks only; vanilla calendar commands and sleep cannot advance winter. */
 public final class WinterProgression {
+    public static final long MINUTE = 1200;
+    private static final int[] BOUNDARIES = {60, 120, 180, 270};
+    private static final double[] MULTIPLIERS = {.65, .80, 1, 1.10, 1.25};
     private WinterProgression() { }
-
-    public static int stage(long timeOfDay, WinterConfig config) {
-        long days = Math.max(0, timeOfDay) / 24000;
-        return (int) Math.min(config.maxWinterStages, days / config.winterStageDays);
+    public static int stage(long elapsedTicks, WinterConfig config) {
+        int stage = 0;
+        while (stage < BOUNDARIES.length && elapsedTicks >= BOUNDARIES[stage] * MINUTE) stage++;
+        return stage;
     }
-
-    public static double lossMultiplier(long timeOfDay, WinterConfig config) {
-        return 1 + stage(timeOfDay, config) * config.winterStageLossIncrease;
+    public static double lossMultiplier(long elapsedTicks, WinterConfig config) {
+        return MULTIPLIERS[stage(elapsedTicks, config)];
     }
 }

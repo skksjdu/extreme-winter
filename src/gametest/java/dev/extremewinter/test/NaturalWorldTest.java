@@ -54,6 +54,9 @@ public final class NaturalWorldTest implements FabricClientGameTest {
                         Object iris = api.getMethod("getInstance").invoke(null);
                         boolean active = (boolean) api.getMethod("isShaderPackInUse").invoke(iris);
                         require(active == profile.equals("D"), "shader activation matches profile " + profile);
+                        String pack = (String) Class.forName("net.irisshaders.iris.Iris").getMethod("getCurrentPackName").invoke(null);
+                        if (profile.equals("D")) require(pack.startsWith("ComplementaryReimagined_"), "actual Complementary pack is active: " + pack);
+                        ExtremeWinter.LOGGER.info("TEST {}: Iris active={} pack={}", profile, active, pack);
                     } catch (ReflectiveOperationException exception) {
                         throw new AssertionError("Could not verify Iris public API", exception);
                     }

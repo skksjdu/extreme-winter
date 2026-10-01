@@ -32,12 +32,23 @@ public final class ExtremeWinter implements ModInitializer {
     public void onInitialize() {
         WinterBlocks.initialize();
         HeatItems.initialize();
+        dev.extremewinter.survival.WinterGear.initialize();
+        dev.extremewinter.survival.WinterItems.initialize();
+        dev.extremewinter.survival.HeatingContent.initialize();
+        dev.extremewinter.temperature.HeatSourceIndex.initialize();
+        dev.extremewinter.survival.WinterTasks.initialize();
+        dev.extremewinter.survival.WinterSupplies.initialize();
         StarterSupplies.initialize();
         TemperatureData.initialize();
+        dev.extremewinter.temperature.Hypothermia.initialize();
+        ServerTickEvents.END_SERVER_TICK.register(dev.extremewinter.temperature.WinterWorldState::tick);
         TemperatureSync.register(CONFIG);
+        dev.extremewinter.network.WinterStatusSync.register(CONFIG);
+        var weatherController = new dev.extremewinter.environment.WinterWeatherController(CONFIG);
+        ServerTickEvents.END_SERVER_TICK.register(weatherController::tick);
         WinterClimate.register(CONFIG);
         var environment = new WinterEnvironment(CONFIG);
-        ServerLevelEvents.LOAD.register((server, world) -> environment.onLoad(world));
+        ServerLevelEvents.LOAD.register((server, world) -> weatherController.onLoad(world));
         ServerTickEvents.END_LEVEL_TICK.register(environment::tick);
         var weathering = new HeatWeathering(CONFIG);
         ServerChunkEvents.CHUNK_LOAD.register((world, chunk, generated) -> weathering.onChunkLoad(world, chunk));

@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "performed": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:snowball"
+    },
+    "title": {
+      "translate": "advancement.extreme_winter.storm"
+    },
+    "description": {
+      "translate": "advancement.extreme_winter.storm.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "parent": "extreme_winter:survival/bottle"
+}

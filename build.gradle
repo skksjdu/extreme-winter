@@ -62,6 +62,24 @@ dependencies {
 }
 loom.runs.clientGameTest { runDir "work/run-gametest-${project.minecraft_version}" }
 
+// Opt-in focused regressions. Omitting this property always runs every registered test.
+def winterTests = providers.gradleProperty('winterTests').getOrElse('')
+tasks.named('processGametestResources').configure {
+    inputs.property 'winterTests', winterTests
+    doLast {
+        def metadata = new File(destinationDir, 'fabric.mod.json')
+        def json = new groovy.json.JsonSlurper().parse(file('src/gametest/resources/fabric.mod.json'))
+        if (!winterTests.isEmpty()) {
+            def requested = winterTests.split(',').toList()
+            def available = json.entrypoints['fabric-client-gametest']
+            def selected = available.findAll { requested.contains(it.tokenize('.').last()) }
+            if (selected.size() != requested.size()) throw new GradleException('Unknown or repeated winterTests: ' + winterTests)
+            json.entrypoints['fabric-client-gametest'] = selected
+        }
+        metadata.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+    }
+}
+
 // Optional test-only profiles. These files are never included in the distributable JAR.
 def compatProfile = providers.gradleProperty('compatProfile').getOrElse('A')
 if (!(compatProfile in ['A', 'B', 'C', 'D', 'E'])) throw new GradleException('compatProfile must be A, B, C, D or E')

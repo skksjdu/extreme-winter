@@ -1,96 +1,83 @@
-# 配置文件
+# 26.0.7 配置说明
 
-路径：**游戏实例**的 `config/extreme-winter.json`。开发和每个兼容性测试实例有各自独立的配置。
-修改后完全重启游戏；不进行运行中热重载。缺省字段沿用默认值。
-1.0 配置首次升级时备份为 `extreme-winter.json.v1.bak`，再迁移仍为旧默认值的参数。
-自定义值、未知字段和禁用冻伤的设置保留；`configVersion=2` 后不会重复改写。
+实例 `config/extreme-winter.json`，修改后完全重启。所有速率按 20 tick 为一游戏秒，温暖度不是摄氏温度。
 
-| 字段 | 默认值 | 单位 / 含义 |
-| --- | ---: | --- |
-| `configVersion` | 2 | 配置迁移标记 |
-| `minTemperature` | 0 | 严重冻伤温度下限 |
-| `maxTemperature` | 100 | 正常温度上限及重生初值 |
-| `coldThreshold` | 70 | 低于此值显示寒冷；室内被动恢复上限 |
-| `slownessThreshold` | 40 | 低于此值获得缓慢 I |
-| `fatigueThreshold` | 20 | 低于此值再获得挖掘疲劳 I |
-| `baseLoss` | 0.32 | 每游戏秒，露天基础降温 |
-| `weatherPenalty` | 0.18 | 每游戏秒，露天降水额外降温 |
-| `nighttimePenalty` | 0.18 | 每游戏秒，露天夜间额外降温 |
-| `waterPenalty` | 1.4 | 每游戏秒，浸水额外降温，包括室内水 |
-| `recoveryRate` | 1.2 | 每游戏秒的基础恢复量，乘可见热源累计强度（含距离衰减） |
-| `shelteredRecoveryRate` | 0.03 | 每游戏秒，无热源的干燥室内被动恢复量 |
-| `heatSourceRadius` | 4 | 方块距离，允许 1–6；墙体遮挡有效 |
-| `damageThreshold` | 40 | 低于此温度开始冻伤，必须大于最低温；缺省时随缓慢阈值 |
-| `damageIntervalSeconds` | 4 | 冻伤间隔，允许 1–3600 游戏秒 |
-| `minimumFreezingDamage` | 1 | 刚低于冻伤阈值时每次伤害，1 点 = 半颗心 |
-| `freezingDamage` | 6 | 最低温时每次伤害，允许 0–20；必须不小于最小伤害 |
-| `snowIntervalTicks` | 20 | 积雪采样间隔，允许 20–72000 tick |
-| `freezeIntervalTicks` | 40 | 结冰采样间隔，允许 20–72000 tick |
-| `samplesPerPass` | 16 | 每个采样批次的总列数，允许 1–64，不随玩家数相乘 |
-| `simulationRadiusChunks` | 4 | 玩家周边采样半径，允许 0–8 区块，仅处理已加载区块 |
-| `maxSnowLayers` | 0 | 0 表示不设厚度上限，只受实际空间和世界高度限制；正数 1–4096 为自选整列层数上限，8 层 = 1 格；不削减已有雪 |
-| `persistentWeather` | true | 主世界开始时及每 60 游戏秒延长原版降水，不触发雷暴 |
-| `coldVanillaBiomes` | true | 通过 Fabric API 降低原版主世界生物群系气温并启用降水 |
-| `coldModdedBiomes` | false | 26.0.2 新增：将模组新增的主世界生物群系也降温并启用降水；Terralith 等扩展群系需开启此项才统一降雪，下界和末地不变 |
-| `snowAccumulation` | true | 开启本模组的额外积雪采样 |
-| `waterFreezing` | true | 开启本模组的额外水源结冰采样 |
-| `outdoorHeatExtinguishing` | true | 主世界露天热源熄灭 / 岩浆源冷却 |
-| `campfireExposureSeconds` | 120 | 营火累计露天游戏秒 |
-| `soulCampfireExposureSeconds` | 180 | 灵魂营火累计露天游戏秒 |
-| `furnaceExposureSeconds` | 240 | 熔炉累计燃烧且露天游戏秒 |
-| `blastFurnaceExposureSeconds` | 300 | 高炉累计燃烧且露天游戏秒 |
-| `smokerExposureSeconds` | 150 | 烟熏炉累计燃烧且露天游戏秒 |
-| `lavaExposureSeconds` | 3600 | 岩浆源累计露天游戏秒，默认 3 游戏日后成为黑曜石 |
-| `heatRecoverySeconds` | 30 | 营火与炉子物品在玩家背包中从耗尽到充满所需的游戏秒，允许 1–3600；按每秒恢复取整，实际不超过配置时长 |
-| `torchExposureSeconds` | 45 | 火把/灵魂火把（含墙上火把）累计露天时长，允许 1–604800；到期掉为物品实体 |
-| `torchRecoverySeconds` | 5 | 火把在背包或地上恢复满并允许重新放置所需游戏秒，允许 1–3600 |
-| `torchHeatStrength` | 0.35 | 火把相对普通热源的强度，允许 0–1 |
-| `maxHeatStrength` | 4 | 多个可见热源累计强度上限，允许 1–20；距离衰减与墙体遮挡仍生效 |
-| `winterStageDays` | 3 | 每隔多少完整游戏日进入下一寒冷阶段，允许 1–365 |
-| `winterStageLossIncrease` | 0.1 | 每阶段增加的失温倍数，允许 0–1；0 关闭渐冷 |
-| `maxWinterStages` | 10 | 最多增加的阶段数，允许 0–100；0 关闭渐冷 |
+v1/v2 首次升级先校验原文，备份为 `.v1.bak`/`.v2.bak`，再将仍为旧默认的参数迁移。阈值组和伤害组整体迁移，定制组保留，禁止冻伤的 0 值保留。未知字段、coldModdedBiomes 和显式无限雪 0 保留。非法原文不修改并记录可见错误，回退安全默认；再次启动不会重复迁移。备份冲突不会覆盖旧备份。
 
-1 游戏秒 = 20 tick。所有速率必须是 0–100 的有限数字；温度上下限允许 -10000–10000。
-阈值必须满足 `minTemperature < fatigueThreshold < slownessThreshold < coldThreshold <= maxTemperature`。
-不满足限制时整份配置回退至默认值并记录错误，原文件保留，便于修复。
+当前用户确认两格雪的目标配置在 `outputs/extreme-winter-26.0.7-target-config.json`，coldModdedBiomes=true。这里只生成交付文件，尚未应用到真实实例。
 
-减少清雪工作：增大 `snowIntervalTicks`，减小 `samplesPerPass`，或为 `maxSnowLayers` 设置正数上限。
-树冠下额外采样间隔为 `snowIntervalTicks × 4`，使用同一批随机列，积雪厚度不另设上限。
-雨雪天气中的树冠雪花每 5 tick 最多尝试生成 4 个，范围为玩家周围水平 6 格，沿用原版粒子设置。
-关闭 `snowAccumulation` 也会关闭树冠额外积雪及雪花；树叶按 `minecraft:leaves` 标签识别。
-延长探索时间：减小 `baseLoss`、`weatherPenalty`、`nighttimePenalty`。
-关闭额外采样用布尔开关，不要把间隔设为 0。
+| 字段 | 默认值 | 含义 |
+| --- | --- | --- |
+| `weatherMode` | `scheduled` | scheduled 计划天气 / legacy 旧持续降水 / vanilla 原版控制 |
+| `blizzardParticles` | `true` | 仅额外偏斜原版雪花，最多每 5 tick 四个，不改变危险 |
+| `blizzardWind` | `true` | 仅原版风声资源，遵循天气音量，屋顶下较弱 |
+| `blizzardHaze` | `true` | 暴雪轻白雾屏幕色罩，可独立关闭；不改变世界三维雾或光影管线 |
+| `blizzardFrost` | `true` | 低温时淡霜边，可独立关闭，中心视野保持 |
+| `structureSupplies` | `true` | 加载战利品时仅向九个指定原版内置表追加补给；重启或重载后生效，不影响已打开箱 |
+| `configVersion` | `3` | 迁移标记；v2→v3 先备份原文，保留未知字段和定制值 |
+| `minTemperature` | `0.0` | 温暖度下限 |
+| `maxTemperature` | `100.0` | 温暖度上限和重生初值 |
+| `coldThreshold` | `70.0` | 寒冷显示及室内恢复上限 |
+| `slownessThreshold` | `25.0` | 低于此值缓慢 I |
+| `fatigueThreshold` | `10.0` | 仅 miningFatigue=true 时低于此值附加挖掘疲劳 |
+| `baseLoss` | `0.04` | 每游戏秒露天基础损耗 |
+| `weatherPenalty` | `0.015` | 每游戏秒露天降水损耗 |
+| `nighttimePenalty` | `0.01` | 每游戏秒露天夜间损耗 |
+| `waterPenalty` | `0.2` | 每游戏秒浸水损耗，屋内仍生效 |
+| `recoveryRate` | `1.2` | 每秒有效热强度乘此回温值 |
+| `shelteredRecoveryRate` | `0.3` | 干燥无热源庇护每秒回温，至 coldThreshold |
+| `heatSourceRadius` | `4` | 普通热源半径 1—6；距离/墙体遮挡生效 |
+| `damageIntervalSeconds` | `10` | 预警后伤害脉冲间隔秒 |
+| `damageThreshold` | `25.0` | 冻伤预警温暖度阈值 |
+| `minimumFreezingDamage` | `0.5` | 伤害脉冲最低值，生命点 |
+| `freezingDamage` | `1.0` | 最低温暖度时伤害脉冲，生命点 |
+| `snowIntervalTicks` | `80` | 额外积雪采样间隔 tick；树冠为四倍 |
+| `freezeIntervalTicks` | `200` | 额外水源结冰采样间隔 tick |
+| `samplesPerPass` | `16` | 每批候选总数 1—64 |
+| `simulationRadiusChunks` | `4` | 玩家附近已加载区块半径 0—8 |
+| `maxSnowLayers` | `16` | 天气额外新增整列层数上限；0 无限；不削减旧雪、不限制手动堆放/重力合并 |
+| `persistentWeather` | `true` | legacy 模式的持续降水开关；scheduled 由统一控制器接管 |
+| `coldVanillaBiomes` | `true` | 原版主世界群系静态降温 |
+| `coldModdedBiomes` | `false` | 模组主世界群系静态降温；Terralith 可开启，迁移保留实际开关 |
+| `snowAccumulation` | `true` | 仅额外积雪采样开关 |
+| `waterFreezing` | `true` | 仅额外源水结冰采样开关 |
+| `outdoorHeatExtinguishing` | `true` | 耐候总开关，分类开关同时生效 |
+| `campfireExposureSeconds` | `600` | 营火累计露天耐候秒 |
+| `soulCampfireExposureSeconds` | `900` | 灵魂营火累计露天耐候秒 |
+| `furnaceExposureSeconds` | `240` | 仅对应分类机制开启时使用，单位为游戏秒 |
+| `blastFurnaceExposureSeconds` | `300` | 仅对应分类机制开启时使用，单位为游戏秒 |
+| `smokerExposureSeconds` | `150` | 仅对应分类机制开启时使用，单位为游戏秒 |
+| `lavaExposureSeconds` | `3600` | 仅对应分类机制开启时使用，单位为游戏秒 |
+| `heatRecoverySeconds` | `30` | 背包内耐候条恢复秒；不是燃料 |
+| `torchExposureSeconds` | `45` | 仅对应分类机制开启时使用，单位为游戏秒 |
+| `torchRecoverySeconds` | `5` | 仅对应分类机制开启时使用，单位为游戏秒 |
+| `torchHeatStrength` | `0.35` | 火把相对热强度 |
+| `maxHeatStrength` | `4.0` | 多源叠加上限 |
+| `winterStageDays` | `3` | legacy 兼容字段，独立时钟不再使用 |
+| `winterStageLossIncrease` | `0.1` | legacy 兼容字段，独立时钟不再使用 |
+| `maxWinterStages` | `10` | legacy 兼容字段，独立时钟不再使用 |
+| `minimumColdHealth` | `6.0` | 本模组冻伤生命下限；不补血，不影响其他伤害 |
+| `damageWarningSeconds` | `60` | 低于 damageThreshold 累计预警；回到阈值+2 清除 |
+| `respawnProtectionSeconds` | `180` | 新生/死亡重生冻伤保护；重登不刷新 |
+| `miningFatigue` | `false` | 本模组挖掘疲劳开关 |
+| `torchWeathering` | `false` | 火把过冷掉落/冷却；关闭可清理旧物品组件并允许正常放置 |
+| `furnaceWeathering` | `false` | 原版炉具受冷停工；关闭自动清除旧 BLOCKED |
+| `lavaCooling` | `false` | 额外岩浆源冷却；关闭停止推进，不还原黑曜石 |
 
-`snowAccumulation=false` / `waterFreezing=false` 只关闭本模组额外采样；
-原版寒冷生物群系在降水时仍会进行原版的积雪与结冰。
-`persistentWeather=true` 会在睡觉或天气命令清空降水后，最迟约 60 游戏秒重新维持降水。
+阈值满足 min < fatigue < slowness < cold <= max；所有值必须有限。损耗 0—100，伤害 0—20，minimumFreezingDamage <= freezingDamage。关闭伤害请同时设两个伤害字段为 0。
 
-数据包可扩展 `extreme_winter:snow_surfaces` 方块标签，使其他模组的普通地表接受雪层。
-方块实体、非雪非空气目标、实心屋顶下、水中及过亮位置仍受保护。
-模组生物群系默认保留原气候；设 `coldModdedBiomes=true` 后，主世界扩展群系统一接受降温。
-只有实际寒冷的生物群系接受额外雪/冰采样；体温系统则在整个主世界生效。
-该开关在游戏启动时注册，修改后需完全重启游戏；无需重建存档或改写已有地形。
+额外雪冰只处理已经加载的随机候选列，不替换作物、机器或含水方块；原版雪冰和世界生成仍可能发生。雪保留旧方块 ID，已超上限的雪停止天气新增，铲底后下落、合并仍守恒。
 
-积雪使用 `extreme_winter:snow_drift`，每格保持 1–8 层并跨格堆叠。
-无支撑时生成原版下落方块实体；薄雪会合并。实体与邻居变化使用计划 tick，不逐 tick 扫描整个雪堆。
-普通铲子可快速清理，每层掉落一个雪球。原版纹理引用允许资源包改变雪的外观。
+关闭火把/炉具机制后旧物品的无效耐候条和冷却文案隐藏；旧炉具在正常 serverTick 自动解锁，不丢输入和未使用燃料。营火耐候条和未来炉具燃料条是不同规则。关闭岩浆额外冷却不扫描全地图或还原已冷却方块。
 
-1.1.0 配置无需重写，缺失的新字段自动使用默认值；可手动添加上述字段，时长允许 1–604800 游戏秒。
-26.0.0 的有效庇护要求当前位置有顶且周围 3×3 至少 7 列有顶，玩家与热源使用同一规则。
-单块遮挡、窄梁、屋檐边缘或正上方洞口不暂停失温/热源计时；玻璃屋顶、完整树冠、洞顶有效。
-积雪允许穿过树叶遮挡，树冠上的雪不会掩盖下方地面；玻璃、石头等实心顶块仍阻止积雪和额外雪花。
-树冠下积雪约为露天的四分之一频率；雪厚不另设上限。结冰继续要求单列天空直达。
-已升级配置中的正数 `maxSnowLayers` 不自动重写，设为 0 可启用无上限；缺失该字段的新配置默认无上限。
-1.0 配置的已知旧默认值仍按原有迁移规则更新并备份，其中默认 3 层现更新为 0。
-有效庇护下暂停计时，区块卸载/离线不推进；计时保存在方块实体附件或世界数据中。熄灭的营火可重新点燃。
-炉子被天气熄灭后，添加屋顶或回收充能后重新放置可恢复工作；不丢弃库存中的物品或燃料。
-默认岩浆发现扫描每秒一块已加载地表区块，不扫描地下、流动岩浆或下界。
-1.1.2 已移除内置圆润树叶视觉包，树叶恢复原版。积雪下陷和水平减速由方块行为实现，无额外配置项。
-1.2.0 已移除安全屋，旧配置的 `starterShelter` 不再生效。每个新存档首次进入只领取 1 个营火。
-营火与炉子使用保存并同步的物品时间条；回收/重新放置保留进度，背包（含快捷栏、副手）每秒恢复。
-1.2.1 新增火把弱热源、过冷掉落及短冷却。营火/炉子掉在地上不恢复，火把掉落物也会按实际实体 tick 恢复；箱子里的物品不恢复。
-所有热源未使用或恢复满时隐藏时间条，悬停仍可查看满耐久信息；普通武器耐久不受影响。
-阶段为 `min(maxWinterStages, floor(游戏日 / winterStageDays))`，失温倍率为 `1 + 阶段 × winterStageLossIncrease`。
-这里的游戏日是原版日历时间 `getOverworldClockTime() / 24000`（26.1 的主世界时钟），睡觉及时间命令会影响它；每个存档独立、重进保留。倍率只作用于主世界失温，不减慢热源/室内回温。
-创造模式只保护玩家体温，不免除露天热源损耗；有效屋顶/树冠庇护及单人暂停会停止暴露计时。
-新字段缺省时使用上述默认值，无需重写旧配置；可按表手动增加并重启游戏。
+寒潮独立运行时钟保存在主世界 extreme_winter_world。新旧世界首次缺少此数据从 0 初始化。旧 temperature、snow_drift、heat_exposure_seconds、starter_heat_received 等标识保持。创造/旁观玩家温暖度安全，原版其他危险正常。睡觉及时间命令不改变进度。
+
+
+天气固定规则：首次 85 分钟预警 / 90 分钟暴雪 / 93 分钟退潮 / 95 分钟缓和；以后按保存的种子在暴雪结束后 45—75 分钟再来一次，持续 5—7 分钟，预警 5 分钟/退潮 2 分钟。正常缓和与降雪窗口 10—20 分钟。准备期额外雪采样 25%、额外冻结 0；普通降雪 100%、暴雪 200%；缓和期额外新增 0。不扩大采样半径/候选数，不改静态群系温度。原版雨雪有渐入渐出，缓和不会清理旧雪。
+
+`persistentWeather=false` 的旧配置在缺少 weatherMode 时读取/迁移为 vanilla；显式 weatherMode 优先。配置 v3 缺少新字段时在内存采用缺省，不反复改写。服务端定时发送独立 WinterStatusPayload，winterStage 与 temperature 危险 stage 分开；客户端不能提交状态。
+
+保暖和补给不新增可变默认速率：内衬/食物只缩放空气项，浸水独立；热水袋与炖菜使用全存档运行时钟，放箱继续计时，暂停/退出停钟。热水袋14400tick/充热200tick/补热.03，炖菜6000tick空气倍率.8。structureSupplies 缺省 true，不改变关键物品合成路径；关闭后重启或重载生效，不重刷已开箱。
+# 26.0.6 家园规则
+
+取暖炉与冬季农业使用当前新手固定规则，不增加复杂配置：炉具半径6、源强1.25，原木/木板/木棍/煤与木炭/煤块分别1600/400/200/9600/86400 tick。温室需屋顶、光≥9、农业热量≥.25；深冬/长冬露天生长机会为.5/.25。骨粉保持原版，`data/extreme_winter/tags/block/winter_crops.json` 定义参与作物，资源包/资料包可按原版扩展对应资源。玩家热源总上限仍由既有 maxHeatStrength 控制。
