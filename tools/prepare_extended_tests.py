@@ -19,7 +19,7 @@ if args.mode=='legacy-create':
     config={'configVersion':2,'coldVanillaBiomes':True,'coldModdedBiomes':False,'maxSnowLayers':0,'persistentWeather':True}
     (run/'config/extreme-winter.json').write_text(json.dumps(config,indent=2)+'\n',encoding='utf-8')
 elif not (run/'config/extreme-winter.json').exists():
-    config=json.loads((root/'outputs/extreme-winter-26.0.6-target-config.json').read_text(encoding='utf-8'));config['coldModdedBiomes']=False
+    config=json.loads((root/'outputs/releases/26.0.6/extreme-winter-26.0.6-target-config.json').read_text(encoding='utf-8'));config['coldModdedBiomes']=False
     (run/'config/extreme-winter.json').write_text(json.dumps(config,indent=2)+'\n',encoding='utf-8')
 (work/'review.gradle').write_text('''gradle.projectsEvaluated {
     rootProject.with {
@@ -33,7 +33,7 @@ elif not (run/'config/extreme-winter.json').exists():
             destinationDirectory = layout.buildDirectory.dir('testmods')
         }
         tasks.register('runWinterExtended', tasks.named('runProductionGameTest').get().getClass().superclass) {
-            def winterJar = mode == 'legacy-create' ? file('outputs/extreme-winter-26.0.2.jar') : tasks.named('jar')
+            def winterJar = mode == 'legacy-create' ? file('outputs/releases/26.0.2/extreme-winter-26.0.2.jar') : tasks.named('jar')
             mods.setFrom(winterJar, tasks.named('winterExtendedJar'), configurations.productionRuntimeMods)
             runDir = file("work/e-validation/run-${mode}-${attempt}")
             jvmArgs.addAll('-Dfabric.client.gametest',

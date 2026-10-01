@@ -18,7 +18,9 @@ version = dict(line.split('=', 1) for line in (root / 'gradle.properties').read_
 for path, text in zip(logs[1:], texts[1:]):
     assert f'extreme_winter {version}' in text, f'Game log is for another mod version: {path}'
 source = Path(audit['file'])
-target = root / 'outputs' / source.name
+release_dir = root / 'outputs' / 'releases' / version
+release_dir.mkdir(parents=True, exist_ok=True)
+target = release_dir / source.name
 if target.exists():
     assert hashlib.sha256(target.read_bytes()).hexdigest() == audit['sha256'], 'An existing different release must not be overwritten'
 else:
@@ -39,6 +41,6 @@ evidence = dict(audit, version=version, stage=args.stage, file=str(target), unit
                 game_observations=[line for text in texts[1:] for line in text.splitlines() if re.search(r'TEST .*PASSED', line)],
                 installed_in_user_instance=False, pushed=False, published=False,
                 limitations=limitations)
-(root / f'outputs/package-{version}.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-(root / f'outputs/extreme-winter-{version}.sha256').write_text(audit['sha256'] + '  ' + target.name + '\n', encoding='ascii')
+(release_dir / f'package-{version}.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+(release_dir / f'extreme-winter-{version}.sha256').write_text(audit['sha256'] + '  ' + target.name + '\n', encoding='ascii')
 print(json.dumps({'version': version, 'sha256': audit['sha256'], 'unit': unit, 'game_observations': len(evidence['game_observations'])}, indent=2))

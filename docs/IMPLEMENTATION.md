@@ -10,7 +10,7 @@ WinterLegacySaveTest已由保留的26.0.2正式JAR创建原版100天旧存档，
 
 WinterSurvivalRegressionTest已实际验证饥饿、摔落、僵尸AI和溺水四次死亡重生，个人生产收据/原版进度保持；原版粉雪冻结伤害及五秒去重、点燃完整下界门往返、末地进入/原版通关界面/正常关闭返回主世界和共享冬季时钟通过。首轮测试停在首次末地返回的原版通关界面，读当前EndPortalBlock字节码确认seenCredits路径后补上真实WinScreen.onClose交互，未改游戏机制或绕开断言。
 
-benchmark-3完成三段各1200实际tick，60/270分钟真实参数自然跨边界；其AFK30FPS样本弃用于视觉比较。benchmark-4只复测四个视觉窗口，MINIMIZED解除AFK限帧，平均FPS下降7.75%，有效场景模组CPU p95最高.42ms。固定小场景及分段观测不表示大型基地、连续4.5小时或长时间内存保证；详细原始/聚合记录在outputs/beginner-26.0.7-performance.md/json。五组正式JAR各19完整入口，以及两组Terralith/Eclipse实际光影矩阵均已通过。封存证据在outputs/package-26.0.7.json及最终验证记录。
+benchmark-3完成三段各1200实际tick，60/270分钟真实参数自然跨边界；其AFK30FPS样本弃用于视觉比较。benchmark-4只复测四个视觉窗口，MINIMIZED解除AFK限帧，平均FPS下降7.75%，有效场景模组CPU p95最高.42ms。固定小场景及分段观测不表示大型基地、连续4.5小时或长时间内存保证；详细原始/聚合记录在outputs/validation/26.0.7/beginner-26.0.7-performance.md/json。五组正式JAR各19完整入口，以及两组Terralith/Eclipse实际光影矩阵均已通过。封存证据在outputs/releases/26.0.7/package-26.0.7.json及最终验证记录。
 
 ---
 

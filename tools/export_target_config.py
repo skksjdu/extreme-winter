@@ -17,7 +17,9 @@ for typ,key,value in re.findall(r'public (int|double|float|boolean|String) (\w+)
     defaults[key]=json.loads(value) if typ in ('String','boolean') else float(value.rstrip('f')) if typ in ('double','float') else int(value)
 defaults.update(previous)
 properties=dict(line.split('=',1) for line in (root/'gradle.properties').read_text().splitlines() if '=' in line)
-target=root/f"outputs/extreme-winter-{properties['mod_version']}-target-config.json"
+release_dir=root/'outputs'/'releases'/properties['mod_version']
+release_dir.mkdir(parents=True,exist_ok=True)
+target=release_dir/f"extreme-winter-{properties['mod_version']}-target-config.json"
 result=json.dumps(defaults,ensure_ascii=False,indent=2)+'\n'
 if target.exists(): assert target.read_text(encoding='utf-8')==result,'A different existing target configuration must be reviewed explicitly'
 else: target.write_text(result,encoding='utf-8')

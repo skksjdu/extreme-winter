@@ -21,7 +21,7 @@ D组合保留了现有Iris/Complementary的`BIOME_SULFUR_CAVES`自定义uniform�
 | on | -0.5 / SNOW | 578 | 6 | 实际Eclipse启用 |
 | off | 0.24775 / RAIN | 0 | 0 | 实际Eclipse启用 |
 
-群系夹具临时使用radius=0、samples=64，并处于暴雪窗口；发行配置未改变。这些计数不代表默认积雪速度。新截图保存在outputs/visual-26.0.7，包含E组合、D实际光影和Terralith开关两组。
+群系夹具临时使用radius=0、samples=64，并处于暴雪窗口；发行配置未改变。这些计数不代表默认积雪速度。新截图保存在outputs/screenshots/visual-26.0.7，包含E组合、D实际光影和Terralith开关两组。
 
 19入口覆盖A/B/C/D全部新手机制：配置/三颗心保护/原版伤害、时间日历独立、睡觉/真实暂停/重进、天气排期/真实雪冰、装备及组件保留、热水袋/炖菜、九表补给/外部数据包覆盖、五类自然地形、炉具/漏斗/拆装/燃烧同步/卸载、热源范围/墙体/不加载、农业/骨粉、七项实际进度、生产远征保存闭环、手册中文六页和英文六页共十二张渲染、原创像素资产、视觉独立开关与HUD骑乘/水下/F1。
 
@@ -54,7 +54,7 @@ D05完整闭环：原版树苗实际生成6根橡木，生存砍树并拾取；�
 
 夹具起始明确提供普通工具、20圆石、5铁、3皮革、肉/种子/骨粉/树苗，以及平台/屋顶。作物使用固定种子随机tick加速；移动是按tick的位置脚本；远征箱是固定原版表夹具，未声称在自然村庄徒步发现或实等数小时成熟。12分钟袋/5分钟食物/180或270分钟阶段的完整等待仍未执行，边界与实际区间分别记录。
 
-中英手册全部12页用原版书界面实际渲染，按实际字体114px宽换行，文字高度≤128px；截图在 `outputs/manual-26.0.6`，已目视核验。D英语页面缩短以避免页底截断，保留当前已解锁炉具与温室规则。
+中英手册全部12页用原版书界面实际渲染，按实际字体114px宽换行，文字高度≤128px；截图在 `outputs/screenshots/manual-26.0.6`，已目视核验。D英语页面缩短以避免页底截断，保留当前已解锁炉具与温室规则。
 
 正式包：191308字节，76个Java25类，12 Mixin，SHA256 `c4d41d14d17d4776164f8328f0d2c8ad44864b7d583236baad479e161f6c682e`。所有JSON可解析、中英键一致；无测试类/诊断Mixin/第三方包/原版视觉覆盖。`package-26.0.6.json`、JAR、sha256和target-config均在outputs；配置继续保留coldModdedBiomes=true、maxSnowLayers=16。旧26.0.3/.4/.5包保留。
 
@@ -97,11 +97,11 @@ C01—C06 已实现。新增内衬组件/保留数据配方、运行时钟热水
 - **实际睡觉**：原版床入睡后醒到早晨，寒潮只增加实际运行 tick；排期不变。**实际单人暂停菜单**：Minecraft.isPaused 为真，等待 40 客户端 tick 后世界时钟完全不变，再恢复正常运行。
 - 正式 JAR 使用独立 Terralith 2.6.1 / Tectonic 3.0.28 / Lithostitched 1.8.0 / Sodium 0.9.1 / Iris 1.11.4 / Eclipse Unstable 实例分别执行开关 on/off。日志均含 `Using shaderpack: Eclipse-Shader-Unstable.zip`，确实启用光影。
 - on：Yellowstone 温度 -0.5、客户端 SNOW、实际 597 雪层、9 冰源，屋顶/维度/读档/额外雪花通过，1 分 25 秒；off：温度 .24775、客户端 RAIN、0 雪/0 冰且无额外雪花，1 分 16 秒。日志 `work/beginner-B-terralith-on.log`、`work/beginner-B-terralith-off.log`。测试为可观察性临时 radius=0/samples=64；目标配置仍是 radius=4/samples=16。
-- 包结构通过：42 个玩法 Java 25 类、4 个原有 Mixin，没有测试类、嵌套第三方 JAR 或原版视觉资源覆盖。文件 106409 字节；SHA-256 `a980fd8b7c4b8534b6b928f6fc62adc7ae85cd0e2f815401798da4fc037d5167`，证据 `outputs/package-26.0.4.json`。
+- 包结构通过：42 个玩法 Java 25 类、4 个原有 Mixin，没有测试类、嵌套第三方 JAR 或原版视觉资源覆盖。文件 106409 字节；SHA-256 `a980fd8b7c4b8534b6b928f6fc62adc7ae85cd0e2f815401798da4fc037d5167`，证据 `outputs/releases/26.0.4/package-26.0.4.json`。
 
 ## 交付与边界
 
-成品 `outputs/extreme-winter-26.0.4.jar`、同名 sha256、目标配置 `outputs/extreme-winter-26.0.4-target-config.json`。目标配置保留用户 coldModdedBiomes=true 与明确 maxSnowLayers=16，不应用到真实游戏实例。代码默认 coldModdedBiomes=false。
+成品 `outputs/releases/26.0.4/extreme-winter-26.0.4.jar`、同名 sha256、目标配置 `outputs/releases/26.0.4/extreme-winter-26.0.4-target-config.json`。目标配置保留用户 coldModdedBiomes=true 与明确 maxSnowLayers=16，不应用到真实游戏实例。代码默认 coldModdedBiomes=false。
 
 缓和停止本模组额外雪冰采样，不清理旧雪；静态群系降温与原版雪冰仍可能发生，没有实现动态暖季。HUD 平时每 10 秒校准倒计时。B 的跨维度检查验证共享状态，不等于玩家真实跨维度旅程。
 
@@ -123,7 +123,7 @@ C01—C06 已实现。新增内衬组件/保留数据配方、运行时钟热水
 - HUD 目视检查通过：火焰、箭头、庇护符号位置可读，未与饱食度重叠；水下回归通过。尚未进行最终光影/骑乘矩阵。
 - 目标配置文件 extreme-winter-26.0.3-target-config.json 保留实际 coldModdedBiomes=true，明确 maxSnowLayers=16。未写入真实实例。
 
-构建日志 `work/beginner-A-focused-5.log`；完整回归 `work/beginner-A-game-final.log`；包证据 `outputs/package-26.0.3.json`。最初缓存读取受限，提权使用原工具链后解决；旧语义断言、登录保护和重生观察时点的问题已修复，失败尝试日志保留。
+构建日志 `work/beginner-A-focused-5.log`；完整回归 `work/beginner-A-game-final.log`；包证据 `outputs/releases/26.0.3/package-26.0.3.json`。最初缓存读取受限，提权使用原工具链后解决；旧语义断言、登录保护和重生观察时点的问题已修复，失败尝试日志保留。
 
 冻结去重使用实际原版 freeze 伤害 API；站入粉雪方块的完整操作、睡觉/暂停真实分段、其他原版危险及所有地形/光影组合留在后续 B/E。固定公式不是路线试玩。尚未收到用户主观试玩反馈，不阻塞后续开发。
 
@@ -151,7 +151,7 @@ C01—C06 已实现。新增内衬组件/保留数据配方、运行时钟热水
 - 开启后日志为 **149/160** 群系修改，新增覆盖 Terralith 的 95 个群系；没有增加 Terralith 硬依赖或客户端渲染 Mixin。
 - Eclipse 日志与截图确认实际启用。原光影设置保留；光影可能给雨天地表绘制白色覆盖，测试以服务器真实雪方块与客户端降水类型为依据。
 
-成品：`outputs/extreme-winter-26.0.2.jar`，SHA-256：
+成品：`outputs/releases/26.0.2/extreme-winter-26.0.2.jar`，SHA-256：
 `d7d8d4f0bf695ae4832d961b8c71746318a8b36aec7a75ffdac72bfd7ee9410c`。
 包检查通过：31 个玩法类、Java 25 字节码、原有四个 Mixin、测试代码隔离、无资源覆盖或可选模组硬依赖。
 
@@ -162,13 +162,13 @@ C01—C06 已实现。新增内衬组件/保留数据配方、运行时钟热水
 
 日志：`work/build-26.0.2.log`、`work/test-26.0.2-A.log`、`work/terralith-climate/review-off.log` 和 `review-on.log`。
 截图：`outputs/terralith-climate-off/on-26.0.2.png` 与 `terralith-climate-comparison-26.0.2.png`。
-包与安装记录：`outputs/package-26.0.2.json`、`outputs/installation-26.0.2.json`。
+包与安装记录：`outputs/releases/26.0.2/package-26.0.2.json`、`outputs/validation/installations/installation-26.0.2.json`。
 尚未验收指定实例的全部界面/性能模组及 Voxy 远景缓存刷新，也未覆盖其他主世界群系模组或多人。
 
 # 26.0.1 / Minecraft 26.1.2 移植验证（历史记录）
 
 2026-09-30，以 `mvp-26.0.0` 固定的最新版 MVP 为基础，移植到 **Minecraft 26.1.2 / Fabric / 单人**。
-成品：`outputs/extreme-winter-26.0.1.jar`；原 26.0.0 成品与标签保留。
+成品：`outputs/releases/26.0.1/extreme-winter-26.0.1.jar`；原 26.0.0 成品与标签保留。
 Loader **0.19.5** / Fabric API **0.155.3+26.1.2** / Gradle 9.8.0 / Loom 1.18.2。
 使用本机 JDK 26.0.1 构建与运行，输出 Java 25 字节码；游戏最低 Java 25。
 
@@ -209,11 +209,11 @@ D 的光影状态由 Iris 公共 API 断言和 `Using shaderpack: ComplementaryR
 ## 交付与限制
 
 成品 79859 字节、31 个 Java 25 类、4 个通用 Mixin；无测试类、嵌套第三方 JAR、
-可选模组硬依赖或原版视觉覆盖。包清单 `outputs/package-26.0.1.json`，
+可选模组硬依赖或原版视觉覆盖。包清单 `outputs/releases/26.0.1/package-26.0.1.json`，
 SHA-256：`89ef011558e6a8d46c9071e0ca37d9bebcd4ee8b82208d531c54c4db14d7f969`。
 日志：`work/test-26.0.1-A.log` 至 `-E.log`；汇总 `work/matrix-26.0.1-summary.log`。
 单元报告：`build/reports/tests/test/index.html`。
-截图：`outputs/canopy-snow-26.0.1-vanilla.png` / `-complementary.png`，以及
+截图：`outputs/screenshots/26.0.1/canopy-snow-26.0.1-vanilla.png` / `-complementary.png`，以及
 `heat-bars`、`warmth-hud`、`visuals` 的相同版本与组合后缀。
 
 离线测试的认证/Realms 日志、Iris refmap、Sodium 驱动规避与 Complementary
@@ -226,7 +226,7 @@ SHA-256：`89ef011558e6a8d46c9071e0ca37d9bebcd4ee8b82208d531c54c4db14d7f969`。
 # 26.0.0 MVP / 树冠降雪与无上限积雪验证
 
 2026-09-30，模组 **26.0.0** 作为后续开发的 MVP 基线，目标 **Minecraft 26.1 / Fabric / 单人**。
-成品：`outputs/extreme-winter-26.0.0.jar`；范围与后续维护约定见 [MVP.md](MVP.md)。
+成品：`outputs/releases/26.0.0/extreme-winter-26.0.0.jar`；范围与后续维护约定见 [MVP.md](MVP.md)。
 Loader 0.19.5 / Fabric API 0.145.1+26.1 / Gradle 9.8.0 / Loom 1.18.2。
 JDK 26.0.1 构建与运行，Java 25 字节码；游戏最低 Java 25。
 
@@ -270,8 +270,8 @@ JDK 26.0.1 构建与运行，Java 25 字节码；游戏最低 Java 25。
 无测试类、嵌套第三方 JAR、可选模组硬依赖或原版视觉覆盖。
 SHA-256：`2bc0c2d78889543369126a256c787fbe627ebdd7654c412541c9059391090f72`。
 日志 `work/test-26.0.0-A.log` 至 `work/test-26.0.0-E.log`，汇总 `work/matrix-26.0.0-mvp-summary.log`。
-单元报告 `build/reports/tests/test/index.html`；包清单 `outputs/package-26.0.0.json`。
-`outputs/canopy-snow-26.0.0-vanilla.png` 和 `outputs/canopy-snow-26.0.0-complementary.png`
+单元报告 `build/reports/tests/test/index.html`；包清单 `outputs/releases/26.0.0/package-26.0.0.json`。
+`outputs/screenshots/26.0.0/canopy-snow-26.0.0-vanilla.png` 和 `outputs/screenshots/26.0.0/canopy-snow-26.0.0-complementary.png`
 展示树下积雪及雪花；其他最终截图使用 `heat-bars`、`warmth-hud`、`visuals` 的相同版本/组合后缀。
 
 离线认证、Realms、测试窗口选项和第三方 Iris/Complementary 警告保留，没有修改第三方源文件。
@@ -347,7 +347,7 @@ Iris refmap 提示，以及 Complementary 的 `BIOME_SULFUR_CAVES` 和旧 `stone
 
 # 1.2.1 历史验证报告
 
-2026-09-30，本地单人验证；未上传 GitHub。成品：`outputs/extreme-winter-1.2.1.jar`。
+2026-09-30，本地单人验证；未上传 GitHub。成品：`outputs/releases/1.2.1/extreme-winter-1.2.1.jar`。
 Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
 
 - `build` 通过；16 项单元测试（10 项温度、6 项配置）通过，0 失败、错误或跳过。
@@ -366,18 +366,18 @@ Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
 - 包检查通过：74072 字节，29 个 Java 21 类，四个通用 Mixin；无测试类、内嵌第三方 JAR、可选模组硬依赖、安全屋或原版视觉覆盖。
   SHA-256：`3b87524b8f862c630eed5dbf966635752725871acf00dec3fcc00895f6fc67d9`。
 
-日志：`work/test-1.2.1-A-final.log`、`work/test-1.2.1-D.log`；单元报告：`build/reports/tests/test/index.html`；包检查：`outputs/package-1.2.1.json`。
-截图：`outputs/heat-bars-1.2.1-vanilla.png`、`outputs/campfire-tooltip-1.2.1-zh.png`、`outputs/campfire-tooltip-1.2.1-en.png`、`outputs/furnace-tooltip-1.2.1-zh.png`、`outputs/torch-tooltip-1.2.1-zh.png`、`outputs/campfire-tooltip-1.2.1-complementary.png`。
+日志：`work/test-1.2.1-A-final.log`、`work/test-1.2.1-D.log`；单元报告：`build/reports/tests/test/index.html`；包检查：`outputs/releases/1.2.1/package-1.2.1.json`。
+截图：`outputs/screenshots/1.2.1/heat-bars-1.2.1-vanilla.png`、`outputs/screenshots/1.2.1/campfire-tooltip-1.2.1-zh.png`、`outputs/screenshots/1.2.1/campfire-tooltip-1.2.1-en.png`、`outputs/screenshots/1.2.1/furnace-tooltip-1.2.1-zh.png`、`outputs/screenshots/1.2.1/torch-tooltip-1.2.1-zh.png`、`outputs/screenshots/1.2.1/campfire-tooltip-1.2.1-complementary.png`。
 Complementary 仍记录既有 `BIOME_SULFUR_CAVES`、`endFlashIntensity/endFlashFactor` 和旧 `stone_slab variant` 警告；测试器的空音频设备选项及离线登录警告保留。语言重载时曾有一次服务器落后 50 tick 的提示，全部断言通过；本次未出现此前 Eclipse 的 OpenGL 错误。
 
 已安装到指定实例：`D:\迅雷下载\PCL 正式版 2.12.7.3\.minecraft\versions\1.21.6-Fabric 0.19.5\mods\extreme-winter-1.2.1.jar`。
 安装前确认该游戏进程退出；构建、成品和安装文件哈希一致，实例仅保留 1 个本模组 JAR。其他三个模组、`options.txt`、两份配置及光影 ZIP 哈希不变。
-旧版 1.2.0 备份：`work/install-backup-1.2.1-20260930-095323`；安装清单：`outputs/installation-1.2.1.json`。旧配置未重写，缺省的新字段自动采用默认值。
+旧版 1.2.0 备份：`work/install-backup-1.2.1-20260930-095323`；安装清单：`outputs/validation/installations/installation-1.2.1.json`。旧配置未重写，缺省的新字段自动采用默认值。
 只验收单人；未测试专用服务器/多人、用户各个已有存档、其他 GPU 或末地光影效果。已有世界按原版日历直接进入相应寒冷阶段；睡觉和时间命令会改变阶段。
 
 # 1.2.0 历史验证报告
 
-2026-09-30，本地单人验证；未上传 GitHub。成品：`outputs/extreme-winter-1.2.0.jar`。
+2026-09-30，本地单人验证；未上传 GitHub。成品：`outputs/releases/1.2.0/extreme-winter-1.2.0.jar`。
 Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
 
 - `build` 通过，14 项单元测试通过，0 失败、错误或跳过。最终正式 JAR 的基础回归 A 通过，2m 9s。
@@ -393,17 +393,17 @@ Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
 - 包检查通过：60281 字节，25 个 Java 21 类，四个通用 Mixin；无测试类、内嵌第三方 JAR、可选模组硬依赖或原版视觉覆盖。
   SHA-256：`8d3fb24fbcc8dc593f6f05f748fe3e9298745753d5f5e40040bc5d8827acbbfb`。
 
-复查日志：`work/test-1.2.0-A-final.log`、`work/test-1.2.0-D-final.log`；单元报告：`build/reports/tests/test/index.html`；包检查：`python tools/audit_package.py`，结果在 `outputs/package-1.2.0.json`。
-截图：`outputs/heat-charge-1.2.0-vanilla.png`、`outputs/heat-charge-1.2.0-complementary.png`、`outputs/spawn-1.2.0-vanilla.png`、`outputs/spawn-1.2.0-complementary.png`；物品时间条、自然出生地及 HUD 已目视检查。
+复查日志：`work/test-1.2.0-A-final.log`、`work/test-1.2.0-D-final.log`；单元报告：`build/reports/tests/test/index.html`；包检查：`python tools/audit_package.py`，结果在 `outputs/releases/1.2.0/package-1.2.0.json`。
+截图：`outputs/screenshots/1.2.0/heat-charge-1.2.0-vanilla.png`、`outputs/screenshots/1.2.0/heat-charge-1.2.0-complementary.png`、`outputs/screenshots/1.2.0/spawn-1.2.0-vanilla.png`、`outputs/screenshots/1.2.0/spawn-1.2.0-complementary.png`；物品时间条、自然出生地及 HUD 已目视检查。
 Complementary 保留既有 `BIOME_SULFUR_CAVES`、`endFlashIntensityM/endFlashFactor1`、旧 `stone_slab variant` 警告；主世界测试通过，未出现此前 Eclipse 的 OpenGL 错误。测试器还记录空音频设备选项警告，未修改用户选项。
 
 最终文件已安装至 `D:\迅雷下载\PCL 正式版 2.12.7.3\.minecraft\versions\1.21.6-Fabric 0.19.5\mods\extreme-winter-1.2.0.jar`，哈希与上述成品一致；只替换本模组，核验其他三个模组与三份配置哈希不变。
-原始 1.1.2 在 `work/install-backup-1.2.0-20260930-080813`，清单为 `outputs/installation-1.2.0.json`。原配置中的 `starterShelter` 已忽略，缺省恢复时长自动为 30 秒。
+原始 1.1.2 在 `work/install-backup-1.2.0-20260930-080813`，清单为 `outputs/validation/installations/installation-1.2.0.json`。原配置中的 `starterShelter` 已忽略，缺省恢复时长自动为 30 秒。
 本版只验收单人，未做专用服务器或多人连接测试。旧存档已建建筑保留，已有玩家不补发营火；岩浆桶没有物品时间条。
 
 # 1.1.2 历史验证报告
 
-2026-09-30，本地验证；未上传 GitHub。成品：`outputs/extreme-winter-1.1.2.jar`。
+2026-09-30，本地验证；未上传 GitHub。成品：`outputs/releases/1.1.2/extreme-winter-1.1.2.jar`。
 Minecraft 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
 
 - `build` 通过；14 项单元测试通过，0 失败、错误或跳过。
@@ -429,15 +429,15 @@ Iris/Sodium 文件名中的 1.21.8 不代表排除 1.21.6。
 光影日志保留 `BIOME_SULFUR_CAVES`、`endFlashIntensityM/endFlashFactor1` 和旧 `stone_slab variant` 映射警告，主世界画面与所有回归通过。
 本次 D 未发现此前 Eclipse 的 `GL_INVALID_ENUM/non-integer format 28`；没有修改任何光影源文件来隐藏警告。
 未验证末地相关光影效果、其他 GPU 或用户存档的实际启动。
-截图交付：`outputs/visuals-1.1.2-vanilla.png`、`outputs/visuals-1.1.2-complementary.png`、`outputs/shelter-1.1.2-complementary.png`。
+截图交付：`outputs/screenshots/1.1.2/visuals-1.1.2-vanilla.png`、`outputs/screenshots/1.1.2/visuals-1.1.2-complementary.png`、`outputs/screenshots/1.1.2/shelter-1.1.2-complementary.png`。
 
 已安装至用户指定的 `D:\迅雷下载\PCL 正式版 2.12.7.3\.minecraft\versions\1.21.6-Fabric 0.19.5`：
 仅替换本模组，新增 Iris/Sodium/光影包与启用配置，`options.txt` 只移除旧树叶包 ID，逐个核验安装文件哈希。
-旧模组和原始 `options.txt` 位于 `work/install-backup-1.1.2-20260930-072007`，安装清单为 `outputs/installation-1.1.2.json`。
+旧模组和原始 `options.txt` 位于 `work/install-backup-1.1.2-20260930-072007`，安装清单为 `outputs/validation/installations/installation-1.1.2.json`。
 
 # 1.1.1 历史验证报告
 
-2026-09-30，本地验收；未上传 GitHub。安装包：`outputs/extreme-winter-1.1.1.jar`。
+2026-09-30，本地验收；未上传 GitHub。安装包：`outputs/releases/1.1.1/extreme-winter-1.1.1.jar`。
 Minecraft Java 1.21.6 / Fabric Loader 0.19.5 / Fabric API 0.128.2+1.21.6 / Java 21。
 构建沿用 Gradle 9.8.0 / Loom 1.18.2 / 本机 Java 26，系统配置未更改。
 
@@ -500,7 +500,7 @@ SHA-256：`5804f979de500e4e277345d3c2dc7ba106b65c9a6b2c1eddbb6eadf738c02f99`。
 - 最终构建：`work/build-1.1.1-final.log`；矩阵：`work/test-1.1.1-A.log` 至 `work/test-1.1.1-E.log`。
 - 无本模组光影基线：`work/test-1.1.1-eclipse-baseline.log`；启动脚本：`work/shader-baseline.gradle`。
 - 单元报告：`build/reports/tests/test/index.html`；包检查：`python tools/audit_package.py`。
-- 最终截图：`outputs/shelter-1.1.1-eclipse.png`、`outputs/winter-1.1.1-eclipse.png`、`outputs/visuals-1.1.1-eclipse.png`、`outputs/warmth-1.1.1-left-to-right.png`。
+- 最终截图：`outputs/screenshots/1.1.1/shelter-1.1.1-eclipse.png`、`outputs/screenshots/1.1.1/winter-1.1.1-eclipse.png`、`outputs/screenshots/1.1.1/visuals-1.1.1-eclipse.png`、`outputs/screenshots/1.1.1/warmth-1.1.1-left-to-right.png`。
 
 仅单人验收，未做专用服务器/多人、所有种子、长时间存档压力和全资源包组合测试。
 旧存档基地保留；新基地需要新世界。极端地形无安全已加载位置时仍可能跳过生成。

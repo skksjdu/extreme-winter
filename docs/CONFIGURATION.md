@@ -4,7 +4,7 @@
 
 v1/v2 首次升级先校验原文，备份为 `.v1.bak`/`.v2.bak`，再将仍为旧默认的参数迁移。阈值组和伤害组整体迁移，定制组保留，禁止冻伤的 0 值保留。未知字段、coldModdedBiomes 和显式无限雪 0 保留。非法原文不修改并记录可见错误，回退安全默认；再次启动不会重复迁移。备份冲突不会覆盖旧备份。
 
-当前用户确认两格雪的目标配置在 `outputs/extreme-winter-26.0.7-target-config.json`，coldModdedBiomes=true。这里只生成交付文件，尚未应用到真实实例。
+当前用户确认两格雪的目标配置在 `outputs/releases/26.0.7/extreme-winter-26.0.7-target-config.json`，coldModdedBiomes=true。这里只生成交付文件，尚未应用到真实实例。
 
 | 字段 | 默认值 | 含义 |
 | --- | --- | --- |

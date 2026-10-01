@@ -5,11 +5,13 @@ Minecraft Java **26.1.2 / Fabric / 单人**的新手慢节奏寒潮生存。开�
 ## 安装与开始
 
 1. 使用 Minecraft 26.1.2、Fabric Loader 0.19.5、Fabric API 0.155.3+26.1.2、Java 25+。
-2. 将 `outputs/extreme-winter-26.0.7.jar` 安装到独立实例；只保留一份本模组。不安装 sources 或 gametest JAR。
+2. 将 `outputs/releases/26.0.7/extreme-winter-26.0.7.jar` 安装到独立实例；只保留一份本模组。不安装 sources 或 gametest JAR。
 3. 新存档额外领取 1 营火、16 火把、1 石铲、4 烤马铃薯和生存手册。新老玩家以独立收据只领一次手册；升级、死亡、重登不重复发物资。
 4. 饱食度上方十枚火焰表示 **温暖度**（0—100），箭头表示趋势；⌂ 为庇护，+ 为有效热源。不是摄氏温度。
 
 本轮仅在项目和独立测试实例开发，未安装到用户真实游戏实例，未发布或推送。旧版本成品和 MVP 标签保留。
+
+本地成果按发行包、验证报告、截图、计划、交接和光影配置分类，入口见 [成果目录](outputs/README.md)。
 
 ## 当前已实现的新手规则
 
@@ -51,10 +53,10 @@ Minecraft Java **26.1.2 / Fabric / 单人**的新手慢节奏寒潮生存。开�
 
 原版进度界面记录搭顶、回温、制作内衬、充满热水袋、经历暴雪结束和温室收获。进入长冬，自己的炉具曾燃烧，温室累计收获 32 份作物且经历过暴雪，即可完成冬日家园。进度没有期限；打开界面和预览合成不会完成任务。砍树烧木炭、供暖种植、烤马铃薯制作炖菜、带热水袋远征并补回燃料，可形成持续的生产循环。
 
-A—E已完成。34单元、五组每组19真实入口、两组Terralith/Eclipse、真实旧存档与原版危险/传送门扩展均通过；固定小场景CPU p95≤.42ms、额外视觉FPS下降7.75%。真实时间只做分段边界观测；完整证据及已知范围见 `outputs/beginner-26.0.7-validation.md`、`outputs/beginner-26.0.7-performance.md`。
+A—E已完成。34单元、五组每组19真实入口、两组Terralith/Eclipse、真实旧存档与原版危险/传送门扩展均通过；固定小场景CPU p95≤.42ms、额外视觉FPS下降7.75%。真实时间只做分段边界观测；完整证据及已知范围见 `outputs/validation/26.0.7/beginner-26.0.7-validation.md`、`outputs/validation/26.0.7/beginner-26.0.7-performance.md`。
 
 配置迁移、边界与所有字段见 [配置说明](docs/CONFIGURATION.md)，实际检查见 [测试记录](docs/TESTING.md)，实现见 [实现记录](docs/IMPLEMENTATION.md)。
-执行清单为 `outputs/extreme-winter-beginner-roadmap.md`，历史测试不能算作当前版通过。
+执行清单为 `outputs/planning/extreme-winter-beginner-roadmap.md`，历史测试不能算作当前版通过。
 
 ## 本地开发
 
